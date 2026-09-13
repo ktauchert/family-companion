@@ -3,16 +3,26 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "echo \"Next.js App folgt in einer späteren Phase\"",
-    "build": "echo \"Next.js App folgt in einer späteren Phase\"",
-    "lint": "echo \"lint skipped\"",
+    "dev": "next dev --turbopack",
+    "build": "next build --turbopack",
+    "start": "next start",
+    "lint": "eslint",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@family-companion/shared": "*"
+    "@family-companion/shared": "*",
+    "next": "15.5.25",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3",
     "@family-companion/config-typescript": "*",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.25",
     "typescript": "^5.8.0"
   }
 }

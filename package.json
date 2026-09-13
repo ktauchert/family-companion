@@ -7,6 +7,8 @@
   ],
   "scripts": {
     "dev": "turbo dev",
+    "dev:web": "turbo dev --filter=@family-companion/web",
+    "dev:mobile": "npm exec --workspace=@family-companion/mobile -- expo start",
     "build": "turbo build",
     "lint": "turbo lint",
     "type-check": "turbo type-check"
@@ -18,5 +20,9 @@
   "engines": {
     "node": ">=20"
   },
-  "packageManager": "npm@10.9.2"
+  "packageManager": "npm@10.9.2",
+  "overrides": {
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  }
 }

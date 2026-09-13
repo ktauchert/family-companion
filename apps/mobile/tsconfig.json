@@ -1,8 +1,8 @@
 {
-  "extends": "@family-companion/config-typescript/base.json",
+  "extends": "@family-companion/config-typescript/react-native.json",
   "compilerOptions": {
-    "noEmit": true
+    "strict": true
   },
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],
   "exclude": ["node_modules"]
 }

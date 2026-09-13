@@ -1,8 +1,10 @@
 {
-  "extends": "@family-companion/config-typescript/base.json",
+  "extends": "@family-companion/config-typescript/nextjs.json",
   "compilerOptions": {
-    "noEmit": true
+    "paths": {
+      "@/*": ["./*"]
+    }
   },
-  "include": ["**/*.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
 }
