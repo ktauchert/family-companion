@@ -28,3 +28,13 @@ Nach jeder inhaltlichen Änderung:
 - npm Workspaces, kein pnpm ([ADR 0001](./docs/adr/0001-npm-workspaces.md)).
 - Shared-Code nur in `@family-companion/shared`.
 - Keine Secrets committen. OpenAI und Firebase-Admin nur serverseitig.
+
+## Agent skills
+
+### Issue tracker
+
+Specs und Tickets liegen als GitHub Issues (`gh`). Siehe `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context: eine `CONTEXT.md` im Root, ADRs in `docs/adr/`. Siehe `docs/agents/domain.md`.

@@ -26,6 +26,7 @@ Quellen: [features.md](./features.md), [user-journey.md](./user-journey.md), [mo
 - [x] `CONTRIBUTING.md` und README *(ergänzt)*
 - [x] Phasen-Branches und lebende Docs ([ADR 0007](./adr/0007-phasen-branches-und-docs.md)) *(ergänzt)*
 - [x] GitHub-Remote, erster Push auf `main` *(ergänzt)*
+- [x] Matt-Pocock-Skills-Setup: GitHub Issues, single-context (`docs/agents/`) *(ergänzt)*
 
 ---
 
