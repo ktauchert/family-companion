@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Family Companion — Designvorlage</title>
+    <style>
+      :root,
+      [data-theme='light'] {
+        --bg: #f1ebe0;
+        --sheet: #f7f2e8;
+        --well: #e6dfd2;
+        --ink: #2b261f;
+        --ink-soft: #5e574c;
+        --ink-faint: #8a8274;
+        --rule: #d3c9b8;
+        --sage: #6e7f6a;
+        --sage-wash: #e3e6d8;
+        --clay: #b08968;
+        --shadow: 0 12px 32px -16px rgb(43 38 31 / 18%);
+        --inset: inset 0 1px 0 rgb(255 255 255 / 45%);
+      }
+
+      [data-theme='dark'] {
+        --bg: #24211e;
+        --sheet: #2f2b27;
+        --well: #1a1816;
+        --ink: #e6dfd2;
+        --ink-soft: #b2a99a;
+        --ink-faint: #7a7368;
+        --rule: #454039;
+        --sage: #9aa890;
+        --sage-wash: #3a3f36;
+        --clay: #c4a27a;
+        --shadow: 0 12px 28px -14px rgb(0 0 0 / 45%);
+        --inset: inset 0 1px 0 rgb(255 255 255 / 6%);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: 'Source Sans 3', 'Segoe UI', sans-serif;
+        line-height: 1.45;
+      }
+
+      h1,
+      h2,
+      .serif {
+        font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+        font-weight: 600;
+      }
+
+      .wrap {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 24px 24px 80px;
+      }
+
+      .top {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 12px 20px;
+        background: var(--sheet);
+        box-shadow: var(--shadow);
+        border-bottom: 1px solid var(--rule);
+      }
+
+      .top nav {
+        display: flex;
+        gap: 16px;
+        flex: 1;
+        font-size: 15px;
+      }
+
+      .top a {
+        color: var(--ink-soft);
+        text-decoration: none;
+      }
+
+      .top a[aria-current='page'] {
+        color: var(--ink);
+      }
+
+      .crumb {
+        color: var(--ink-faint);
+        font-size: 13px;
+        margin: 16px 0 8px;
+      }
+
+      .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .chip {
+        background: var(--well);
+        color: var(--ink-soft);
+        border-radius: 999px;
+        padding: 8px 14px;
+        font-size: 14px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+
+      .card {
+        background: var(--sheet);
+        border-radius: 20px;
+        padding: 20px 22px 22px;
+        box-shadow: var(--shadow), var(--inset);
+        position: relative;
+      }
+
+      .card header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 8px;
+      }
+
+      .card h2 {
+        margin: 0;
+        font-size: 1.25rem;
+      }
+
+      .card header + p,
+      .rule {
+        width: 48px;
+        height: 1px;
+        background: var(--rule);
+        margin: 0 0 16px;
+        border: 0;
+      }
+
+      .stamp {
+        font-size: 12px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+      }
+
+      .stamp.pro {
+        color: var(--clay);
+      }
+
+      .card.pro::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 20px;
+        background: color-mix(in srgb, var(--sheet) 55%, transparent);
+        pointer-events: none;
+      }
+
+      .card ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        color: var(--ink-soft);
+      }
+
+      .card li + li {
+        margin-top: 8px;
+      }
+
+      .swatches {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 12px;
+        margin: 32px 0;
+      }
+
+      .swatch {
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+      }
+
+      .swatch i {
+        display: block;
+        height: 56px;
+      }
+
+      .swatch span {
+        display: block;
+        padding: 8px 10px;
+        background: var(--sheet);
+        font-size: 12px;
+        color: var(--ink-soft);
+      }
+
+      button {
+        background: var(--well);
+        color: var(--ink);
+        border: 0;
+        border-radius: 12px;
+        padding: 8px 14px;
+        cursor: pointer;
+        font: inherit;
+      }
+
+      .phone {
+        max-width: 360px;
+        margin: 40px auto 0;
+        background: var(--sheet);
+        border-radius: 28px;
+        padding: 20px 16px 0;
+        box-shadow: var(--shadow);
+      }
+
+      .tabs {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+        padding: 12px 8px 20px;
+        background: var(--well);
+        border-radius: 0 0 28px 28px;
+        font-size: 11px;
+        color: var(--ink-faint);
+      }
+
+      .tabs b {
+        color: var(--sage);
+        font-weight: 600;
+      }
+
+      @media (max-width: 720px) {
+        .grid,
+        .row {
+          grid-template-columns: 1fr;
+          display: block;
+        }
+
+        .top nav {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body data-theme="light">
+    <div class="top">
+      <strong class="serif">Family Companion</strong>
+      <nav>
+        <a href="#heute" aria-current="page">Heute</a>
+        <a href="#kalender">Kalender</a>
+        <a href="#todos">Todos</a>
+        <a href="#listen">Listen</a>
+        <a href="#haushalt">Haushalt</a>
+      </nav>
+      <button type="button" id="theme">Dark / Light</button>
+    </div>
+
+    <div class="wrap">
+      <p class="crumb">Heute</p>
+      <div class="row">
+        <div>
+          <h1 class="serif">Guten Morgen, Julian</h1>
+          <p style="color: var(--ink-soft); margin: 0">
+            Art Paper und Stone — Karten ohne linken Streifen.
+          </p>
+        </div>
+        <div class="chip">Check-in · Sophie 3 / Julian 4</div>
+      </div>
+
+      <div class="grid">
+        <article class="card">
+          <header>
+            <h2>Tagesplan</h2>
+            <span class="stamp">3 offen</span>
+          </header>
+          <hr class="rule" />
+          <ul>
+            <li>Auto sauber · heute · Julian</li>
+            <li>Milch, Brot · Supermarkt</li>
+            <li>Fitness · 18:00 · beide</li>
+          </ul>
+        </article>
+        <article class="card">
+          <header>
+            <h2>Kalender</h2>
+            <span class="stamp">Heute</span>
+          </header>
+          <hr class="rule" />
+          <ul>
+            <li>09:30 Kita</li>
+            <li>18:00 Fitness</li>
+          </ul>
+        </article>
+        <article class="card">
+          <header>
+            <h2>Supermarkt</h2>
+            <span class="stamp">Liste</span>
+          </header>
+          <hr class="rule" />
+          <ul>
+            <li>Milch</li>
+            <li>Brot</li>
+          </ul>
+        </article>
+        <article class="card pro">
+          <header>
+            <h2>KI-Tagesbriefing</h2>
+            <span class="stamp pro">Pro</span>
+          </header>
+          <hr class="rule" />
+          <p style="color: var(--ink-soft); margin: 0">
+            Feinere Reihenfolge, wenn der Algo nicht mehr reicht.
+          </p>
+        </article>
+      </div>
+
+      <h2 class="serif" style="margin-top: 48px">Farben</h2>
+      <div class="swatches" id="swatches"></div>
+
+      <div class="phone">
+        <p class="crumb" style="margin-top: 0">Unser Haushalt</p>
+        <h2 class="serif" style="margin: 0 0 12px">Heute</h2>
+        <article class="card">
+          <header>
+            <h2>Tagesplan</h2>
+            <span class="stamp">3 offen</span>
+          </header>
+          <hr class="rule" />
+          <ul>
+            <li>Auto sauber</li>
+            <li>Supermarkt</li>
+          </ul>
+        </article>
+        <div class="tabs">
+          <b>Heute</b><span>Kalender</span><span>Todos</span><span>Listen</span
+          ><span>Mehr</span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const tokens = {
+        light: [
+          ['paper', '#F1EBE0'],
+          ['sheet', '#F7F2E8'],
+          ['ink', '#2B261F'],
+          ['sage', '#6E7F6A'],
+          ['clay', '#B08968'],
+        ],
+        dark: [
+          ['stone', '#24211E'],
+          ['slab', '#2F2B27'],
+          ['chalk', '#E6DFD2'],
+          ['lichen', '#9AA890'],
+          ['sand', '#C4A27A'],
+        ],
+      };
+
+      const root = document.body;
+      const swatches = document.getElementById('swatches');
+
+      function paint() {
+        const theme = root.getAttribute('data-theme');
+        swatches.replaceChildren(
+          ...tokens[theme].map(([name, hex]) => {
+            const el = document.createElement('div');
+            el.className = 'swatch';
+            el.innerHTML = `<i style="background:${hex}"></i><span>${name}<br>${hex}</span>`;
+            return el;
+          }),
+        );
+      }
+
+      document.getElementById('theme').addEventListener('click', () => {
+        root.setAttribute(
+          'data-theme',
+          root.getAttribute('data-theme') === 'light' ? 'dark' : 'light',
+        );
+        paint();
+      });
+
+      paint();
+    </script>
+  </body>
+</html>

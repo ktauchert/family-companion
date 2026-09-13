@@ -1,0 +1,201 @@
+# UI / UX — Family Companion
+
+Lebendige Form- und Farbvorlage für Web und Android. Beide Flächen teilen dieselbe Sprache; Web darf ausführlicher sein, die App bleibt tab-schnell.
+
+Wireframe-Bilder: [preview.html](./preview.html) (Tokens live) · [tokens](./design-tokens-board.png)
+
+## Haltung
+
+Ruhe vor Lautstärke. Die Oberfläche soll sich anfühlen wie ein Küchentisch am Morgen: Papier oder Stein, nicht ein SaaS-Dashboard.
+
+- **Kein Sidebar.** Weder Web noch App.
+- **Eine Informationsarchitektur.** Dieselben fünf Orte, nur die Chrome unterscheidet sich.
+- **Karten ohne linken Farbstreifen.** Das ist das Klischee, das wir vermeiden.
+- Light = **Art Paper**, Dark = **Stone**.
+
+---
+
+## Orte (gemeinsam)
+
+| Ort | Web | App |
+| --- | --- | --- |
+| **Heute** | Dashboard, Check-in, priorisierter Tag | Tab *Heute* |
+| **Kalender** | Woche/Monat, Detail | Tab *Kalender* |
+| **Todos** | Liste + Filter | Tab *Todos* |
+| **Listen** | Themen (Supermarkt, …) | Tab *Listen* |
+| **Haushalt** | Mitglieder, Einladung, Plan | Tab *Mehr* |
+
+Web-Chrome: schmale **Top-Leiste** (Wortmarke, die fünf Orte, Theme, Avatar) plus **Breadcrumbs**.  
+App-Chrome: **Title** oben, **Tabs** unten. Kein Hamburger.
+
+Breadcrumbs bilden denselben Stack wie die App-Routes, z. B.:
+
+```text
+Heute
+Listen / Supermarkt
+Haushalt / Einladen
+```
+
+So bleibt Web nah am Mobile-Routing, ohne eine zweite Navigationsmetapher.
+
+---
+
+## Farbe
+
+Wenige Töne, alle warm-stumpf. Akzent ist Salbei, nicht Petrol und nicht Lila. Ton/Clay nur für Pro-Siegel und mittlere Energie.
+
+### Light — Art Paper
+
+| Token | Hex | Rolle |
+| --- | --- | --- |
+| `paper` | `#F1EBE0` | Fläche |
+| `sheet` | `#F7F2E8` | Karte, Top-Bar |
+| `well` | `#E6DFD2` | vertieft (Chips, Tab-Bar) |
+| `ink` | `#2B261F` | Text |
+| `ink-soft` | `#5E574C` | Sekundär |
+| `ink-faint` | `#8A8274` | Meta, Breadcrumb |
+| `rule` | `#D3C9B8` | Haarlinie |
+| `sage` | `#6E7F6A` | Fokus, erledigt-ruhig |
+| `sage-wash` | `#E3E6D8` | sanfte Fläche |
+| `clay` | `#B08968` | Pro-Siegel, Energie mittel |
+| `rust` | `#9A5B4A` | Fehler, nie knallrot |
+
+### Dark — Stone
+
+| Token | Hex | Rolle |
+| --- | --- | --- |
+| `stone` | `#24211E` | Fläche |
+| `slab` | `#2F2B27` | Karte, Top-Bar |
+| `cave` | `#1A1816` | vertieft |
+| `chalk` | `#E6DFD2` | Text |
+| `chalk-soft` | `#B2A99A` | Sekundär |
+| `chalk-faint` | `#7A7368` | Meta |
+| `vein` | `#454039` | Haarlinie |
+| `lichen` | `#9AA890` | Fokus |
+| `lichen-wash` | `#3A3F36` | sanfte Fläche |
+| `sand` | `#C4A27A` | Pro-Siegel |
+| `terracotta` | `#C48978` | Fehler |
+
+![Farb- und Formboard](./design-tokens-board.png)
+
+---
+
+## Form
+
+| Maß | Wert | Warum |
+| --- | --- | --- |
+| Kartenradius | `20px` | weicher als Material-8, nicht Blob |
+| Button / Chip | `999px` oder `12px` | Chips pill, Buttons leicht gerundet |
+| Haarlinie | `1px` `rule` / `vein` | statt Schattenwänden |
+| Schatten Light | `0 12px 32px -16px rgb(43 38 31 / 18%)` | Papier hebt sich |
+| Schatten Dark | `0 12px 28px -14px rgb(0 0 0 / 45%)` | Steinplatte |
+| Innenkante | `inset 0 1px 0 rgb(255 255 255 / 40%)` (Light) | Blattglanz, kein Gradient-SaaS |
+| Raster | 8 · 16 · 24 · 40 | Web-Inhalt max. ~1080px, zentriert |
+| Titel | serif, Georgia / Iowan / `Source Serif 4` | editorial, nicht Inter-everywhere |
+| UI-Text | humanist sans, `Source Sans 3` oder System-UI | lesbar auf dem Handy |
+
+---
+
+## Karten
+
+**Nicht:** linker Balken, lila Gradient, 3-D-Clay, knallige Badges.
+
+**Stattdessen:**
+
+1. Fläche `sheet` / `slab`, Radius 20.
+2. Kurze **Haarlinie unter dem Titel** (nicht über die ganze Karte).
+3. Meta oben rechts als kleiner **Stempel** (`Heute`, `2 offen`, `Pro`).
+4. Optional: sehr blasses Zeichen (Kalender, Liste) in der Ecke, ~6 % Deckkraft.
+5. Free-Karten sind voll lesbar. Pro-Karten bleiben lesbar, liegen aber unter einem leichten Milchglas und tragen ein ruhiges Siegel — nicht ausgegraut-tot.
+
+```text
+┌─────────────────────────────────────────┐
+│  Tagesplan                    3 offen   │  ← Stempel, kein Badge-Bonbon
+│  ────────                               │  ← kurze Linie
+│                                         │
+│  Auto sauber          heute · Julian    │
+│  Milch, Brot          Supermarkt        │
+│  Fitness              18:00 · beide     │
+└─────────────────────────────────────────┘
+```
+
+Pro-Karte: derselbe Körper, Siegel `Pro` in Clay/Sand, ein Satz warum es wartet. Kein Schloss-Emoji-Teppich.
+
+---
+
+## Dashboard
+
+Pflicht für *Heute*, sobald der Morgen-Check-in da ist (sonst nur Check-in-Karte).
+
+Web (ausführlicher):
+
+- Gruß + Check-in-Chip (Stimmung / Energie, beide Personen wenn da)
+- Kartenraster 2×2: Priorisierter Tag, Kalender, offene Liste, Pro-Hinweis
+- Keine Widget-Dichte wie eine Analytics-Suite
+
+App (derselbe Inhalt, eine Spalte):
+
+- Gruß + Chip
+- 2–3 Karten, dann Schluss
+- Rest lebt in den Tabs
+
+---
+
+## Wireframes
+
+### Web — Heute (Art Paper / Stone)
+
+![Web Heute, Light](./wireframe-web-heute.png)
+
+![Web Heute, Dark](./wireframe-web-heute-dark.png)
+
+```text
+┌ top: Family Companion    Heute  Kalender  Todos  Listen  Haushalt   ☽  ● ┐
+├ breadcrumb: Heute                                                    ┤
+│                                                                      │
+│  Guten Morgen, Julian          [ Check-in · Sophie 3 / Julian 4 ]    │
+│                                                                      │
+│  ┌ Tagesplan ─┐  ┌ Kalender ─┐  ┌ Supermarkt ─┐  ┌ Pro-Briefing ─┐  │
+│  │ …          │  │ …         │  │ …           │  │ Siegel Pro    │  │
+│  └────────────┘  └───────────┘  └─────────────┘  └───────────────┘  │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+### App — Heute (Art Paper / Stone)
+
+![App Heute, Light](./wireframe-app-heute.png)
+
+![App Heute, Dark](./wireframe-app-heute-dark.png)
+
+```text
+┌ Haushalt · Unser Haushalt          ┐
+│ Heute                              │
+│ Guten Morgen                       │
+│ [ Check-in ]                       │
+│ ┌ Tagesplan ─────────────┐         │
+│ └────────────────────────┘         │
+│ ┌ Nächster Termin ───────┐         │
+│ └────────────────────────┘         │
+│ ┌ Supermarkt ────────────┐         │
+│ └────────────────────────┘         │
+├ Heute  Kalender  Todos  Listen  Mehr ┤
+└────────────────────────────────────┘
+```
+
+---
+
+## Theme
+
+System folgen, manuell überschreibbar (Top-Bar / *Mehr*). Dieselben Token-Namen in CSS und in einer kleinen Shared-Map für Expo (`paper` ↔ `stone` je Mode). Kein zweites Paletten-Set pro Plattform.
+
+---
+
+## Nicht tun
+
+- Sidebar, Drawer als Hauptnavigation
+- Linker Akzentstreifen an Karten
+- Reines Schwarz / reines Weiß als Fläche
+- Sättigung über die Salbei-/Clay-Werte
+- Unterschiedliche IA zwischen Web und App
+
+Tokens zum Ausprobieren: [preview.html](./preview.html).

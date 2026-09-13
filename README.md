@@ -65,4 +65,5 @@ Pro Phase ein Branch, PR nach `main`. Siehe [CONTRIBUTING.md](./CONTRIBUTING.md)
 | [docs/phasenplan.md](docs/phasenplan.md) | Phasen-Index |
 | [docs/phasen/](docs/phasen/00.1-app-scaffolds.md) | Arbeitspakete pro Phase |
 | [docs/user-journey.md](docs/user-journey.md) | Julian / Sophie |
+| [docs/design/ui.md](docs/design/ui.md) | UI: Art Paper / Stone, Karten, Wireframes |
 | [docs/adr/](docs/adr/README.md) | Architekturentscheidungen |

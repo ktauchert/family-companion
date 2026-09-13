@@ -8,6 +8,7 @@ Arbeitsdokumente für Family Companion. Hier landen Notizen, Journeys, der Phase
 | [phasenplan.md](./phasenplan.md) | Phasen-Index |
 | [phasen/](./phasen/00.1-app-scaffolds.md) | Eine Datei pro Phase, mit Arbeitspaketen |
 | [user-journey.md](./user-journey.md) | Personas, Free/Pro-Journey, Feature-Matrix |
+| [design/ui.md](./design/ui.md) | Farben, Form, Navigation, Wireframes |
 | [monorepo-struktur.md](./monorepo-struktur.md) | Ursprüngliche Struktur-Notiz (angepasst auf npm) |
 | [adr/](./adr/README.md) | Architecture Decision Records |
 | [agents/](./agents/issue-tracker.md) | Skill-Config (Tracker, Domain-Docs) |

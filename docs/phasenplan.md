@@ -2,7 +2,7 @@
 
 Index. Jede Phase hat eine eigene Datei mit Arbeitspaketen unter [phasen/](./phasen/).
 
-Quellen: [features.md](./features.md), [user-journey.md](./user-journey.md), [adr/](./adr/README.md).
+Quellen: [features.md](./features.md), [user-journey.md](./user-journey.md), [design/ui.md](./design/ui.md), [adr/](./adr/README.md).
 
 **Lebendiger Stand:** Haken in der *Phasen-Datei* setzen. Neuer Scope: Punkt dort aufnehmen und `*(ergänzt)*` markieren ([ADR 0007](./adr/0007-phasen-branches-und-docs.md)).
 
