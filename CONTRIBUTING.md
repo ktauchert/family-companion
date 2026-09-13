@@ -10,9 +10,10 @@ Family Companion wird **phasenweise** gebaut. Eine Phase, ein Branch, ein PR nac
 ```bash
 npm install
 npm run type-check
+npm run lint
 ```
 
-`npm run test` folgt in Phase 0.2 (Vitest).
+`npm run test` folgt in Phase 0.2 (Vitest). `npm run dev` startet Web (Next.js) und Mobile (Expo) über Turbo.
 
 ## Branch und PR
 

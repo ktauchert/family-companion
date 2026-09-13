@@ -8,7 +8,7 @@ Ziel: Types, Firebase-Konstanten und Validierungslogik zwischen Next.js (Web) un
 
 ## Ziel-Dateibaum (spätere Phasen)
 
-Die Apps selbst werden erst in späteren Phasen eingerichtet. Der Ordnerbaum unten ist das Zielbild, nicht der aktuelle Stand.
+Scaffolds stehen (Phase 0.1). Der Ordnerbaum unten ist das Zielbild inkl. späterer Auth- und API-Routen.
 
 ```text
 family-companion/
@@ -108,4 +108,4 @@ const currentHousehold: Household = {
 
 - Vorlage nutzte `family-app` / `@family-app/*` und pnpm.
 - Hier: `family-companion` / `@family-companion/*` und npm.
-- Next.js- und Expo-Scaffolds sind bewusst noch nicht angelegt.
+- Next.js- und Expo-Scaffolds stehen seit Phase 0.1.
