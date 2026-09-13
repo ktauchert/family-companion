@@ -19,15 +19,15 @@ Arbeitsregeln für Agenten in diesem Repo. Menschliche Ergänzung: [CONTRIBUTING
 
 Nach jeder inhaltlichen Änderung:
 
-1. Checkliste in [docs/phasenplan.md](./docs/phasenplan.md) aktualisieren (`[x]` / `[ ]`).
+1. Checkliste in der **aktuellen Phasen-Datei** unter [docs/phasen/](./docs/phasen/) aktualisieren (`[x]` / `[ ]`). Index: [docs/phasenplan.md](./docs/phasenplan.md).
 2. [docs/features.md](./docs/features.md), Journey oder ADRs anfassen, wenn sich Produkt oder Architektur ändert.
-3. Fehlt etwas Wichtiges im Plan: Punkt **ergänzen** und mit `*(ergänzt)*` markieren.
+3. Fehlt etwas Wichtiges: Arbeitspaket in der Phase **ergänzen** und mit `*(ergänzt)*` markieren.
 
 ## Technik (kurz)
 
 - npm Workspaces, kein pnpm ([ADR 0001](./docs/adr/0001-npm-workspaces.md)).
 - Shared-Code nur in `@family-companion/shared`.
-- Keine Secrets committen. OpenAI und Firebase-Admin nur serverseitig.
+- Keine Secrets committen. Vorlage: `.env.example`. Echte Werte nur in `.env.local` (gitignored). OpenAI und Firebase-Admin nur serverseitig.
 
 ## Agent skills
 

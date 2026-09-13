@@ -15,6 +15,12 @@ web-build
 .env.*
 !.env.example
 
+# Firebase credential files (nie committen)
+google-services.json
+GoogleService-Info.plist
+*firebase-adminsdk*.json
+secrets/
+
 # Logs & OS
 *.log
 .DS_Store

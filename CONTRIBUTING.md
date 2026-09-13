@@ -29,6 +29,6 @@ Tests dort, wo Logik kippen kann. Immer auch **Negativfälle** (ungültige Daten
 
 ## Docs
 
-Nach jeder Anpassung die Checkliste in [docs/phasenplan.md](./docs/phasenplan.md) setzen. Neuer wichtiger Scope, der nicht im Plan stand: Punkt aufnehmen und `*(ergänzt)*` markieren.
+Nach jeder Anpassung die Checkliste in der aktuellen Datei unter [docs/phasen/](./docs/phasen/00.1-app-scaffolds.md) setzen. Index: [docs/phasenplan.md](./docs/phasenplan.md). Neuer Scope: Arbeitspaket aufnehmen und `*(ergänzt)*` markieren.
 
 Architekturentscheidungen: [docs/adr/](./docs/adr/README.md).

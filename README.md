@@ -36,6 +36,8 @@ Node.js 20+, npm.
 
 ```bash
 npm install
+cp .env.example .env.local
+# Firebase-Werte eintragen (Console → Projekteinstellungen)
 npm run type-check
 ```
 
@@ -50,6 +52,7 @@ Pro Phase ein Branch, PR nach `main`. Siehe [CONTRIBUTING.md](./CONTRIBUTING.md)
 | Dokument | Inhalt |
 | --- | --- |
 | [docs/features.md](docs/features.md) | Produktkatalog |
-| [docs/phasenplan.md](docs/phasenplan.md) | Checkliste und Reihenfolge |
+| [docs/phasenplan.md](docs/phasenplan.md) | Phasen-Index |
+| [docs/phasen/](docs/phasen/00.1-app-scaffolds.md) | Arbeitspakete pro Phase |
 | [docs/user-journey.md](docs/user-journey.md) | Julian / Sophie |
 | [docs/adr/](docs/adr/README.md) | Architekturentscheidungen |
