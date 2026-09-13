@@ -1,0 +1,7 @@
+{
+  "extends": "@family-companion/config-typescript/base.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["index.ts", "src"]
+}

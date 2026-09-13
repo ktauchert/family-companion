@@ -1,0 +1,29 @@
+# Dependencies
+node_modules
+
+# Turbo
+.turbo
+
+# Builds
+.next
+dist
+.expo
+web-build
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Logs & OS
+*.log
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea
+.vscode/*
+!.vscode/extensions.json
+
+# Test / coverage
+coverage
