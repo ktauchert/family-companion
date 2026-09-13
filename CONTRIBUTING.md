@@ -13,7 +13,7 @@ npm run type-check
 npm run lint
 ```
 
-`npm run test` folgt in Phase 0.2 (Vitest). `npm run dev` startet Web (Next.js) und Mobile (Expo) über Turbo.
+`npm run test` folgt in Phase 0.2 (Vitest). Dev: `npm run dev` (beide über Turbo), `npm run dev:web`, `npm run dev:mobile` (Expo direkt, QR für Expo Go).
 
 ## Branch und PR
 

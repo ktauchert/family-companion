@@ -41,7 +41,17 @@ cp .env.example .env.local
 npm run type-check
 ```
 
-Weitere Scripts: `npm run dev` (Web + Mobile über Turbo), `npm run build`, `npm run lint`.
+Dev-Scripts:
+
+```bash
+npm run dev          # Web + Mobile über Turbo
+npm run dev:web      # nur Next.js → http://localhost:3000
+npm run dev:mobile   # Expo interaktiv, QR im Terminal → Expo Go
+```
+
+`dev:mobile` geht absichtlich nicht über Turbo: sonst fehlt das Expo-Menü und der QR-Code. Port 8081 muss frei sein (kein zweites `expo start`).
+
+Weitere Scripts: `npm run build`, `npm run lint`.
 
 ## Mitwirken
 
