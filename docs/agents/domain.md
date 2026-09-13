@@ -7,10 +7,11 @@ How the engineering skills should consume this repo's domain documentation when 
 - **`CONTEXT.md`** at the repo root, or
 - **`CONTEXT-MAP.md`** at the repo root if it exists: it points at one `CONTEXT.md` per context. Read each one relevant to the topic.
 - **`docs/adr/`**: read ADRs that touch the area you're about to work in.
+- **`docs/design/ui.md`**: when the work is UI, layout, navigation, or visual form. Tokens live there; do not invent a sidebar or left-stripe cards.
 
 If any of these files don't exist, **proceed silently**. Don't flag their absence; don't suggest creating them upfront. The `/domain-modeling` skill (reached via `/grill-with-docs` and `/improve-codebase-architecture`) creates them lazily when terms or decisions actually get resolved.
 
-This repo is **single-context**. ADRs already live in `docs/adr/`. Product notes (`docs/features.md`, `docs/user-journey.md`, `docs/phasenplan.md`) are extra context, not a second glossary.
+This repo is **single-context**. ADRs already live in `docs/adr/`. Product notes (`docs/features.md`, `docs/user-journey.md`, `docs/phasenplan.md`) are extra context, not a second glossary. Surface UI follows [`docs/design/ui.md`](../design/ui.md).
 
 ## File structure
 
@@ -23,6 +24,7 @@ Single-context (this repo):
 │   ├── 0001-npm-workspaces.md
 │   └── …
 ├── docs/features.md
+├── docs/design/ui.md
 └── packages/shared/
 ```
 

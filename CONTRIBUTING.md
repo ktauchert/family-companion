@@ -32,4 +32,4 @@ Tests dort, wo Logik kippen kann. Immer auch **Negativfälle** (ungültige Daten
 
 Nach jeder Anpassung die Checkliste in der aktuellen Datei unter [docs/phasen/](./docs/phasen/00.2-tests-ci.md) setzen. Index: [docs/phasenplan.md](./docs/phasenplan.md). Neuer Scope: Arbeitspaket aufnehmen und `*(ergänzt)*` markieren.
 
-Architekturentscheidungen: [docs/adr/](./docs/adr/README.md).
+Architekturentscheidungen: [docs/adr/](./docs/adr/README.md). UI: [docs/design/ui.md](./docs/design/ui.md).

@@ -20,13 +20,14 @@ Arbeitsregeln für Agenten in diesem Repo. Menschliche Ergänzung: [CONTRIBUTING
 Nach jeder inhaltlichen Änderung:
 
 1. Checkliste in der **aktuellen Phasen-Datei** unter [docs/phasen/](./docs/phasen/) aktualisieren (`[x]` / `[ ]`). Index: [docs/phasenplan.md](./docs/phasenplan.md).
-2. [docs/features.md](./docs/features.md), Journey oder ADRs anfassen, wenn sich Produkt oder Architektur ändert.
+2. [docs/features.md](./docs/features.md), Journey oder ADRs anfassen, wenn sich Produkt oder Architektur ändert. UI/UX: [docs/design/ui.md](./docs/design/ui.md) lesen und einhalten.
 3. Fehlt etwas Wichtiges: Arbeitspaket in der Phase **ergänzen** und mit `*(ergänzt)*` markieren.
 
 ## Technik (kurz)
 
 - npm Workspaces, kein pnpm ([ADR 0001](./docs/adr/0001-npm-workspaces.md)).
 - Shared-Code nur in `@family-companion/shared`.
+- UI: Art Paper (Light) / Stone (Dark), keine Sidebar, Karten ohne linken Farbstreifen. Tokens und Wireframes: [docs/design/ui.md](./docs/design/ui.md). Vorschau: [docs/design/preview.html](./docs/design/preview.html).
 - Keine Secrets committen. Vorlage: `.env.example`. Echte Werte nur in `.env.local` (gitignored). OpenAI und Firebase-Admin nur serverseitig.
 
 ## Agent skills
