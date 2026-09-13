@@ -6,7 +6,7 @@ Types, Zod-Schemas und Firestore-Konstanten liegen in `@family-companion/shared`
 
 ## Stand
 
-Phase 0.1: Lauffähige Next.js- und Expo-Scaffolds, beide importieren `@family-companion/shared`. Auth folgt in Phase 1, Tests/CI in Phase 0.2.
+Phase 0.2: Vitest in `@family-companion/shared`, `npm run test` über Turbo, GitHub Actions auf Push/PR. Auth folgt in Phase 1.
 
 Produkt: [docs/features.md](docs/features.md) · Plan: [docs/phasenplan.md](docs/phasenplan.md)
 
@@ -15,7 +15,7 @@ Produkt: [docs/features.md](docs/features.md) · Plan: [docs/phasenplan.md](docs
 - Turborepo, **npm** Workspaces (kein pnpm)
 - Next.js 15 (Web), Expo 57 / Expo Router (Mobile)
 - Firebase Auth + Firestore
-- Vitest + GitHub Actions — entschieden, noch nicht eingebaut ([ADR 0002](docs/adr/0002-unit-tests-und-github-ci.md))
+- Vitest + GitHub Actions ([ADR 0002](docs/adr/0002-unit-tests-und-github-ci.md))
 
 ## Struktur
 
@@ -51,7 +51,7 @@ npm run dev:mobile   # Expo interaktiv, QR im Terminal → Expo Go
 
 `dev:mobile` geht absichtlich nicht über Turbo: sonst fehlt das Expo-Menü und der QR-Code. Port 8081 muss frei sein (kein zweites `expo start`).
 
-Weitere Scripts: `npm run build`, `npm run lint`.
+Weitere Scripts: `npm run test`, `npm run build`, `npm run lint`.
 
 ## Mitwirken
 

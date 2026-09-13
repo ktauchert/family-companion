@@ -11,7 +11,8 @@
     "dev:mobile": "npm exec --workspace=@family-companion/mobile -- expo start",
     "build": "turbo build",
     "lint": "turbo lint",
-    "type-check": "turbo type-check"
+    "type-check": "turbo type-check",
+    "test": "turbo test"
   },
   "devDependencies": {
     "turbo": "^2.5.0",
