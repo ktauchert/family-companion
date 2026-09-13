@@ -13,7 +13,7 @@ Arbeitsregeln für Agenten in diesem Repo. Menschliche Ergänzung: [CONTRIBUTING
 
 - Tests dort, wo Verhalten kippen kann: Shared-Logik, Schemas, Limits, Algos, Auth-Regeln. Nicht für reines Type-Durchreichen.
 - Immer auch **Negativfälle**: ungültiges Input, falsches Tier, Limit überschritten, fremdes Haushaltsmitglied, fehlender Check-in.
-- Stack laut [ADR 0002](./docs/adr/0002-unit-tests-und-github-ci.md): Vitest, `turbo test`. Runner ist noch nicht eingebaut (Phase 0.2).
+- Stack laut [ADR 0002](./docs/adr/0002-unit-tests-und-github-ci.md): Vitest, `turbo test`.
 
 ## Docs nachziehen
 
