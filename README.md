@@ -6,7 +6,7 @@ Types, Zod-Schemas und Firestore-Konstanten liegen in `@family-companion/shared`
 
 ## Stand
 
-Phase 1 (in Arbeit): Haushalt und Auth. Web: Google auf `/login`, neues Konto auf `/register`. Join: PIN + E-Mail-Whitelist, kein `/join/…` ([ADR 0010](docs/adr/0010-invite-pin-und-email-whitelist.md)). In der Firebase Console muss **Authentication → E-Mail/Passwort** an sein. Nach Rule-Änderungen `firestore.rules` neu veröffentlichen. App: dieselben Flows; Google nur nativ (Dev-Build), Expo Go über E-Mail ([ADR 0009](docs/adr/0009-auth-google-und-email.md)). Lessons: [docs/lessons-learned.md](docs/lessons-learned.md).
+Phase 1 erledigt ([01-auth-haushalt](docs/phasen/01-auth-haushalt.md)): Auth & Haushalt. Phase **1.1** danach: Android Dev-Build + Google nativ ([01.1](docs/phasen/01.1-dev-build-google-native.md)). App in Expo Go: E-Mail; Google nur im Dev-Build ([ADR 0009](docs/adr/0009-auth-google-und-email.md)). Join: PIN + E-Mail-Whitelist ([ADR 0010](docs/adr/0010-invite-pin-und-email-whitelist.md)). Lessons: [docs/lessons-learned.md](docs/lessons-learned.md).
 
 Produkt: [docs/features.md](docs/features.md) · Plan: [docs/phasenplan.md](docs/phasenplan.md)
 
