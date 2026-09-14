@@ -16,7 +16,7 @@ Was die Phase wollte, und wo wir nach den Umwegen stehen.
 | Geplant | Ist |
 | --- | --- |
 | Google auf Web | **geprüft:** Popup, Haushalt anlegen |
-| Google auf Android (Expo Go Web-OAuth, sonst nativ) | **verworfen für Expo Go** (Google blockiert `exp://`). Nativ vorbereitet (Paket, SHA-1, `google-services.json`), Gerätetest **nach** Web-PoC + Dev-Build |
+| Google auf Android (Expo Go Web-OAuth, sonst nativ) | **verworfen für Expo Go**; nativ vorbereitet → Gerätetest in **[Phase 1.1](./01.1-dev-build-google-native.md)** |
 | Dummy in Expo Go | **bewusst nicht** (Storage / UID / Kalender-Import) |
 | Sophie joint per Link | **ersetzt** durch PIN + E-Mail-Whitelist (ADR 0010). `/join/…` entfernt. Join-E2E geprüft (PIN + Whitelist) |
 | Mitglieder nur anlegen/listen | **WP4 erledigt:** Konto-E-Mail sichtbar; Owner entfernt, Mitglied tritt aus; E2E geprüft |
@@ -34,7 +34,7 @@ Was die Phase wollte, und wo wir nach den Umwegen stehen.
 - [x] Google Sign-In Android vorbereitet *(Paket `com.familycompanion.app`, `google-services.json`, SHA-1)*
 - [x] Expo-Go-Web-OAuth entfernt; Google in der App nur nativ *(korrigiert)*
 - [x] E-Mail/Passwort Web + App *(ergänzt, ADR 0009)* — `/login` vs `/register`; Fehlertexte je Flow; Console-Provider **E-Mail/Passwort** muss an sein (`auth/operation-not-allowed` sonst)
-- [ ] Google nativ erst im Dev-Build testen *(nach Web-PoC)*
+- [ ] Google nativ im Dev-Build testen → **[Phase 1.1](./01.1-dev-build-google-native.md)** *(ausgelagert)*
 
 Env: `apps/web/.env.local` und `apps/mobile/.env.local`. Werte **ohne** Anführungszeichen. Kein Root-Parser.
 
