@@ -15,20 +15,35 @@ Arbeitsregeln für Agenten in diesem Repo. Menschliche Ergänzung: [CONTRIBUTING
 - Immer auch **Negativfälle**: ungültiges Input, falsches Tier, Limit überschritten, fremdes Haushaltsmitglied, fehlender Check-in.
 - Stack laut [ADR 0002](./docs/adr/0002-unit-tests-und-github-ci.md): Vitest, `turbo test`.
 
+## Persistenz: CRUD vor der Umsetzung
+
+Bevor Store, Rules oder UI für eine **gespeicherte** Entity gebaut oder erweitert werden: **Einschätzung an den User**, parallel ins aktuelle Phasen-WP. Nicht erst nach dem ersten Happy-Path.
+
+Je Buchstabe: nötig / nicht nötig, wer darf, welches Feld der Mensch sehen oder ändern muss.
+
+| | Frage |
+| --- | --- |
+| **C** | Wer legt an, mit welchem Input? Gibt es schon einen Create-Pfad (z. B. Join statt zweites Formular)? |
+| **R** | Welche Felder muss ein Mensch lesen? IDs und Rollen allein reichen nicht (E-Mail, Titel, Datum). |
+| **U** | Welche Felder ändern sich im Alltag? Weglassen nur mit Begründung. |
+| **D** | Wer entfernt, was passiert mit Limits und Referenzen? Ohne Delete wird der Datensatz starr. |
+
+Create+Read ohne Delete ist fast immer zu wenig (Invites nachträglich, Members in Phase 1 vergessen). Details: [lessons-learned.md](./docs/lessons-learned.md).
+
 ## Docs nachziehen
 
 Nach jeder inhaltlichen Änderung:
 
 1. Checkliste in der **aktuellen Phasen-Datei** unter [docs/phasen/](./docs/phasen/) aktualisieren (`[x]` / `[ ]`). Index: [docs/phasenplan.md](./docs/phasenplan.md).
-2. [docs/features.md](./docs/features.md), Journey oder ADRs anfassen, wenn sich Produkt oder Architektur ändert. UI/UX: [docs/design/ui.md](./docs/design/ui.md) lesen und einhalten.
+2. [docs/features.md](./docs/features.md), Journey oder ADRs anfassen, wenn sich Produkt oder Architektur ändert. UI/UX: [docs/design/ui.md](./docs/design/ui.md) lesen und einhalten. Wiederholte Fallen: [docs/lessons-learned.md](./docs/lessons-learned.md).
 3. Fehlt etwas Wichtiges: Arbeitspaket in der Phase **ergänzen** und mit `*(ergänzt)*` markieren.
 
 ## Technik (kurz)
 
 - npm Workspaces, kein pnpm ([ADR 0001](./docs/adr/0001-npm-workspaces.md)).
-- Shared-Code nur in `@family-companion/shared`.
+- Shared-Code nur in `@family-companion/shared`. Firestore-Lese/Schreib (außer Auth) über `householdStore(db)` dort; Web und App binden nur ihren `db`.
 - UI: Art Paper (Light) / Stone (Dark), keine Sidebar, Karten ohne linken Farbstreifen. Tokens und Wireframes: [docs/design/ui.md](./docs/design/ui.md). Vorschau: [docs/design/preview.html](./docs/design/preview.html).
-- Keine Secrets committen. Vorlage: `.env.example`. Echte Werte nur in `.env.local` (gitignored). OpenAI und Firebase-Admin nur serverseitig.
+- Keine Secrets committen. Vorlagen: `apps/web/.env.example`, `apps/mobile/.env.example`. Echte Werte nur in der jeweiligen `.env.local` (gitignored). OpenAI und Firebase-Admin nur serverseitig.
 
 ## Agent skills
 

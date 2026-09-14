@@ -6,7 +6,7 @@ Types, Zod-Schemas und Firestore-Konstanten liegen in `@family-companion/shared`
 
 ## Stand
 
-Phase 0.2: Vitest in `@family-companion/shared`, `npm run test` über Turbo, GitHub Actions auf Push/PR. Auth folgt in Phase 1.
+Phase 1 (in Arbeit): Haushalt und Auth. Web: Google auf `/login`, neues Konto auf `/register`. Join: PIN + E-Mail-Whitelist, kein `/join/…` ([ADR 0010](docs/adr/0010-invite-pin-und-email-whitelist.md)). In der Firebase Console muss **Authentication → E-Mail/Passwort** an sein. Nach Rule-Änderungen `firestore.rules` neu veröffentlichen. App: dieselben Flows; Google nur nativ (Dev-Build), Expo Go über E-Mail ([ADR 0009](docs/adr/0009-auth-google-und-email.md)). Lessons: [docs/lessons-learned.md](docs/lessons-learned.md).
 
 Produkt: [docs/features.md](docs/features.md) · Plan: [docs/phasenplan.md](docs/phasenplan.md)
 
@@ -36,8 +36,10 @@ Node.js 20+, npm.
 
 ```bash
 npm install
-cp .env.example .env.local
+cp apps/web/.env.example apps/web/.env.local
+cp apps/mobile/.env.example apps/mobile/.env.local
 # Firebase-Werte eintragen (Console → Projekteinstellungen)
+# Firestore-Regeln aus firestore.rules in der Console veröffentlichen
 npm run type-check
 ```
 

@@ -17,10 +17,16 @@ export interface Household {
   id: string;
   name: string;
   plan: SubscriptionPlan;
+  ownerId: string;
   members: string[];
+  memberEmails: Record<string, string>;
   createdAt: string;
+  invitePin: string;
+  invitedEmails: string[];
   kaizenNudgesEnabled?: boolean;
 }
+
+export type HouseholdDraft = Omit<Household, 'id'>;
 
 export interface MemberCompletion {
   userId: string;

@@ -41,3 +41,6 @@ Was haben wir verworfen — und warum?
 | [0005](./0005-morgen-check-in-und-priorisierung.md) | Morgen-Check-in und Priorisierung | Accepted |
 | [0006](./0006-kategorisierte-einkaufslisten.md) | Kategorisierte Listen und Smart Shopping | Accepted |
 | [0007](./0007-phasen-branches-und-docs.md) | Phasen-Branches, PRs und lebende Docs | Accepted |
+| [0008](./0008-google-anmeldung-zwei-pfade.md) | Google-Anmeldung: Expo Go Web-OAuth, Build nativ | Superseded |
+| [0009](./0009-auth-google-und-email.md) | Google + E-Mail/Passwort; App-Google nur nativ | Accepted |
+| [0010](./0010-invite-pin-und-email-whitelist.md) | Firestore-ID, Join per PIN + E-Mail-Whitelist | Accepted |

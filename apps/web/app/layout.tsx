@@ -1,5 +1,11 @@
 import type { Metadata } from 'next';
+import { Source_Sans_3 } from 'next/font/google';
 import './globals.css';
+
+const sourceSans = Source_Sans_3({
+  subsets: ['latin'],
+  weight: ['400', '600'],
+});
 
 export const metadata: Metadata = {
   title: 'Family Companion',
@@ -13,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="de">
-      <body>{children}</body>
+      <body className={sourceSans.className}>{children}</body>
     </html>
   );
 }
