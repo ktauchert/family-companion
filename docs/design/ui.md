@@ -23,7 +23,7 @@ Ruhe vor Lautstärke. Die Oberfläche soll sich anfühlen wie ein Küchentisch a
 | **Kalender** | Woche/Monat, Detail | Tab *Kalender* |
 | **Todos** | Liste + Filter | Tab *Todos* |
 | **Listen** | Themen (Supermarkt, …) | Tab *Listen* |
-| **Haushalt** | Mitglieder, Einladung, Plan | Tab *Mehr* |
+| **Haushalt** | Mitglieder **mit E-Mail**, Entfernen/Austreten, Einladungs-Überblick, Link zur Invite-Verwaltung | Tab *Mehr* |
 
 Web-Chrome: schmale **Top-Leiste** (Wortmarke, die fünf Orte, Theme, Avatar) plus **Breadcrumbs**.  
 App-Chrome: **Title** oben, **Tabs** unten. Kein Hamburger.
@@ -33,6 +33,7 @@ Breadcrumbs bilden denselben Stack wie die App-Routes, z. B.:
 ```text
 Heute
 Listen / Supermarkt
+Haushalt / Mitglieder
 Haushalt / Einladen
 ```
 
@@ -91,6 +92,7 @@ Wenige Töne, alle warm-stumpf. Akzent ist Salbei, nicht Petrol und nicht Lila. 
 | Schatten Dark | `0 12px 28px -14px rgb(0 0 0 / 45%)` | Steinplatte |
 | Innenkante | `inset 0 1px 0 rgb(255 255 255 / 40%)` (Light) | Blattglanz, kein Gradient-SaaS |
 | Raster | 8 · 16 · 24 · 40 | Web-Inhalt max. ~1080px, zentriert |
+| Formularstapel | max. 12px zwischen den Feldern | nur `gap`, kein Extra-Margin am `.field` |
 | Titel | serif, Georgia / Iowan / `Source Serif 4` | editorial, nicht Inter-everywhere |
 | UI-Text | humanist sans, `Source Sans 3` oder System-UI | lesbar auf dem Handy |
 
@@ -181,6 +183,21 @@ App (derselbe Inhalt, eine Spalte):
 ├ Heute  Kalender  Todos  Listen  Mehr ┤
 └────────────────────────────────────┘
 ```
+
+### Web — Haushalt (Mitglieder)
+
+```text
+┌ Haushalt                              Plan free · 2 Mitglieder ┐
+│ ────────                                                       │
+│  sophie@home.de     Mitglied                                   │
+│  julian@home.de     Inhaber · du          [ Austreten ]        │
+│  (Owner sieht bei anderen [ Entfernen ])                       │
+│                                                                │
+│  Offene Einladungen → Einladungen verwalten                    │
+└────────────────────────────────────────────────────────────────┘
+```
+
+Konto-E-Mail ist die primäre Zeile, Rolle sekundär. Kein nacktes „Mitglied“ als einzige Beschriftung.
 
 ---
 

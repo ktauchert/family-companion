@@ -12,6 +12,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "firebase": "^12.19.0",
     "zod": "^3.24.0"
   },
   "devDependencies": {

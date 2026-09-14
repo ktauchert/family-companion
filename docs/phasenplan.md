@@ -2,7 +2,7 @@
 
 Index. Jede Phase hat eine eigene Datei mit Arbeitspaketen unter [phasen/](./phasen/).
 
-Quellen: [features.md](./features.md), [user-journey.md](./user-journey.md), [design/ui.md](./design/ui.md), [adr/](./adr/README.md).
+Quellen: [features.md](./features.md), [user-journey.md](./user-journey.md), [design/ui.md](./design/ui.md), [adr/](./adr/README.md) (Invite: [0010](./adr/0010-invite-pin-und-email-whitelist.md)), [lessons-learned.md](./lessons-learned.md).
 
 **Lebendiger Stand:** Haken in der *Phasen-Datei* setzen. Neuer Scope: Punkt dort aufnehmen und `*(ergänzt)*` markieren ([ADR 0007](./adr/0007-phasen-branches-und-docs.md)).
 
@@ -12,8 +12,8 @@ Quellen: [features.md](./features.md), [user-journey.md](./user-journey.md), [de
 | --- | --- | --- |
 | 0 Monorepo-Gerüst | erledigt | [00-monorepo.md](./phasen/00-monorepo.md) |
 | 0.1 App-Scaffolds | erledigt | [00.1-app-scaffolds.md](./phasen/00.1-app-scaffolds.md) |
-| **0.2 Tests und CI** | **PR offen** | [00.2-tests-ci.md](./phasen/00.2-tests-ci.md) |
-| 1 Auth & Haushalt | offen | [01-auth-haushalt.md](./phasen/01-auth-haushalt.md) |
+| 0.2 Tests und CI | erledigt | [00.2-tests-ci.md](./phasen/00.2-tests-ci.md) |
+| **1 Auth & Haushalt** | **in Arbeit** | [01-auth-haushalt.md](./phasen/01-auth-haushalt.md) |
 | 2 Alltag | offen | [02-alltag.md](./phasen/02-alltag.md) |
 | 3 Pro-Trigger | offen | [03-pro-trigger.md](./phasen/03-pro-trigger.md) |
 | 4 Pro: KI & Habits | offen | [04-pro-ki-habits.md](./phasen/04-pro-ki-habits.md) |
@@ -24,7 +24,8 @@ Quellen: [features.md](./features.md), [user-journey.md](./user-journey.md), [de
 | --- | --- |
 | Phase 0 | Vitest + CI entschieden, kein CD ([ADR 0002](./adr/0002-unit-tests-und-github-ci.md)) |
 | Phase 0.2 / 1 | Vitest, `turbo test`, Actions |
-| Phase 2 | Tests für Priorisierungs-Algo und Listen-Kategorien |
+| Vor jeder persistierten Entity | CRUD-Einschätzung (C/R/U/D) an den Maintainer und ins Phasen-WP, bevor Store/UI gebaut werden ([AGENTS.md](../AGENTS.md), [lessons-learned.md](./lessons-learned.md)) |
+| Phase 2 | Tests für Priorisierungs-Algo und Listen-Kategorien; CRUD je Collection (Events, Todos, Listenpunkte) |
 | Phase 2+ | E2E Web (Playwright) |
 | Deploybar | CD — eigenes ADR |
 

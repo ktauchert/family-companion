@@ -12,7 +12,8 @@
     "build": "turbo build",
     "lint": "turbo lint",
     "type-check": "turbo type-check",
-    "test": "turbo test"
+    "test": "turbo test",
+    "firebase:sha1": "keytool -list -v -keystore \"$HOME/.android/debug.keystore\" -alias androiddebugkey -storepass android"
   },
   "devDependencies": {
     "turbo": "^2.5.0",

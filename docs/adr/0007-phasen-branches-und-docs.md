@@ -12,6 +12,7 @@ Das Repo wächst phasenweise. Ohne feste Git- und Doc-Regel vermischen sich Phas
 - **Eine Phase, ein Branch** von `main`, ein **PR** nach `main`. Der Maintainer reviewed und merged. Die nächste Phase startet erst danach.
 - Agenten dürfen `gh` für Push und PRs nutzen. Commit-Messages beschreiben das Warum.
 - **Docs sind Teil der Arbeit:** nach jeder Anpassung die Checkliste in `docs/phasenplan.md` setzen. Neuer wichtiger Scope, der nicht im Plan stand: Punkt aufnehmen und mit `*(ergänzt)*` markieren.
+- Persistierte Entities in der Phasenplanung mit **C/R/U/D** denken, nicht nur den Create-Pfad (siehe `AGENTS.md`).
 - Verbindlich für Agenten: `AGENTS.md`. Für Menschen: `CONTRIBUTING.md`.
 
 Der **erste Init-Push** darf direkt auf `main` (kein vorgelagerter PR).

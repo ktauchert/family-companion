@@ -1,35 +1,37 @@
-import { FREE_TIER_MAX_MEMBERS } from '@family-companion/shared';
+import { onAuthStateChanged } from 'firebase/auth';
+import { useRouter } from 'expo-router';
+import { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { auth } from '../lib/firebase';
+import { households } from '../lib/households';
+import { useTheme } from '../lib/theme';
 
-export default function HomeScreen() {
+export default function IndexScreen() {
+  const router = useRouter();
+  const theme = useTheme();
+
+  useEffect(() => {
+    return onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        router.replace('/login');
+        return;
+      }
+      const household = await households.householdForUser(user.uid);
+      router.replace(household ? '/heute' : '/onboarding');
+    });
+  }, [router]);
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Family Companion</Text>
-      <Text style={styles.body}>Mobile-Scaffold. Shared-Paket ist verbunden.</Text>
-      <Text style={styles.body}>
-        Free-Tier: höchstens {FREE_TIER_MAX_MEMBERS} Mitglieder.
-      </Text>
+    <View style={[styles.page, { backgroundColor: theme.paper }]}>
+      <Text style={{ color: theme.inkSoft }}>Laden…</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  page: {
     flex: 1,
     justifyContent: 'center',
-    padding: 32,
-    backgroundColor: '#F6F3EE',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '600',
-    color: '#1D1A16',
-    marginBottom: 12,
-  },
-  body: {
-    fontSize: 16,
-    lineHeight: 24,
-    color: '#5C564C',
-    marginBottom: 8,
+    padding: 24,
   },
 });

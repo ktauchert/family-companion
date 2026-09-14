@@ -7,19 +7,33 @@
 
 ## Arbeitspakete
 
+Vor jedem Store: CRUD-Einschätzung (C/R/U/D) an den Maintainer und hier festhalten — [AGENTS.md](../../AGENTS.md). Phase 1 hat Members ohne D und ohne lesbare E-Mail geliefert; Kalender/Todos/Listen dürfen das nicht wiederholen.
+
+Erwartung (kann in der Einschätzung begründet abweichen):
+
+| Entity | C | R | U | D |
+| --- | --- | --- | --- | --- |
+| Kalender-Event | anlegen | Titel, Zeit, wer | ändern | löschen |
+| Todo | anlegen | Titel, Fälligkeit, wer | ändern / abhaken | löschen |
+| Listenpunkt | hinzufügen | Text, Thema, Status | umbenennen / abhaken | entfernen |
+| Morgen-Check-in | einmal pro Tag | Stimmung, Energie | korrigieren am selben Tag | nein (Tag bleibt nachvollziehbar) |
+
 ### WP1 — Kalender
 
+- [ ] CRUD-Einschätzung Events festhalten, dann Store + UI
 - [ ] Events (Beginn, optional Ende)
 - [ ] Wiederholung, Zuweisung
 - [ ] Haushalts-Erledigung (eine Person hakte für alle)
 
 ### WP2 — Todos
 
+- [ ] CRUD-Einschätzung Todos festhalten, dann Store + UI
 - [ ] Todos mit Fälligkeit und Zuweisung
 - [ ] Haushalts-Erledigung
 
 ### WP3 — Einkaufslisten
 
+- [ ] CRUD-Einschätzung Listenpunkte festhalten, dann Store + UI
 - [ ] Listen nach Thema (Supermarkt, Drogerie, Apotheke, Klamotten, Sonstiges)
 - [ ] Abhaken in Echtzeit
 - [ ] Add-/Check-Historie für spätere Muster

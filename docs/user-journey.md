@@ -15,17 +15,18 @@ Produktkatalog: [features.md](./features.md).
 
 ### 1. Registrierung & Haushalts-Erstellung (Julian – Next.js Web App)
 
-1. **Landing Page:** Julian besucht die Web-App und klickt auf *Mit Google anmelden*.
-2. **Auth Flow:** Über Firebase Google Auth ist der Account in 2 Klicks erstellt.
-3. **Haushalt anlegen:** Ein Onboarding-Modal fragt nach dem Haushaltsnamen (*Unser Haushalt*).
-4. **Einladungs-Link:** Die App generiert einen eindeutigen Einladungs-Link oder QR-Code (`https://family-app.com/join/hh_98765`).
+1. **Landing Page:** Julian öffnet `/login` (anmelden) oder `/register` (neues E-Mail-Konto). Google nur auf Login.
+2. **Auth Flow:** Firebase erzeugt oder findet den Account. Google ist der Komfortweg; E-Mail reicht zum Mitmachen und zum Testen ohne zweites Google-Konto ([ADR 0009](./adr/0009-auth-google-und-email.md)).
+3. **Haushalt anlegen:** Ein Onboarding fragt nach dem Haushaltsnamen (*Unser Haushalt*). Firestore vergibt die Dokument-ID. Es entsteht ein 6-stelliger PIN.
+4. **Einladung:** Unter Haushalt sieht Julian die Mitglieder **mit Konto-E-Mail** (nicht nur „Mitglied“). *Einladungen verwalten* (`/haushalt/einladen`): E-Mail auf die Liste, ändern, entfernen. PIN daneben, Versand per WhatsApp oder SMS ([ADR 0010](./adr/0010-invite-pin-und-email-whitelist.md)).
+5. **Mitglieder:** Owner kann ein beigetretenes Mitglied entfernen (Free-Slot wird frei). Ein Mitglied kann selbst austreten. Den Owner kicken geht nicht — dafür Haushalt auflösen oder später Ownership übertragen.
 
-### 2. Beitritt des zweiten Mitglieds (Sophie – React Native Android App)
+### 2. Beitritt des zweiten Mitglieds (Sophie)
 
-1. **App-Start:** Sophie lädt die Android-App herunter und öffnet den Einladungs-Link von Julian.
-2. **Google Sign-In:** Ein Klick auf *Mit Google fortfahren*.
-3. **Auto-Join:** Das Firebase-Firestore-Backend schlägt die Brücke: Sophies `uid` wird im Firestore-Dokument `/households/hh_98765` zum `members`-Array hinzugefügt.
-4. **Ergebnis:** Beide sind nun demselben Haushalt zugeordnet und im **Free Tier** (Max. 2 Personen).
+1. Sophie registriert oder meldet sich **mit genau der eingeladenen E-Mail** an (Web oder App).
+2. Im Onboarding gibt sie den PIN ein. Shared `joinHousehold`: PIN **und** Konto-E-Mail müssen passen.
+3. Ihre `uid` landet im `members`-Array, die Konto-E-Mail in `memberEmails`; die Adresse verschwindet von der Invite-Liste. Free lehnt ein drittes Mitglied ab.
+4. **Ergebnis:** Beide sind demselben Haushalt zugeordnet (Free: max. 2 Personen). Unter Haushalt stehen beide E-Mails. Dieselbe UID gilt später für Storage.
 
 ---
 
@@ -113,7 +114,7 @@ Im Free Tier gibt es keine Mengenlimits bei Einkäufen, Todos oder Terminen.
 
 ### Multi-Mitglieder
 
-Weitere Personen per Einladungslink (Free war bei 2 Schluss).
+Weitere Personen per E-Mail-Whitelist und PIN (Free war bei 2 Schluss).
 
 ---
 
@@ -121,8 +122,8 @@ Weitere Personen per Einladungslink (Free war bei 2 Schluss).
 
 | Feature | Standard (Free) | Pro |
 | --- | --- | --- |
-| Authentication | Google Sign-In | Google Sign-In |
-| Haushalts-Limits | Max. 2 Mitglieder | Unbegrenzt |
+| Authentication | Google oder E-Mail/Passwort | dieselben Wege |
+| Haushalts-Limits | Max. 2 Mitglieder; Liste mit E-Mail; Entfernen / Austreten | Unbegrenzt; dieselben Member-Operationen |
 | Echtzeit-Sync | Firestore | Firestore |
 | Kalender | Eigenes Modell | Eigenes Modell |
 | Todos | Haushalts-Erledigung, Zuweisung | + Per-Member, Habits |

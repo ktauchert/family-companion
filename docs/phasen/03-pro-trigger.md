@@ -13,6 +13,6 @@
 ### WP2 — Plan-Feld
 
 - [ ] `plan: "pro"` am Household
-- [ ] Mitgliedslimit für Pro aufheben
+- [ ] Mitgliedslimit für Pro aufheben (Member-CRUD aus Phase 1 bleibt: E-Mail sichtbar, Entfernen/Austreten)
 
 Payment-Provider bleibt offen (eigenes ADR).

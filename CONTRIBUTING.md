@@ -30,6 +30,8 @@ Tests dort, wo Logik kippen kann. Immer auch **Negativfälle** (ungültige Daten
 
 ## Docs
 
-Nach jeder Anpassung die Checkliste in der aktuellen Datei unter [docs/phasen/](./docs/phasen/00.2-tests-ci.md) setzen. Index: [docs/phasenplan.md](./docs/phasenplan.md). Neuer Scope: Arbeitspaket aufnehmen und `*(ergänzt)*` markieren.
+Nach jeder Anpassung die Checkliste in der aktuellen Datei unter [docs/phasen/](./docs/phasen/01-auth-haushalt.md) setzen. Index: [docs/phasenplan.md](./docs/phasenplan.md). Neuer Scope: Arbeitspaket aufnehmen und `*(ergänzt)*` markieren.
 
-Architekturentscheidungen: [docs/adr/](./docs/adr/README.md). UI: [docs/design/ui.md](./docs/design/ui.md).
+Persistierte Daten: vor dem Bau kurz **C/R/U/D** klären (wer darf anlegen, was muss lesbar sein, was ändert sich, wer darf löschen). Ohne Delete und ohne menschenlesbare Felder wird der Alltag starr — [AGENTS.md](./AGENTS.md), [lessons-learned.md](./docs/lessons-learned.md).
+
+Architekturentscheidungen: [docs/adr/](./docs/adr/README.md). UI: [docs/design/ui.md](./docs/design/ui.md). Umwege: [docs/lessons-learned.md](./docs/lessons-learned.md).

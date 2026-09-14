@@ -1,0 +1,92 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function email() {
+      return request.auth.token.email;
+    }
+
+    function isMember() {
+      return signedIn() && request.auth.uid in resource.data.members;
+    }
+
+    function isInvited() {
+      return signedIn() && email() is string && email() in resource.data.invitedEmails;
+    }
+
+    function isOwnerWrite() {
+      return signedIn()
+        && request.auth.uid == resource.data.ownerId
+        && request.resource.data.id == resource.data.id
+        && request.resource.data.ownerId == resource.data.ownerId
+        && request.resource.data.invitePin == resource.data.invitePin
+        && request.resource.data.plan == resource.data.plan
+        && request.resource.data.members == resource.data.members
+        && request.resource.data.createdAt == resource.data.createdAt;
+    }
+
+    function identityFrozen() {
+      return request.resource.data.id == resource.data.id
+        && request.resource.data.ownerId == resource.data.ownerId
+        && request.resource.data.invitePin == resource.data.invitePin
+        && request.resource.data.plan == resource.data.plan
+        && request.resource.data.createdAt == resource.data.createdAt;
+    }
+
+    function isJoinWrite() {
+      return isInvited()
+        && request.auth.uid in request.resource.data.members
+        && !(request.auth.uid in resource.data.members)
+        && !(email() in request.resource.data.invitedEmails)
+        && request.resource.data.members.size() == resource.data.members.size() + 1
+        && request.resource.data.invitedEmails.size() == resource.data.invitedEmails.size() - 1
+        && identityFrozen()
+        && (resource.data.plan != 'free' || request.resource.data.members.size() <= 2);
+    }
+
+    function isOwnerKickWrite() {
+      return signedIn()
+        && request.auth.uid == resource.data.ownerId
+        && request.auth.uid in request.resource.data.members
+        && identityFrozen()
+        && request.resource.data.invitedEmails == resource.data.invitedEmails
+        && request.resource.data.members.size() == resource.data.members.size() - 1;
+    }
+
+    function isLeaveWrite() {
+      return signedIn()
+        && request.auth.uid in resource.data.members
+        && request.auth.uid != resource.data.ownerId
+        && !(request.auth.uid in request.resource.data.members)
+        && identityFrozen()
+        && request.resource.data.invitedEmails == resource.data.invitedEmails
+        && request.resource.data.members.size() == resource.data.members.size() - 1;
+    }
+
+    function isMemberEmailWrite() {
+      return isMember()
+        && identityFrozen()
+        && request.resource.data.members == resource.data.members
+        && request.resource.data.invitedEmails == resource.data.invitedEmails
+        && request.resource.data.name == resource.data.name;
+    }
+
+    match /households/{id} {
+      allow read: if isMember() || isInvited();
+
+      allow create: if signedIn()
+        && request.resource.data.id == id
+        && request.resource.data.ownerId == request.auth.uid
+        && request.auth.uid in request.resource.data.members
+        && request.resource.data.members.size() == 1
+        && request.resource.data.invitedEmails.size() == 0
+        && request.resource.data.invitePin is string
+        && request.resource.data.invitePin.matches('^[0-9]{6}$');
+
+      allow update: if isOwnerWrite() || isJoinWrite() || isOwnerKickWrite() || isLeaveWrite() || isMemberEmailWrite();
+    }
+  }
+}
