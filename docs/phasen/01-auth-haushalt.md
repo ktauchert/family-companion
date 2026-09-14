@@ -22,7 +22,7 @@ Was die Phase wollte, und wo wir nach den Umwegen stehen.
 | Mitglieder nur anlegen/listen | **WP4 erledigt:** Konto-E-Mail sichtbar; Owner entfernt, Mitglied tritt aus; E2E geprüft |
 | Ein Root-`.env.local` | **korrigiert:** Env pro App (`apps/web`, `apps/mobile`) |
 | QR-Code / Join-Link | **verworfen** als Hauptweg |
-| PR nach `main` | offen — PR folgt |
+| PR nach `main` | [PR #3](https://github.com/ktauchert/family-companion/pull/3) offen |
 | E-Mail/Passwort | **gebaut** (Web + App). Console: Provider *E-Mail/Passwort* einschalten |
 
 ## Arbeitspakete
