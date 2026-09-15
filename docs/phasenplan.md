@@ -16,6 +16,8 @@ Quellen: [features.md](./features.md), [user-journey.md](./user-journey.md), [de
 | **1 Auth & Haushalt** | erledigt | [01-auth-haushalt.md](./phasen/01-auth-haushalt.md) |
 | **1.1 Dev-Build & Google nativ** | erledigt | [01.1-dev-build-google-native.md](./phasen/01.1-dev-build-google-native.md) |
 | 2 Alltag | erledigt | [02-alltag.md](./phasen/02-alltag.md) |
+| **2.1 Heute UX** | offen | [02.1-heute-ux.md](./phasen/02.1-heute-ux.md) · Milestone [Phase 2.1](https://github.com/ktauchert/family-companion/milestone/1) |
+| **2.2 Kalender & Todos UX** | offen | [02.2-kalender-todos-ux.md](./phasen/02.2-kalender-todos-ux.md) · Milestone [Phase 2.2](https://github.com/ktauchert/family-companion/milestone/2) |
 | 3 Pro-Trigger | offen | [03-pro-trigger.md](./phasen/03-pro-trigger.md) |
 | 4 Pro: KI & Habits | offen | [04-pro-ki-habits.md](./phasen/04-pro-ki-habits.md) |
 
@@ -33,7 +35,7 @@ Quellen: [features.md](./features.md), [user-journey.md](./user-journey.md), [de
 
 ## Offene Entscheidungen (später)
 
-- **UI/UX-Pass Phase-2-Screens** — nach User-Test; kein eigenes Phasen-WP yet (Init: [phase-2-ux-init-prompt.txt](./agents/phase-2-ux-init-prompt.txt))
+- **UI/UX-Pass Listen & Nav** — nach [02.2 Kalender & Todos](./phasen/02.2-kalender-todos-ux.md); Milestones ab 2.1
 - Kalender-Import (Google/Outlook) — eigenes ADR
 - Payment-Provider für Pro
 - Domain / Branding (Platzhalter: family-app.com)

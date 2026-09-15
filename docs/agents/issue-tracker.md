@@ -4,6 +4,7 @@ Issues and specs for this repo live as GitHub issues. Use the `gh` CLI for all o
 
 ## Conventions
 
+- **Milestones**: Ab Phase 2.1 ein GitHub-Milestone pro UX-/Phasen-Slice (z. B. `Phase 2.1 — Heute UX`). Issues mit `--milestone "..."` verknüpfen. Phasen-Docs verlinken den Milestone.
 - **Create an issue**: `gh issue create --title "..." --body "..."`. Use a heredoc for multi-line bodies.
 - **Read an issue**: `gh issue view <number> --comments`, filtering comments by `jq` and also fetching labels.
 - **List issues**: `gh issue list --state open --json number,title,body,labels,comments --jq '[.[] | {number, title, body, labels: [.labels[].name], comments: [.comments[].body]}]'` with appropriate `--label` and `--state` filters.

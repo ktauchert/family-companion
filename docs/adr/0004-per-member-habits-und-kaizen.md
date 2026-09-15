@@ -34,3 +34,7 @@ Free kann `per_member` an normalen Todos nutzen. Der Nudge, „mandatory täglic
 - **Nur Zuweisung an eine Person:** deckt „Fitness für beide“ nicht ab.
 - **Getrennte Todos pro Person anlegen:** dupliziert Daten, bricht die gemeinsame Definition.
 - **Streaks und Gamification als Kern:** zu nah an Fitness-Apps, nicht am Haushalts-Alltag.
+
+## UI-Hinweis (Phase 2.2, 2026-09-15)
+
+Kalender-Habits bleiben am **Kalender** (geteilte Wochenansicht für den Haushalt). Abhaken im **View-Modal**, nicht in der Event-Liste — Completion-Daten bleiben für Kaizen/LLM (Phase 4). Todo-Habits für Aufgaben ohne festen Zeit-Slot. Details: [02.2-kalender-todos-ux.md](../phasen/02.2-kalender-todos-ux.md).

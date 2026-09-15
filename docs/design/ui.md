@@ -125,6 +125,71 @@ Pro-Karte: derselbe Körper, Siegel `Pro` in Clay/Sand, ein Satz warum es wartet
 
 ---
 
+## Icons (Phase 2.1)
+
+Eine Icon-Sprache für Bereiche und Item-Typen — **dieselben Icons** in App-Tabs, Web-Nav und Heute-Cards.
+
+| Bereich | Key (Shared) | Verwendung |
+| --- | --- | --- |
+| Heute | `heute` | Tab, Nav, ggf. Gruß-Bereich |
+| Kalender | `kalender` | Tab, Nav, Termin-Cards |
+| Todos | `todos` | Tab, Nav, Todo-Cards |
+| Listen | `listen` | Tab, Nav, Einkauf-Cards |
+| Haushalt / Mehr | `haushalt` | Nav, Tab *Mehr* |
+
+Item-Typen auf dem Tagesplan: `event`, `todo`, `shopping` (+ optional Kategorie-Icon für Listen-Themen).
+
+- Keys und Labels in `@family-companion/shared`; Rendering Web (SVG) und App (Vector Icons) getrennt, gleiche Semantik.
+- Keine Emoji als Ersatz für Navigation.
+
+## Energie-Hinweis (Anzeige, Phase 2.1)
+
+`energyHint` auf Heute-Cards als **gedämpfte Ampel** — scanbar, aber zur Haltung passend:
+
+| Stufe | Token (Light) | Token (Dark) |
+| --- | --- | --- |
+| `low` | `sage` | `lichen` |
+| `medium` | `clay` | `sand` |
+| `high` | `rust` (sparsam) | `terracotta` (sparsam) |
+
+Immer zusätzlich Kurzlabel oder `aria-label` („Energie: niedrig“) — nicht nur Farbe.
+
+---
+
+## Heute-Dashboard (Phase 2.1)
+
+Nach User-Test und [02.1-heute-ux.md](../phasen/02.1-heute-ux.md):
+
+1. **Gruß** + Check-in-Formular *oder* **Check-in-Chip** (eigene + Partner-Stimmung/Energie)
+2. **Vorschläge** (wenn Algo welche liefert) — eigene Card, Bestätigen/Ablehnen
+3. **Tagesplan** — priorisierte **Mini-Cards** (nicht flache Liste); Typ-Icon, Energie-Signal, Meta als Stempel
+4. **Einkauf** auf dem Tagesplan: nur **Kategorie + Anzahl offen** (z. B. „Supermarkt · 3 offen“), keine Produktnamen
+5. **Summary-Cards** (Web Raster, App Spalte): Kalender, Listen, Todos — je eine Zeile + Tap zum Tab
+
+Heute bleibt primär **Überblick**; Abhaken optional später (Issue #20). Detail-CRUD in den Tabs.
+
+---
+
+## Kalender (Phase 2.2)
+
+[02.2-kalender-todos-ux.md](../phasen/02.2-kalender-todos-ux.md)
+
+- **Wochenansicht:** KW-Header mit Vor/Zurück; Termine pro Tag als **EventCards** (nicht Endlosliste).
+- **Liste:** keine Checkbox, keine Text-Buttons — Tap öffnet **View-Modal**.
+- **View-Modal:** Infos ausführlich (Pills), **Erledigt**-Chip, Bearbeiten/Löschen (Löschen `rust`).
+- **Habits** (`kind: habit`) bleiben im Kalender — Haushalt sieht gegenseitig den Plan.
+- **Neu:** Plus-Icon (Web oben rechts in der Card, Mobile FAB unten rechts) → Add-Modal mit Chip-Selectors.
+- Zuweisung in der Card: **Anzahl** Personen (fett wenn du dabei); Namen später.
+
+## Todos (Phase 2.2)
+
+- **TodoCards** wie EventCards (Pills, Energie, Icons).
+- **Abhaken:** Checkbox auf der Card erlaubt; zusätzlich im View-Modal.
+- Add/Edit: Modal + Chips, Plus-FAB wie Kalender.
+- Todo-Habits: Aufgaben ohne festen Kalender-Slot; Kalender-Habits: zeitgebunden in der KW.
+
+---
+
 ## Dashboard
 
 Pflicht für *Heute*, sobald der Morgen-Check-in da ist (sonst nur Check-in-Karte).
