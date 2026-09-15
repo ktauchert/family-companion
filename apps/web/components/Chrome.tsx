@@ -6,7 +6,7 @@ export function Chrome({
   children,
 }: {
   crumb: string;
-  current?: 'heute' | 'haushalt';
+  current?: 'heute' | 'kalender' | 'todos' | 'listen' | 'haushalt';
   children: React.ReactNode;
 }) {
   return (
@@ -17,9 +17,15 @@ export function Chrome({
           <Link href="/heute" aria-current={current === 'heute' ? 'page' : undefined}>
             Heute
           </Link>
-          <span>Kalender</span>
-          <span>Todos</span>
-          <span>Listen</span>
+          <Link href="/kalender" aria-current={current === 'kalender' ? 'page' : undefined}>
+            Kalender
+          </Link>
+          <Link href="/todos" aria-current={current === 'todos' ? 'page' : undefined}>
+            Todos
+          </Link>
+          <Link href="/listen" aria-current={current === 'listen' ? 'page' : undefined}>
+            Listen
+          </Link>
           <Link href="/haushalt" aria-current={current === 'haushalt' ? 'page' : undefined}>
             Haushalt
           </Link>

@@ -63,7 +63,7 @@ function isHouseholdOwner(householdId) {
 
 ## Kalender-Event (`calendar_events`)
 
-Collection laut Shared-Types. Felder u. a. `title`, `startsAt`, `endsAt`, `assignedTo`, `completionMode`, `recurrence`, `completions`, `kind`, `energyHint`.
+Collection laut Shared-Types. Felder u. a. `title`, `startsAt`, `endsAt`, `assignedTo` (`string[]`, leer = Haushalt), `completionMode`, `recurrence` (`none` \| `daily` \| `weekly`), `completions`, `kind`, `energyHint` (optional, Default `medium`).
 
 **Ergänzung Phase 2:** `createdBy: string` (UID) — für Lösch-Rechte und Anzeige „angelegt von …“ (optional in UI).
 
@@ -84,7 +84,7 @@ Collection laut Shared-Types. Felder u. a. `title`, `startsAt`, `endsAt`, `assig
 
 ## Todo (`todos`)
 
-Analog Kalender: `title`, `status`, `dueDate`, `assignedTo`, `completionMode`, `recurrence`, `completions`, `kind`, `energyHint`.
+Analog Kalender: `title`, `status`, `dueDate`, `assignedTo` (`string[]`), `completionMode`, `recurrence`, `completions`, `kind`, `energyHint` (optional, Default `medium`).
 
 **Ergänzung Phase 2:** `createdBy: string`.
 

@@ -14,11 +14,11 @@ Kalender und Todos sind Kern ([ADR 0003](./adr/0003-kalender-und-todos-sind-kern
 | Haushalt + Einladung | Gemeinsamer Kontext | Free: max. 2. Mitgliederliste mit Konto-E-Mail; **Inhaber** kann Mitglied entfernen, Mitglied kann austreten. Owner setzt E-Mail auf die Liste, PIN per Messenger. Kein Join-Link ([ADR 0010](./adr/0010-invite-pin-und-email-whitelist.md)) |
 | **Rollen Alltag (Phase 2)** | Inhaber vs Mitglied | Kooperatives Anlegen/Bearbeiten für alle; **Löschen** fremder Kalender/Todos/Listeneinträge nur Inhaber. Details: [phase-2-crud-roles.md](./design/phase-2-crud-roles.md) |
 | Echtzeit-Sync | Beide sehen denselben Stand | Firestore |
-| **Kalender** | Termine, Wiederholungen | Eigenes Modell; Import später |
-| **Todos** | Wer macht was | Zuweisbar, Fälligkeit |
-| **Einkaufslisten nach Thema** | Getrennt abhaken | Supermarkt, Drogerie, Apotheke, Klamotten, Sonstiges ([ADR 0006](./adr/0006-kategorisierte-einkaufslisten.md)) |
-| **Morgen-Check-in** | Stimmung + Energie nach dem Schlaf | Pflicht für die Tagesansicht |
-| **Priorisierung (Algo)** | Passt den Tag an Energie an | Z. B. Einkaufen verschieben, wenn beide flach sind ([ADR 0005](./adr/0005-morgen-check-in-und-priorisierung.md)) |
+| **Kalender** | Termine, Wiederholungen | Web + App; Zuweisung, Haushalts-/Per-Member-Erledigung; Import später |
+| **Todos** | Wer macht was | Web + App; Fälligkeit, Zuweisung, Wiederholung |
+| **Einkaufslisten nach Thema** | Getrennt abhaken | Web + App; Supermarkt, Drogerie, Apotheke, Klamotten, Sonstiges ([ADR 0006](./adr/0006-kategorisierte-einkaufslisten.md)) |
+| **Morgen-Check-in** | Stimmung + Energie nach dem Schlaf | Einmal pro Tag (drei Stufen je Feld); nach Speichern auf Heute ausgeblendet |
+| **Priorisierung (Algo)** | Passt den Tag an Energie an | Sortierung + Vorschläge mit Bestätigung ([ADR 0011](./adr/0011-morgen-priorisierung-vorschlaege.md)); nutzt **Morgen-Snapshot**, kein laufendes Budget ([ADR 0012](./adr/0012-tages-energie-budget.md)) |
 | Muster-Vorschläge Einkauf | „Milch ist oft nach 5 Tagen leer“ | Einfacher Algo, sobald genug Daten da sind |
 
 ---
@@ -33,6 +33,7 @@ Kalender und Todos sind Kern ([ADR 0003](./adr/0003-kalender-und-todos-sind-kern
 | **Kaizen / Ikigai-Nudge** | 1 % heute, Disziplin halten | Hinweis + Motivationsspruch, wenn ein Tag fehlt. Abschaltbar. |
 | **Priorisierung (KI)** | Feinere Reihenfolge und Umverteilung | Statt/zusätzlich zum Algo: wer übernimmt, was wartet |
 | **KI-Tagesbriefing** | Morgenüberblick aus Kalender, Todos, Listen, Check-in | Erweitert den Free-Algo |
+| **Tages-Energie-Budget** | Rest-Energie im Tagesverlauf (Tasks/Termine verbrauchen/entlasten) | Phase 4 ([ADR 0012](./adr/0012-tages-energie-budget.md)); baut auf Morgen-Check-in + `energyHint` auf |
 | **Smart Shopping (KI)** | Freitext + Muster aus Abhaken/Einfügen | Z. B. *Wir kochen Lasagne.* |
 
 ---

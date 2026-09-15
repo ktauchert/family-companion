@@ -37,6 +37,7 @@ export interface MemberCompletion {
 export interface CalendarEvent {
   id: string;
   householdId: string;
+  createdBy: string;
   title: string;
   startsAt: string;
   endsAt?: string;
@@ -63,10 +64,11 @@ export interface ShoppingItem {
 export interface TodoItem {
   id: string;
   householdId: string;
+  createdBy: string;
   title: string;
   status: 'todo' | 'done';
   dueDate?: string;
-  assignedTo?: string;
+  assignedTo?: string[];
   completionMode: CompletionMode;
   recurrence: Recurrence;
   kind: 'task' | 'habit';

@@ -15,7 +15,7 @@ Quellen: [features.md](./features.md), [user-journey.md](./user-journey.md), [de
 | 0.2 Tests und CI | erledigt | [00.2-tests-ci.md](./phasen/00.2-tests-ci.md) |
 | **1 Auth & Haushalt** | erledigt | [01-auth-haushalt.md](./phasen/01-auth-haushalt.md) |
 | **1.1 Dev-Build & Google nativ** | **erledigt** *(PR offen)* | [01.1-dev-build-google-native.md](./phasen/01.1-dev-build-google-native.md) |
-| 2 Alltag | offen | [02-alltag.md](./phasen/02-alltag.md) |
+| 2 Alltag | erledigt *(PR aus `phase-2-alltag`)* | [02-alltag.md](./phasen/02-alltag.md) |
 | 3 Pro-Trigger | offen | [03-pro-trigger.md](./phasen/03-pro-trigger.md) |
 | 4 Pro: KI & Habits | offen | [04-pro-ki-habits.md](./phasen/04-pro-ki-habits.md) |
 
@@ -36,3 +36,4 @@ Quellen: [features.md](./features.md), [user-journey.md](./user-journey.md), [de
 - Kalender-Import (Google/Outlook) — eigenes ADR
 - Payment-Provider für Pro
 - Domain / Branding (Platzhalter: family-app.com)
+- Tages-Energie-Budget (Rest-Energie im Verlauf) — [ADR 0012](./adr/0012-tages-energie-budget.md), Arbeit Phase 4 WP3
