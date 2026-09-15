@@ -10,7 +10,7 @@ Kalender und Todos sind Kern ([ADR 0003](./adr/0003-kalender-und-todos-sind-kern
 
 | Feature | Nutzen | Notes |
 | --- | --- | --- |
-| Anmeldung | Google (Komfort) oder E-Mail/Passwort (auch ohne Google-Konto) | Web: `/login` vs `/register`. App: E-Mail überall; Google nur Dev-Build/Store, nicht Expo Go. Dieselbe Firebase-UID ([ADR 0009](./adr/0009-auth-google-und-email.md)) |
+| Anmeldung | Google (Komfort) oder E-Mail/Passwort (auch ohne Google-Konto) | Web: `/login` vs `/register`; öffentliche Landing `/` (Phase 2.5). App: E-Mail überall; Google nur Dev-Build/Store, nicht Expo Go. Dieselbe Firebase-UID ([ADR 0009](./adr/0009-auth-google-und-email.md)) |
 | Haushalt + Einladung | Gemeinsamer Kontext | Free: max. 2. Mitgliederliste mit Konto-E-Mail; **Inhaber** kann Mitglied entfernen, Mitglied kann austreten. Owner setzt E-Mail auf die Liste, PIN per Messenger. Kein Join-Link ([ADR 0010](./adr/0010-invite-pin-und-email-whitelist.md)) |
 | **Rollen Alltag (Phase 2)** | Inhaber vs Mitglied | Kooperatives Anlegen/Bearbeiten für alle; **Löschen** fremder Kalender/Todos/Listeneinträge nur Inhaber. Details: [phase-2-crud-roles.md](./design/phase-2-crud-roles.md) |
 | Echtzeit-Sync | Beide sehen denselben Stand | Firestore |

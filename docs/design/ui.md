@@ -199,6 +199,20 @@ Heute bleibt primär **Überblick**; Abhaken optional später (Issue #20). Detai
 - **Kategorie:** Bearbeiten/Löschen am Ende der Chips (aktiver Tab); Löschen nur **Inhaber**, bei Items **verschieben nach** anderer Liste.
 - **Autocomplete:** ab 3 Zeichen, Teilmatch auf frühere Artikelnamen.
 
+## Haushalt & Shell (Phase 2.4)
+
+[02.4-haushalt-nav-shell.md](../phasen/02.4-haushalt-nav-shell.md)
+
+- **Mitglieder:** MemberRow (E-Mail, Rolle-Pill); Inhaber „Entfernen“ (`rust`).
+- **Web-Chrome:** Check-in-Chip (Morgen-Snapshot) in Top-Leiste.
+- **Mobile:** Zahnrad auf Heute → Einstellungen; Check-in-Chip oben auf Heute (#16).
+- **Settings:** Theme, Konto, Abmelden, Pro-Platzhalter.
+- **Legal:** Footer Web → Impressum/Datenschutz.
+
+## Landing (Phase 2.5)
+
+[02.5-landing-scaffold.md](../phasen/02.5-landing-scaffold.md) — öffentliches `/`, Login/Register bzw. „Zur App“; Design später.
+
 ---
 
 ## Dashboard
