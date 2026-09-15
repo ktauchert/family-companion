@@ -12,6 +12,7 @@ import {
   type Unsubscribe,
 } from 'firebase/firestore';
 import { FIRESTORE_COLLECTIONS } from '../firebase/config';
+import { firestoreDocumentPayload } from '../firebase/document';
 import type { ShoppingItem } from '../types';
 
 function asShoppingItem(id: string, data: ShoppingItem): ShoppingItem {
@@ -36,12 +37,18 @@ export function shoppingStore(db: Firestore) {
     },
 
     async createItem(item: ShoppingItem): Promise<ShoppingItem> {
-      await setDoc(doc(db, FIRESTORE_COLLECTIONS.shoppingItems, item.id), item);
+      await setDoc(
+        doc(db, FIRESTORE_COLLECTIONS.shoppingItems, item.id),
+        firestoreDocumentPayload(item),
+      );
       return item;
     },
 
     async saveItem(item: ShoppingItem): Promise<void> {
-      await setDoc(doc(db, FIRESTORE_COLLECTIONS.shoppingItems, item.id), item);
+      await setDoc(
+        doc(db, FIRESTORE_COLLECTIONS.shoppingItems, item.id),
+        firestoreDocumentPayload(item),
+      );
     },
 
     async deleteItem(itemId: string): Promise<void> {

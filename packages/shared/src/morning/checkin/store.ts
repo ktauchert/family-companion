@@ -11,6 +11,7 @@ import {
   type Unsubscribe,
 } from 'firebase/firestore';
 import { FIRESTORE_COLLECTIONS } from '../../firebase/config';
+import { firestoreDocumentPayload } from '../../firebase/document';
 import type { MorningCheckIn } from '../../types';
 
 function asMorningCheckIn(id: string, data: MorningCheckIn): MorningCheckIn {
@@ -46,12 +47,18 @@ export function morningCheckInStore(db: Firestore) {
     },
 
     async createCheckIn(checkIn: MorningCheckIn): Promise<MorningCheckIn> {
-      await setDoc(doc(db, FIRESTORE_COLLECTIONS.morningCheckIns, checkIn.id), checkIn);
+      await setDoc(
+        doc(db, FIRESTORE_COLLECTIONS.morningCheckIns, checkIn.id),
+        firestoreDocumentPayload(checkIn),
+      );
       return checkIn;
     },
 
     async saveCheckIn(checkIn: MorningCheckIn): Promise<void> {
-      await setDoc(doc(db, FIRESTORE_COLLECTIONS.morningCheckIns, checkIn.id), checkIn);
+      await setDoc(
+        doc(db, FIRESTORE_COLLECTIONS.morningCheckIns, checkIn.id),
+        firestoreDocumentPayload(checkIn),
+      );
     },
 
     subscribeForHouseholdOnDate(

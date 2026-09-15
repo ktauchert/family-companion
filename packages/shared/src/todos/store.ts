@@ -12,6 +12,7 @@ import {
   type Unsubscribe,
 } from 'firebase/firestore';
 import { FIRESTORE_COLLECTIONS } from '../firebase/config';
+import { firestoreDocumentPayload } from '../firebase/document';
 import type { TodoItem } from '../types';
 
 function asTodoItem(id: string, data: TodoItem): TodoItem {
@@ -36,12 +37,12 @@ export function todoStore(db: Firestore) {
     },
 
     async createTodo(todo: TodoItem): Promise<TodoItem> {
-      await setDoc(doc(db, FIRESTORE_COLLECTIONS.todos, todo.id), todo);
+      await setDoc(doc(db, FIRESTORE_COLLECTIONS.todos, todo.id), firestoreDocumentPayload(todo));
       return todo;
     },
 
     async saveTodo(todo: TodoItem): Promise<void> {
-      await setDoc(doc(db, FIRESTORE_COLLECTIONS.todos, todo.id), todo);
+      await setDoc(doc(db, FIRESTORE_COLLECTIONS.todos, todo.id), firestoreDocumentPayload(todo));
     },
 
     async deleteTodo(todoId: string): Promise<void> {

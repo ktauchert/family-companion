@@ -12,6 +12,7 @@ import {
   type Unsubscribe,
 } from 'firebase/firestore';
 import { FIRESTORE_COLLECTIONS } from '../firebase/config';
+import { firestoreDocumentPayload } from '../firebase/document';
 import type { CalendarEvent } from '../types';
 
 function asCalendarEvent(id: string, data: CalendarEvent): CalendarEvent {
@@ -36,12 +37,18 @@ export function calendarEventStore(db: Firestore) {
     },
 
     async createEvent(event: CalendarEvent): Promise<CalendarEvent> {
-      await setDoc(doc(db, FIRESTORE_COLLECTIONS.calendarEvents, event.id), event);
+      await setDoc(
+        doc(db, FIRESTORE_COLLECTIONS.calendarEvents, event.id),
+        firestoreDocumentPayload(event),
+      );
       return event;
     },
 
     async saveEvent(event: CalendarEvent): Promise<void> {
-      await setDoc(doc(db, FIRESTORE_COLLECTIONS.calendarEvents, event.id), event);
+      await setDoc(
+        doc(db, FIRESTORE_COLLECTIONS.calendarEvents, event.id),
+        firestoreDocumentPayload(event),
+      );
     },
 
     async deleteEvent(eventId: string): Promise<void> {

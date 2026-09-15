@@ -2,6 +2,7 @@ export * from './src/types';
 export * from './src/display/status';
 export * from './src/schemas';
 export * from './src/firebase/config';
+export * from './src/firebase/document';
 export * from './src/firebase/store-error';
 export * from './src/household/access';
 export * from './src/household/can-add-member';
