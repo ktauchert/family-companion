@@ -2,7 +2,12 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import type { ExpoConfig } from 'expo/config';
 
-const googleServicesFile = path.join(__dirname, 'google-services.json');
+/** Lokal: apps/mobile/google-services.json. EAS: File-Env GOOGLE_SERVICES_JSON (Pfad auf dem Builder). */
+const googleServicesFromEnv = process.env.GOOGLE_SERVICES_JSON;
+const googleServicesLocal = path.join(__dirname, 'google-services.json');
+const googleServicesFile = googleServicesFromEnv ?? googleServicesLocal;
+const hasGoogleServices =
+  Boolean(googleServicesFromEnv) || existsSync(googleServicesLocal);
 
 const config: ExpoConfig = {
   name: 'Family Companion',
@@ -14,8 +19,10 @@ const config: ExpoConfig = {
   userInterfaceStyle: 'automatic',
   android: {
     package: 'com.familycompanion.app',
-    ...(existsSync(googleServicesFile)
-      ? { googleServicesFile: './google-services.json' }
+    ...(hasGoogleServices
+      ? {
+          googleServicesFile: googleServicesFromEnv ?? './google-services.json',
+        }
       : {}),
     adaptiveIcon: {
       backgroundColor: '#F6F3EE',
@@ -36,6 +43,11 @@ const config: ExpoConfig = {
   ],
   experiments: {
     typedRoutes: false,
+  },
+  extra: {
+    eas: {
+      projectId: '84cdff5d-6899-4e38-b379-93b86ee993a6',
+    },
   },
 };
 

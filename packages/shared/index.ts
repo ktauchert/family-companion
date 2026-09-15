@@ -5,6 +5,7 @@ export * from './src/firebase/store-error';
 export * from './src/household/can-add-member';
 export * from './src/household/membership';
 export * from './src/auth/google-sign-in-path';
+export * from './src/auth/google-native-error';
 export * from './src/auth/email-password';
 export * from './src/auth/safe-app-path';
 export * from './src/household/invite-pin';

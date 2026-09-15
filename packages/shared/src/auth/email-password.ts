@@ -1,5 +1,10 @@
 export const MIN_PASSWORD_LENGTH = 6;
 
+import {
+  googleNativeAuthLogLine,
+  googleNativeAuthUserMessage,
+} from './google-native-error';
+
 export type AuthFlow = 'sign-in' | 'register' | 'google';
 
 export type EmailPasswordResult =
@@ -89,6 +94,16 @@ const FALLBACK: Record<AuthFlow, string> = {
   google: 'Google-Anmeldung fehlgeschlagen.',
 };
 
+function errorCode(err: unknown): string | null {
+  if (err && typeof err === 'object' && 'code' in err) {
+    const code = (err as { code: unknown }).code;
+    if (typeof code === 'string' || typeof code === 'number') {
+      return String(code);
+    }
+  }
+  return null;
+}
+
 export function authErrorCode(codeOrMessage: string): string | null {
   const fromSdk = codeOrMessage.match(/auth\/[\w.-]+/);
   if (fromSdk) {
@@ -118,18 +133,32 @@ export function messageFromAuthError(
   err: unknown,
   flow: AuthFlow = 'sign-in',
 ): string {
-  if (
-    err &&
-    typeof err === 'object' &&
-    'code' in err &&
-    typeof (err as { code: unknown }).code === 'string'
-  ) {
-    return firebaseAuthMessage((err as { code: string }).code, flow);
+  if (flow === 'google') {
+    return googleNativeAuthUserMessage(err);
   }
+
+  const code = errorCode(err);
+  if (code) {
+    const fromFirebase = firebaseAuthMessage(code, flow);
+    if (fromFirebase !== FALLBACK[flow]) {
+      return fromFirebase;
+    }
+    return fromFirebase;
+  }
+
   if (err instanceof Error) {
-    return firebaseAuthMessage(err.message, flow);
+    const fromMessage = firebaseAuthMessage(err.message, flow);
+    if (fromMessage !== FALLBACK[flow]) {
+      return fromMessage;
+    }
   }
+
   return FALLBACK[flow];
+}
+
+/** @deprecated Nutzer-UI: googleNativeAuthUserMessage. Logs: googleNativeAuthLogLine. */
+export function authErrorDetails(err: unknown): string {
+  return googleNativeAuthLogLine(err);
 }
 
 export function emailPasswordReasonMessage(
