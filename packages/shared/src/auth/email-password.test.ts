@@ -127,7 +127,7 @@ describe('messageFromAuthError', () => {
     );
   });
 
-  it('maps native Google DEVELOPER_ERROR', () => {
+  it('maps native Google DEVELOPER_ERROR to support code for users', () => {
     expect(
       messageFromAuthError(
         {
@@ -137,20 +137,25 @@ describe('messageFromAuthError', () => {
         },
         'google',
       ),
-    ).toContain('SHA-1');
+    ).toBe(
+      'Google-Anmeldung fehlgeschlagen. Bitte wende dich an den Admin und nenne den Code GGL-001.',
+    );
   });
 
-  it('includes unknown google error codes in the message', () => {
-    expect(messageFromAuthError({ code: '999', message: 'weird' }, 'google')).toBe(
-      'Google-Anmeldung fehlgeschlagen. (999)',
+  it('includes support code for unknown google errors', () => {
+    expect(messageFromAuthError({ code: '999', message: 'weird' }, 'google')).toContain(
+      'GGL-099',
     );
   });
 });
 
 describe('authErrorDetails', () => {
-  it('formats code and message from native errors', () => {
+  it('logs support code and sdk details for admins', () => {
     expect(
       authErrorDetails({ code: '10', message: 'DEVELOPER_ERROR: troubleshooting' }),
-    ).toBe('code=10 · message=DEVELOPER_ERROR: troubleshooting');
+    ).toContain('GGL-001');
+    expect(
+      authErrorDetails({ code: '10', message: 'DEVELOPER_ERROR: troubleshooting' }),
+    ).toContain('sdk=10');
   });
 });

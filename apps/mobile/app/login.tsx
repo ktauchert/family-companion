@@ -23,7 +23,6 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [errorDetails, setErrorDetails] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [ready, setReady] = useState(false);
   const next = typeof params.next === 'string' ? params.next : undefined;
@@ -52,7 +51,6 @@ export default function LoginScreen() {
     }
     setBusy(true);
     setError(null);
-    setErrorDetails(null);
     try {
       const cred = await signInWithEmailAndPassword(auth, parsed.email, parsed.password);
       await afterSignIn(cred.user.uid);
@@ -115,11 +113,6 @@ export default function LoginScreen() {
     err: {
       color: theme.rust,
     },
-    errDetails: {
-      color: theme.inkSoft,
-      fontSize: 12,
-      fontFamily: 'monospace',
-    },
   });
 
   if (!ready) {
@@ -141,7 +134,6 @@ export default function LoginScreen() {
             : 'E-Mail/Passwort oder natives Google.'}
         </Text>
         {error ? <Text style={styles.err}>{error}</Text> : null}
-        {errorDetails ? <Text style={styles.errDetails}>{errorDetails}</Text> : null}
         <TextInput
           style={styles.input}
           placeholder="E-Mail"
@@ -172,10 +164,7 @@ export default function LoginScreen() {
             ink={theme.ink}
             well={theme.well}
             onSignedIn={afterSignIn}
-            onError={(message, details) => {
-              setError(message);
-              setErrorDetails(details ?? null);
-            }}
+            onError={setError}
           />
         ) : null}
         <Link

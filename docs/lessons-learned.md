@@ -12,7 +12,8 @@ Was uns umgeworfen hat, und was wir das nächste Mal zuerst prüfen. Neueste Ein
 
 ## Auth und Geräte (Phase 1 / 1.1)
 
-- **Expo Build-Fingerprint ≠ Keystore-SHA-1.** Auf der EAS-Build-Seite steht ein Projekt-Fingerprint (Hash der Quellen). Für Firebase/Google braucht es den **SHA-1 des Android-Keystores** unter Expo → Credentials → Android. Falschen Wert eintragen → `DEVELOPER_ERROR` (Code 10), obwohl `google-services.json` größer wird und alles „richtig“ aussieht.
+- **Natives Google (Expo Android):** Checkliste, EAS-Schritte und Support-Codes **GGL-xxx** → [native-google-expo-android.md](./lessons-learned/native-google-expo-android.md)
+- **Expo Build-Fingerprint ≠ Keystore-SHA-1.** Auf der EAS-Build-Seite steht ein Projekt-Fingerprint (Hash der Quellen). Für Firebase/Google braucht es den **SHA-1 des Android-Keystores** unter Expo → Credentials → Android. Falschen Wert eintragen → `DEVELOPER_ERROR` (GGL-001), obwohl `google-services.json` größer wird und alles „richtig“ aussieht.
 - **Hermes kennt kein `crypto`.** `crypto.randomUUID()` wirft in Expo Go / Android `Property 'crypto' doesn't exist`. Haushalts-ID vergibt Firestore. PIN über Shared `newInvitePin` (Web Crypto wenn da, sonst Fallback) — nie das nackte globale `crypto`.
 - **Expo Go kann kein Google.** Weder natives Sign-In (Modul fehlt) noch Web-OAuth (`exp://…` verstößt gegen Googles OAuth-2.0-Regeln; `auth.expo.io` ist tot). App-Google = Dev-Build. Nicht noch einmal einen Browser-Pfad in Expo Go bauen.
 - **Dummy-Login nicht als Dauerlösung.** Storage, Rules und später Kalender-Import brauchen eine stabile UID / ein echtes Google-Konto. Fake-User erzeugen Waisen-Dateien und einen zweiten „Google verbinden“-Pfad.
