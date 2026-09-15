@@ -74,6 +74,201 @@ service cloud.firestore {
         && request.resource.data.name == resource.data.name;
     }
 
+    function householdData(householdId) {
+      return get(/databases/$(database)/documents/households/$(householdId)).data;
+    }
+
+    function isHouseholdMemberOf(householdId) {
+      return signedIn() && request.auth.uid in householdData(householdId).members;
+    }
+
+    function isHouseholdOwnerOf(householdId) {
+      return isHouseholdMemberOf(householdId)
+        && request.auth.uid == householdData(householdId).ownerId;
+    }
+
+    function calendarEventIdentityFrozen() {
+      return request.resource.data.id == resource.data.id
+        && request.resource.data.householdId == resource.data.householdId
+        && request.resource.data.createdBy == resource.data.createdBy;
+    }
+
+    function todoIdentityFrozen() {
+      return request.resource.data.id == resource.data.id
+        && request.resource.data.householdId == resource.data.householdId
+        && request.resource.data.createdBy == resource.data.createdBy;
+    }
+
+    function validTodoCreate() {
+      return request.resource.data.id is string
+        && request.resource.data.householdId is string
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.status in ['todo', 'done']
+        && request.resource.data.completionMode in ['household', 'per_member']
+        && request.resource.data.recurrence in ['none', 'daily', 'weekly']
+        && request.resource.data.kind in ['task', 'habit']
+        && request.resource.data.completions is list;
+    }
+
+    function shoppingItemIdentityFrozen() {
+      return request.resource.data.id == resource.data.id
+        && request.resource.data.householdId == resource.data.householdId
+        && request.resource.data.addedBy == resource.data.addedBy
+        && request.resource.data.createdAt == resource.data.createdAt;
+    }
+
+    function validShoppingItemCreate() {
+      return request.resource.data.id is string
+        && request.resource.data.householdId is string
+        && request.resource.data.addedBy == request.auth.uid
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.category in ['supermarket', 'drugstore', 'pharmacy', 'clothing', 'other']
+        && request.resource.data.checked is bool
+        && request.resource.data.createdAt is string;
+    }
+
+    function morningCheckInIdentityFrozen() {
+      return request.resource.data.id == resource.data.id
+        && request.resource.data.householdId == resource.data.householdId
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.date == resource.data.date;
+    }
+
+    function validMorningCheckInCreate() {
+      return request.resource.data.id is string
+        && request.resource.data.householdId is string
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.date is string
+        && request.resource.data.mood is int
+        && request.resource.data.mood >= 1
+        && request.resource.data.mood <= 5
+        && request.resource.data.energy is int
+        && request.resource.data.energy >= 1
+        && request.resource.data.energy <= 5;
+    }
+
+    function validCalendarEventCreate() {
+      return request.resource.data.id is string
+        && request.resource.data.householdId is string
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.startsAt is string
+        && request.resource.data.completionMode in ['household', 'per_member']
+        && request.resource.data.recurrence in ['none', 'daily', 'weekly']
+        && request.resource.data.kind in ['event', 'habit']
+        && request.resource.data.completions is list;
+    }
+
+    function pad2(value) {
+      return value < 10 ? '0' + string(value) : string(value);
+    }
+
+    function utcDateString() {
+      return string(request.time.year()) + '-' + pad2(request.time.month()) + '-' + pad2(request.time.day());
+    }
+
+    function completionEntryEquals(before, after) {
+      return before.userId == after.userId
+        && before.done == after.done
+        && before.get('doneAt', null) == after.get('doneAt', null);
+    }
+
+    function completionEntryUnchangedInList(beforeEntry, after) {
+      return (after.size() > 0 && completionEntryEquals(beforeEntry, after[0]))
+        || (after.size() > 1 && completionEntryEquals(beforeEntry, after[1]));
+    }
+
+    function entryFrozenIfForeign(beforeEntry, after, actorId) {
+      return beforeEntry.userId == actorId
+        || completionEntryUnchangedInList(beforeEntry, after);
+    }
+
+    function perMemberCompletionsUpdateAllowed(before, after, actorId) {
+      return after.size() == before.size()
+        && (before.size() < 1 || entryFrozenIfForeign(before[0], after, actorId))
+        && (before.size() < 2 || entryFrozenIfForeign(before[1], after, actorId));
+    }
+
+    function completionsUpdateAllowed() {
+      return request.resource.data.completions == resource.data.completions
+        || resource.data.completionMode == 'household'
+        || (
+          resource.data.completionMode == 'per_member'
+          && perMemberCompletionsUpdateAllowed(
+            resource.data.completions,
+            request.resource.data.completions,
+            request.auth.uid
+          )
+        );
+    }
+
+    function validMorningCheckInUpdate() {
+      return request.resource.data.mood is int
+        && request.resource.data.mood >= 1
+        && request.resource.data.mood <= 5
+        && request.resource.data.energy is int
+        && request.resource.data.energy >= 1
+        && request.resource.data.energy <= 5
+        && resource.data.date == utcDateString();
+    }
+
+    function isHouseholdMemberId(householdId, userId) {
+      return userId in householdData(householdId).members;
+    }
+
+    function validAssignedToList(householdId, assignees) {
+      return assignees is list
+        && assignees.size() <= 2
+        && (assignees.size() < 1 || isHouseholdMemberId(householdId, assignees[0]))
+        && (assignees.size() < 2 || isHouseholdMemberId(householdId, assignees[1]));
+    }
+
+    function validOptionalAssignedTo(householdId) {
+      return !('assignedTo' in request.resource.data)
+        || request.resource.data.assignedTo == null
+        || validAssignedToList(householdId, request.resource.data.assignedTo);
+    }
+
+    function validOptionalEnergyHint() {
+      return !('energyHint' in request.resource.data)
+        || request.resource.data.energyHint in ['low', 'medium', 'high'];
+    }
+
+    function validCalendarEventUpdate(householdId) {
+      return request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.startsAt is string
+        && request.resource.data.completionMode in ['household', 'per_member']
+        && request.resource.data.recurrence in ['none', 'daily', 'weekly']
+        && request.resource.data.kind in ['event', 'habit']
+        && request.resource.data.completions is list
+        && validOptionalAssignedTo(householdId)
+        && validOptionalEnergyHint();
+    }
+
+    function validTodoUpdate(householdId) {
+      return request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.status in ['todo', 'done']
+        && request.resource.data.completionMode in ['household', 'per_member']
+        && request.resource.data.recurrence in ['none', 'daily', 'weekly']
+        && request.resource.data.kind in ['task', 'habit']
+        && request.resource.data.completions is list
+        && validOptionalAssignedTo(householdId)
+        && validOptionalEnergyHint();
+    }
+
+    function validShoppingItemUpdate() {
+      return request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.category in ['supermarket', 'drugstore', 'pharmacy', 'clothing', 'other']
+        && request.resource.data.checked is bool;
+    }
+
     match /households/{id} {
       allow read: if isMember() || isInvited();
 
@@ -87,6 +282,71 @@ service cloud.firestore {
         && request.resource.data.invitePin.matches('^[0-9]{6}$');
 
       allow update: if isOwnerWrite() || isJoinWrite() || isOwnerKickWrite() || isLeaveWrite() || isMemberEmailWrite();
+    }
+
+    match /calendar_events/{id} {
+      allow read: if isHouseholdMemberOf(resource.data.householdId);
+
+      allow create: if isHouseholdMemberOf(request.resource.data.householdId)
+        && request.resource.data.id == id
+        && validCalendarEventCreate();
+
+      allow update: if isHouseholdMemberOf(resource.data.householdId)
+        && calendarEventIdentityFrozen()
+        && completionsUpdateAllowed()
+        && validCalendarEventUpdate(resource.data.householdId);
+
+      allow delete: if isHouseholdMemberOf(resource.data.householdId)
+        && (isHouseholdOwnerOf(resource.data.householdId)
+            || resource.data.createdBy == request.auth.uid);
+    }
+
+    match /todos/{id} {
+      allow read: if isHouseholdMemberOf(resource.data.householdId);
+
+      allow create: if isHouseholdMemberOf(request.resource.data.householdId)
+        && request.resource.data.id == id
+        && validTodoCreate();
+
+      allow update: if isHouseholdMemberOf(resource.data.householdId)
+        && todoIdentityFrozen()
+        && completionsUpdateAllowed()
+        && validTodoUpdate(resource.data.householdId);
+
+      allow delete: if isHouseholdMemberOf(resource.data.householdId)
+        && (isHouseholdOwnerOf(resource.data.householdId)
+            || resource.data.createdBy == request.auth.uid);
+    }
+
+    match /shopping_items/{id} {
+      allow read: if isHouseholdMemberOf(resource.data.householdId);
+
+      allow create: if isHouseholdMemberOf(request.resource.data.householdId)
+        && request.resource.data.id == id
+        && validShoppingItemCreate();
+
+      allow update: if isHouseholdMemberOf(resource.data.householdId)
+        && shoppingItemIdentityFrozen()
+        && validShoppingItemUpdate();
+
+      allow delete: if isHouseholdMemberOf(resource.data.householdId)
+        && (isHouseholdOwnerOf(resource.data.householdId)
+            || resource.data.addedBy == request.auth.uid);
+    }
+
+    match /morning_checkins/{id} {
+      allow read: if isHouseholdMemberOf(resource.data.householdId);
+
+      allow create: if isHouseholdMemberOf(request.resource.data.householdId)
+        && request.resource.data.id == id
+        && validMorningCheckInCreate();
+
+      allow update: if isHouseholdMemberOf(resource.data.householdId)
+        && resource.data.userId == request.auth.uid
+        && morningCheckInIdentityFrozen()
+        && validMorningCheckInUpdate();
+
+      allow delete: if false;
     }
   }
 }

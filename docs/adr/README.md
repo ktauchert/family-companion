@@ -44,3 +44,5 @@ Was haben wir verworfen — und warum?
 | [0008](./0008-google-anmeldung-zwei-pfade.md) | Google-Anmeldung: Expo Go Web-OAuth, Build nativ | Superseded |
 | [0009](./0009-auth-google-und-email.md) | Google + E-Mail/Passwort; App-Google nur nativ | Accepted |
 | [0010](./0010-invite-pin-und-email-whitelist.md) | Firestore-ID, Join per PIN + E-Mail-Whitelist | Accepted |
+| [0011](./0011-morgen-priorisierung-vorschlaege.md) | Morgen-Priorisierung: Sortierung und bestätigte Vorschläge (Free) | Accepted |
+| [0012](./0012-tages-energie-budget.md) | Tages-Energie-Budget: Morgen-Snapshot (Phase 2), dynamischer Verbrauch (Phase 4) | Proposed |

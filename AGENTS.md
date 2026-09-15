@@ -13,6 +13,7 @@ Arbeitsregeln für Agenten in diesem Repo. Menschliche Ergänzung: [CONTRIBUTING
 
 - Tests dort, wo Verhalten kippen kann: Shared-Logik, Schemas, Limits, Algos, Auth-Regeln. Nicht für reines Type-Durchreichen.
 - Immer auch **Negativfälle**: ungültiges Input, falsches Tier, Limit überschritten, fremdes Haushaltsmitglied, fehlender Check-in.
+- **TDD in Shared:** Neue oder geänderte Logik in `@family-companion/shared` (nicht reines Durchreichen in Stores/UI-Bindern): **erst failing Test, dann Implementierung** — red → green, ein Slice pro Zyklus. Skill: [`.agents/skills/tdd/SKILL.md`](./.agents/skills/tdd/SKILL.md); Beispiele/Mocks nur bei Bedarf (`tests.md`, `mocking.md` im gleichen Ordner).
 - Stack laut [ADR 0002](./docs/adr/0002-unit-tests-und-github-ci.md): Vitest, `turbo test`.
 
 ## Persistenz: CRUD vor der Umsetzung
@@ -46,6 +47,10 @@ Nach jeder inhaltlichen Änderung:
 - Keine Secrets committen. Vorlagen: `apps/web/.env.example`, `apps/mobile/.env.example`. Echte Werte nur in der jeweiligen `.env.local` (gitignored). OpenAI und Firebase-Admin nur serverseitig.
 
 ## Agent skills
+
+### TDD
+
+Shared-Logik, Schemas, Algos: [TDD-Skill](./.agents/skills/tdd/SKILL.md) — öffentliche Seam testen, Negativfälle in derselben Schleife, kein „alle Tests planen, dann alles bauen“.
 
 ### Issue tracker
 

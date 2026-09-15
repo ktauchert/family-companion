@@ -159,6 +159,33 @@ a {
   font: inherit;
 }
 
+.chip-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  flex: 1;
+  min-width: 5.5rem;
+  appearance: none;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 12px 10px;
+  background: var(--paper);
+  color: var(--ink-soft);
+  font: inherit;
+  cursor: pointer;
+  text-align: center;
+}
+
+.chip.selected {
+  background: var(--sage-wash);
+  border-color: var(--sage);
+  color: var(--ink);
+  font-weight: 600;
+}
+
 .err {
   color: var(--rust);
   background: var(--sage-wash);
@@ -219,4 +246,58 @@ a {
   flex-direction: column;
   gap: 16px;
   max-width: 28rem;
+}
+
+.cards.wide,
+.stack.wide {
+  max-width: 36rem;
+}
+
+.row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.field select {
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+
+.field legend {
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.small {
+  font-size: 14px;
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.event-list {
+  gap: 0;
+}
+
+.event-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 0;
+  border-top: 1px solid var(--rule);
+}
+
+.event-row .done {
+  text-decoration: line-through;
+  color: var(--ink-faint);
 }
