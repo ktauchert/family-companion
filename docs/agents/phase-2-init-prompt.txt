@@ -1,0 +1,37 @@
+Phase 2 — Alltag starten (family-companion)
+
+Kontext:
+- Repo: family-companion (npm workspaces: apps/web, apps/mobile, packages/shared)
+- main ist aktuell: Phase 1 + 1.1 gemerged (Auth, Haushalt, PIN, EAS/Google nativ)
+- Phase-2-CRUD & Rollen sind dokumentiert, noch nicht implementiert
+
+Ziel Phase 2:
+Kalender, Todos, Einkaufslisten (kategorisiert), Morgen-Check-in + Free-Priorisierungs-Algo — Web und Mobile auf denselben Firestore-Collections.
+
+Pflicht-Lektüre vor Code:
+- docs/phasen/02-alltag.md
+- docs/design/phase-2-crud-roles.md (CRUD, Inhaber vs Mitglied, Rollen bei Delete)
+- docs/design/ui.md
+- AGENTS.md (Branch pro Phase, CRUD vor Store, Tests, Docs nachziehen)
+- packages/shared/src/types/index.ts (CalendarEvent, TodoItem, ShoppingItem, MorningCheckIn)
+- packages/shared/src/household/store.ts + membership.ts (Vorbild für Stores/Rules)
+
+Architektur (fest):
+- KEINE Next.js-API für Alltags-CRUD — Shared-Stores + firestore.rules (wie householdStore)
+- Web + App: nur db binden; Domain/Validierung in @family-companion/shared
+- Rollen: kooperatives C/R/U für alle Mitglieder; Delete fremder Items nur Inhaber (ownerId); Check-in nicht löschbar
+- Mobile-Dev: Expo Go + E-Mail/Passwort OK; Google nur Dev-Build
+
+Git:
+- Branch: phase-2-alltag von aktuellem main
+- Am Ende PR nach main (nicht selbst mergen)
+
+Vorgeschlagene Reihenfolge:
+- Branch anlegen
+- WP1 Kalender: createdBy in Types, can* + eventStore in shared, Tests inkl. Rollen-Negativfälle
+- firestore.rules für calendar_events (+ Console-Hinweis in Docs)
+- Minimal-UI Web + Mobile Tab Kalender
+- Dann WP2 Todos, WP3 Listen, WP4 Check-in + Algo, WP5 Heute-Dashboard
+- Docs-Haken in 02-alltag.md, phasenplan.md; npm run test grün
+
+Bitte mit WP1 (Shared + Rules + Tests für calendar_events) starten und vor dem ersten UI kurz den Plan bestätigen.

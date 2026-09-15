@@ -54,3 +54,13 @@ Specs und Tickets liegen als GitHub Issues (`gh`). Siehe `docs/agents/issue-trac
 ### Domain docs
 
 Single-context: eine `CONTEXT.md` im Root, ADRs in `docs/adr/`. Siehe `docs/agents/domain.md`.
+
+## Copy-Paste für den Maintainer
+
+Wenn der User Text **zum Kopieren** braucht (Init-Prompts, Befehlsblöcke, Snippets):
+
+- **Nicht** in Markdown-Code-Fences (` ``` `) in der Chat-Antwort — Cursor hängt beim Kopieren `1 │` … an jede Zeile.
+- Stattdessen: **Plaintext im Fließtext** der Antwort (ohne Fence), oder Datei im Repo nennen zum Kopieren aus dem Editor.
+- Phasen-Handoffs: unter `docs/agents/` ablegen (z. B. `phase-2-init-prompt.md`); in der Antwort nur Pfad + „aus Editor kopieren“.
+- Keine nummerierten Listen in Copy-Payloads — `-` nutzen.
+- Erklärung getrennt vom kopierbaren Block.
