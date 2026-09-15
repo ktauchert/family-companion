@@ -17,7 +17,7 @@ Einkäufe hängen an einer **Liste mit Thema** (`ShoppingCategory`):
 - `clothing`
 - `other`
 
-Pro Thema eine Liste: Einträge erstellen, in Echtzeit abhaken. Weitere Themen später möglich, ohne das Modell zu ändern.
+Pro Thema eine Liste: Einträge erstellen, in Echtzeit abhaken. **Phase 2.3:** haushaltsspezifische Listen (`shopping_lists`), nicht nur festes Enum — Default-Themen werden migriert.
 
 **Smart Shopping in zwei Stufen:**
 
@@ -28,7 +28,7 @@ Analyse betrachtet Einfügen und Abhaken, getrennt nach Liste/Thema.
 
 ## Konsequenzen
 
-- `ShoppingItem.category` ist ein festes Enum, kein freier String.
+- Phase 2: `ShoppingItem.category` als festes Enum. **Phase 2.3:** `listId` verweist auf `shopping_lists` pro Haushalt.
 - Events (add/check) müssen für den Algo historisch auswertbar sein — nicht nur der aktuelle `checked`-Stand.
 - Die alte Idee „nur KI-Zutaten aus Freitext“ bleibt Pro, ist aber nicht mehr der einzige Smart-Shopping-Weg.
 
@@ -36,3 +36,8 @@ Analyse betrachtet Einfügen und Abhaken, getrennt nach Liste/Thema.
 
 - **Eine Liste plus Tag-Filter:** einfacher, aber schlechter im Laden (kein klarer „Apotheke“-Kontext).
 - **Nur KI-Vorschläge:** ohne Datenhistorie keine guten Defaults im Free Tier.
+
+## UI & Custom Listen (Phase 2.3, 2026-09-15)
+
+- Listen-Chips ohne „Alle“-Tab; Inline-Add mit Autocomplete (Teilmatch ab 3 Zeichen).
+- Inhaber darf Listen löschen; bei vorhandenen Items **Verschieben** in andere Liste. Details: [02.3-listen-ux.md](../phasen/02.3-listen-ux.md).

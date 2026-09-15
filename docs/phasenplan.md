@@ -18,6 +18,7 @@ Quellen: [features.md](./features.md), [user-journey.md](./user-journey.md), [de
 | 2 Alltag | erledigt | [02-alltag.md](./phasen/02-alltag.md) |
 | **2.1 Heute UX** | offen | [02.1-heute-ux.md](./phasen/02.1-heute-ux.md) · Milestone [Phase 2.1](https://github.com/ktauchert/family-companion/milestone/1) |
 | **2.2 Kalender & Todos UX** | offen | [02.2-kalender-todos-ux.md](./phasen/02.2-kalender-todos-ux.md) · Milestone [Phase 2.2](https://github.com/ktauchert/family-companion/milestone/2) |
+| **2.3 Listen UX** | offen | [02.3-listen-ux.md](./phasen/02.3-listen-ux.md) · Milestone [Phase 2.3](https://github.com/ktauchert/family-companion/milestone/3) |
 | 3 Pro-Trigger | offen | [03-pro-trigger.md](./phasen/03-pro-trigger.md) |
 | 4 Pro: KI & Habits | offen | [04-pro-ki-habits.md](./phasen/04-pro-ki-habits.md) |
 
@@ -35,7 +36,7 @@ Quellen: [features.md](./features.md), [user-journey.md](./user-journey.md), [de
 
 ## Offene Entscheidungen (später)
 
-- **UI/UX-Pass Listen & Nav** — nach [02.2 Kalender & Todos](./phasen/02.2-kalender-todos-ux.md); Milestones ab 2.1
+- **UI/UX-Pass Nav / Haushalt** — nach [02.3 Listen](./phasen/02.3-listen-ux.md); Milestones ab 2.1
 - Kalender-Import (Google/Outlook) — eigenes ADR
 - Payment-Provider für Pro
 - Domain / Branding (Platzhalter: family-app.com)

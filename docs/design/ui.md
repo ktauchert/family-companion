@@ -188,6 +188,17 @@ Heute bleibt primär **Überblick**; Abhaken optional später (Issue #20). Detai
 - Add/Edit: Modal + Chips, Plus-FAB wie Kalender.
 - Todo-Habits: Aufgaben ohne festen Kalender-Slot; Kalender-Habits: zeitgebunden in der KW.
 
+## Listen (Phase 2.3)
+
+[02.3-listen-ux.md](../phasen/02.3-listen-ux.md)
+
+- **Tabs:** Chip-Reihe = haushaltsspezifische Listen; kein „Alle“-Tab.
+- **Neue Liste:** Plus oben rechts in der Card → Modal.
+- **Artikel:** Hinzufügen unter den Chips — ein Textfeld, ✓/✗ rechts; Kategorie = aktiver Tab.
+- **Zeile:** Checkbox + Name; Löschen-Icon rechts nur bei Fokus; keine Meta-Zeile.
+- **Kategorie:** Bearbeiten/Löschen am Ende der Chips (aktiver Tab); Löschen nur **Inhaber**, bei Items **verschieben nach** anderer Liste.
+- **Autocomplete:** ab 3 Zeichen, Teilmatch auf frühere Artikelnamen.
+
 ---
 
 ## Dashboard

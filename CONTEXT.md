@@ -44,6 +44,6 @@ Zentrale Begriffe für Code, Issues und Docs. Ergänzt durch `/grill-with-docs` 
 ## Quellen
 
 - [phase-2-crud-roles.md](docs/design/phase-2-crud-roles.md)
-- [02.1-heute-ux.md](docs/phasen/02.1-heute-ux.md) · [02.2-kalender-todos-ux.md](docs/phasen/02.2-kalender-todos-ux.md)
+- [02.1-heute-ux.md](docs/phasen/02.1-heute-ux.md) · [02.2-kalender-todos-ux.md](docs/phasen/02.2-kalender-todos-ux.md) · [02.3-listen-ux.md](docs/phasen/02.3-listen-ux.md)
 - [02-alltag.md](docs/phasen/02-alltag.md)
 - ADR [0004](docs/adr/0004-per-member-habits-und-kaizen.md), [0005](docs/adr/0005-morgen-check-in-und-priorisierung.md), [0011](docs/adr/0011-morgen-priorisierung-vorschlaege.md)
