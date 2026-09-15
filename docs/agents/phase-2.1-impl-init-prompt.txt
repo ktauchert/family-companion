@@ -1,0 +1,32 @@
+Phase 2.1 — Heute UX umsetzen (family-companion)
+
+Kontext:
+- main: Phase-2-Alltag + Docs UX 2.1–2.5 (3 Commits ggf. noch nicht gepusht — vor Start: git pull / Status prüfen)
+- Spec: docs/phasen/02.1-heute-ux.md, docs/design/ui.md (Icons, Energie, Heute-Dashboard)
+- Milestone: Phase 2.1 — Heute UX (GitHub #12–#20)
+- Abhängigkeiten: #13 blocked by #12; #18/#19 blocked by #13
+
+Branch:
+- Neu von aktuellem main: phase-2.1-heute-ux
+- Ein PR nach main wenn Milestone erledigt oder in sinnvollen Slices
+
+Reihenfolge heute:
+1. #12 Icon-Set (Shared Keys) + Icons in Web-Nav und Mobile-Tabs
+2. #15 Energie-Ampel (Shared ENERGY_HINT_VISUAL) — parallel oder direkt nach #12
+3. #14 Einkauf-Aggregation in prioritizeDay / DayPlanItem (Shared + Tests)
+4. #13 DayPlanItemCard Web + Mobile
+5. #16 Check-in-Chip nach Speichern (Partner-Anzeige; Race beim Tippen beachten — review_260915)
+6. #17 Vorschläge & Parität Web/Mobile
+7. #18 Summary-Cards, #19 Tap-through
+8. #20 Abhaken auf Heute nur wenn Zeit — sonst offen lassen
+
+Regeln:
+- AGENTS.md: TDD in @family-companion/shared für neue Logik (Aggregation, Icon-Keys, Energie-Map)
+- Kein Pro, kein Energie-Budget (ADR 0012), keine Sidebar
+- Web und Mobile: gleiche Semantik/Komponenten-Spec; Layout darf unterscheiden
+- Docs: Haken in 02.1-heute-ux.md, features.md nur bei Abweichung
+- Issues schließen wenn erledigt; gh issue close mit Kurzkommentar
+
+Start:
+- Lies 02.1-heute-ux.md und issue #12
+- Leg Branch an, beginne mit #12 — zeig kurz Plan, dann implementieren
