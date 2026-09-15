@@ -8,6 +8,7 @@ Was uns umgeworfen hat, und was wir das nächste Mal zuerst prüfen. Neueste Ein
 - **Invites haben es gezeigt, Members hätten es von Anfang an im Phasenkonzept gebraucht.** Einladungen bekamen CRUD erst nachträglich (`/haushalt/einladen`). Mitglieder landeten als `members[]` plus optional `memberEmails`, die Oberfläche zeigte aber nur „Mitglied · Inhaber“ — die Konto-E-Mail fehlte, Entfernen fehlte. Join ohne Reverse-Pfad ist unflexibel (Trennung, Testkonten, falsche Person).
 - **R heißt menschenlesbar, nicht nur IDs.** Eine Mitgliederliste ohne E-Mail (oder Namen) ist für den Alltag unbrauchbar. Fallback „Mitglied“ nur, wenn wirklich keine Adresse da ist — und dann als Datenlücke, nicht als Design.
 - **C nicht doppelt bauen.** Mitglied anlegen bleibt Invite + Join. Ein zweites „Mitglied hinzufügen“-Formular wäre der falsche Create-Pfad. Dafür D: Owner entfernt, Mitglied tritt aus; Owner selbst nicht kicken ohne Auflösung/Transfer.
+- **Rollen Alltag:** Inhaber vs Mitglied — kooperatives CRU, Löschen fremder Items nur Inhaber; Check-in privat. [phase-2-crud-roles.md](./design/phase-2-crud-roles.md)
 - Nächstes Mal: vor dem ersten `setDoc` die vier Buchstaben an den Maintainer (und ins Phasen-WP). Regel in [AGENTS.md](../AGENTS.md).
 
 ## Auth und Geräte (Phase 1)

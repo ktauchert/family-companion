@@ -26,7 +26,7 @@ Quellen: [features.md](./features.md), [user-journey.md](./user-journey.md), [de
 | Phase 0 | Vitest + CI entschieden, kein CD ([ADR 0002](./adr/0002-unit-tests-und-github-ci.md)) |
 | Phase 0.2 / 1 | Vitest, `turbo test`, Actions |
 | Phase 1.1 | Android Dev-Build; natives Google E2E ([01.1](./phasen/01.1-dev-build-google-native.md)) |
-| Vor jeder persistierten Entity | CRUD-Einschätzung (C/R/U/D) an den Maintainer und ins Phasen-WP, bevor Store/UI gebaut werden ([AGENTS.md](../AGENTS.md), [lessons-learned.md](./lessons-learned.md)) |
+| Vor jeder persistierten Entity | CRUD-Einschätzung (C/R/U/D) an den Maintainer und ins Phasen-WP, bevor Store/UI gebaut werden ([AGENTS.md](../AGENTS.md), [lessons-learned.md](./lessons-learned.md)). Phase 2: [phase-2-crud-roles.md](./design/phase-2-crud-roles.md) |
 | Phase 2 | Tests für Priorisierungs-Algo und Listen-Kategorien; CRUD je Collection (Events, Todos, Listenpunkte) |
 | Phase 2+ | E2E Web (Playwright) |
 | Deploybar | CD — eigenes ADR |
