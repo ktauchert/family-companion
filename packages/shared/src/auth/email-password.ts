@@ -89,6 +89,58 @@ const FALLBACK: Record<AuthFlow, string> = {
   google: 'Google-Anmeldung fehlgeschlagen.',
 };
 
+function errorCode(err: unknown): string | null {
+  if (err && typeof err === 'object' && 'code' in err) {
+    const code = (err as { code: unknown }).code;
+    if (typeof code === 'string' || typeof code === 'number') {
+      return String(code);
+    }
+  }
+  return null;
+}
+
+function errorMessage(err: unknown): string {
+  if (err instanceof Error) {
+    return err.message;
+  }
+  if (err && typeof err === 'object' && 'message' in err) {
+    const message = (err as { message: unknown }).message;
+    if (typeof message === 'string') {
+      return message;
+    }
+  }
+  return '';
+}
+
+function googleNativeMessage(err: unknown): string | null {
+  const code = errorCode(err);
+  const message = errorMessage(err);
+
+  if (
+    code === '10' ||
+    /DEVELOPER_ERROR/i.test(message) ||
+    /DEVELOPER_ERROR/i.test(code ?? '')
+  ) {
+    return 'Google-Konfiguration passt nicht (SHA-1 oder Client-ID). Bei EAS-Build: EAS-SHA-1 in Firebase eintragen — npm run firebase:sha1 gilt nur für lokale Builds.';
+  }
+  if (/Missing EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID/i.test(message)) {
+    return 'Web-Client-ID fehlt im Build. EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID setzen und App neu bauen.';
+  }
+  if (/Google Sign-In lieferte kein idToken/i.test(message)) {
+    return 'Google lieferte kein Anmelde-Token. EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID muss die Web-Client-ID sein (nicht die Android-Client-ID).';
+  }
+  if (code === '12501' || /SIGN_IN_CANCELLED/i.test(message)) {
+    return 'Google-Anmeldung abgebrochen.';
+  }
+  if (/PLAY_SERVICES_NOT_AVAILABLE/i.test(message) || code === '2') {
+    return 'Google Play Services fehlen oder sind veraltet.';
+  }
+  if (/Kein User nach dem Login/i.test(message)) {
+    return 'Anmeldung ohne Firebase-User. Bitte erneut versuchen.';
+  }
+  return null;
+}
+
 export function authErrorCode(codeOrMessage: string): string | null {
   const fromSdk = codeOrMessage.match(/auth\/[\w.-]+/);
   if (fromSdk) {
@@ -118,18 +170,82 @@ export function messageFromAuthError(
   err: unknown,
   flow: AuthFlow = 'sign-in',
 ): string {
+  if (flow === 'google') {
+    const native = googleNativeMessage(err);
+    if (native) {
+      return native;
+    }
+  }
+
+  const code = errorCode(err);
+  if (code) {
+    const fromFirebase = firebaseAuthMessage(code, flow);
+    if (fromFirebase !== FALLBACK[flow]) {
+      return fromFirebase;
+    }
+    if (flow === 'google') {
+      return `${FALLBACK[flow]} (${code})`;
+    }
+    return fromFirebase;
+  }
+
+  if (err instanceof Error) {
+    const fromMessage = firebaseAuthMessage(err.message, flow);
+    if (fromMessage !== FALLBACK[flow]) {
+      return fromMessage;
+    }
+    if (flow === 'google' && err.message.trim().length > 0) {
+      return `${FALLBACK[flow]} (${err.message})`;
+    }
+  }
+
+  return FALLBACK[flow];
+}
+
+/** Technische Details für Dev-/Preview-Builds (UI oder Logs). */
+export function authErrorDetails(err: unknown): string {
+  if (!err) {
+    return 'unknown error';
+  }
+
+  const parts: string[] = [];
+  const code = errorCode(err);
+  const message = errorMessage(err);
+
+  if (code) {
+    parts.push(`code=${code}`);
+  }
+  if (message) {
+    parts.push(`message=${message}`);
+  }
+
   if (
     err &&
     typeof err === 'object' &&
-    'code' in err &&
-    typeof (err as { code: unknown }).code === 'string'
+    'userInfo' in err &&
+    err.userInfo !== null &&
+    err.userInfo !== undefined
   ) {
-    return firebaseAuthMessage((err as { code: string }).code, flow);
+    try {
+      parts.push(`userInfo=${JSON.stringify(err.userInfo)}`);
+    } catch {
+      parts.push('userInfo=[unserializable]');
+    }
   }
-  if (err instanceof Error) {
-    return firebaseAuthMessage(err.message, flow);
+
+  if (parts.length > 0) {
+    return parts.join(' · ');
   }
-  return FALLBACK[flow];
+
+  if (err instanceof Error && err.name) {
+    return err.name;
+  }
+
+  try {
+    return JSON.stringify(err);
+  } catch {
+    return String(err);
+  }
 }
 
 export function emailPasswordReasonMessage(

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  authErrorDetails,
   emailPasswordReasonMessage,
   firebaseAuthMessage,
   messageFromAuthError,
@@ -124,5 +125,32 @@ describe('messageFromAuthError', () => {
     expect(messageFromAuthError(new Error('OPERATION_NOT_ALLOWED'), 'register')).toBe(
       'E-Mail/Passwort ist in Firebase nicht eingeschaltet (Authentication → Sign-in method).',
     );
+  });
+
+  it('maps native Google DEVELOPER_ERROR', () => {
+    expect(
+      messageFromAuthError(
+        {
+          code: '10',
+          message:
+            'DEVELOPER_ERROR: Follow troubleshooting instructions at https://react-native-google-signin.github.io/docs/troubleshooting',
+        },
+        'google',
+      ),
+    ).toContain('SHA-1');
+  });
+
+  it('includes unknown google error codes in the message', () => {
+    expect(messageFromAuthError({ code: '999', message: 'weird' }, 'google')).toBe(
+      'Google-Anmeldung fehlgeschlagen. (999)',
+    );
+  });
+});
+
+describe('authErrorDetails', () => {
+  it('formats code and message from native errors', () => {
+    expect(
+      authErrorDetails({ code: '10', message: 'DEVELOPER_ERROR: troubleshooting' }),
+    ).toBe('code=10 · message=DEVELOPER_ERROR: troubleshooting');
   });
 });

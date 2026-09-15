@@ -1,7 +1,7 @@
 # Phase 1 — Auth & Haushalt (Free)
 
-- Status: **in Arbeit**
-- Branch: `phase-1-auth-haushalt`
+- Status: **erledigt**
+- Branch: `phase-1-auth-haushalt` *(gemerged: [PR #3](https://github.com/ktauchert/family-companion/pull/3))*
 - Ergebnis: Julian legt einen Haushalt an, Sophie tritt per PIN und E-Mail-Whitelist bei, Free-Limit gilt
 - Journey: [user-journey.md](../user-journey.md) Phase 1
 - UI: [design/ui.md](../design/ui.md)
@@ -22,7 +22,7 @@ Was die Phase wollte, und wo wir nach den Umwegen stehen.
 | Mitglieder nur anlegen/listen | **WP4 erledigt:** Konto-E-Mail sichtbar; Owner entfernt, Mitglied tritt aus; E2E geprüft |
 | Ein Root-`.env.local` | **korrigiert:** Env pro App (`apps/web`, `apps/mobile`) |
 | QR-Code / Join-Link | **verworfen** als Hauptweg |
-| PR nach `main` | [PR #3](https://github.com/ktauchert/family-companion/pull/3) offen |
+| PR nach `main` | [PR #3](https://github.com/ktauchert/family-companion/pull/3) gemerged |
 | E-Mail/Passwort | **gebaut** (Web + App). Console: Provider *E-Mail/Passwort* einschalten |
 
 ## Arbeitspakete
@@ -34,7 +34,7 @@ Was die Phase wollte, und wo wir nach den Umwegen stehen.
 - [x] Google Sign-In Android vorbereitet *(Paket `com.familycompanion.app`, `google-services.json`, SHA-1)*
 - [x] Expo-Go-Web-OAuth entfernt; Google in der App nur nativ *(korrigiert)*
 - [x] E-Mail/Passwort Web + App *(ergänzt, ADR 0009)* — `/login` vs `/register`; Fehlertexte je Flow; Console-Provider **E-Mail/Passwort** muss an sein (`auth/operation-not-allowed` sonst)
-- [ ] Google nativ im Dev-Build testen → **[Phase 1.1](./01.1-dev-build-google-native.md)** *(ausgelagert)*
+- [x] Google nativ im Dev-Build testen → **[Phase 1.1](./01.1-dev-build-google-native.md)** *(E2E geprüft, EAS Preview)*
 
 Env: `apps/web/.env.local` und `apps/mobile/.env.local`. Werte **ohne** Anführungszeichen. Kein Root-Parser.
 

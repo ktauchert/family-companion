@@ -1,4 +1,4 @@
-import { messageFromAuthError } from '@family-companion/shared';
+import { authErrorDetails, messageFromAuthError } from '@family-companion/shared';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 import { auth } from '../firebase';
@@ -14,7 +14,7 @@ export function NativeGoogleButton({
   ink: string;
   well: string;
   onSignedIn: (uid: string) => Promise<void>;
-  onError: (message: string) => void;
+  onError: (message: string, details?: string) => void;
 }) {
   const [busy, setBusy] = useState(false);
 
@@ -29,7 +29,8 @@ export function NativeGoogleButton({
       }
       await onSignedIn(uid);
     } catch (err) {
-      onError(messageFromAuthError(err, 'google'));
+      console.error('[google-native]', authErrorDetails(err));
+      onError(messageFromAuthError(err, 'google'), authErrorDetails(err));
     } finally {
       setBusy(false);
     }
