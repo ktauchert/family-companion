@@ -1,0 +1,26 @@
+Phase 2 — UI/UX-Pass (family-companion)
+
+Kontext:
+- main enthält Phase 2 (gemerged PR #11): Kalender, Todos, Listen, Morgen-Check-in, Heute mit Algo-Vorschlägen
+- Bewusst Minimal-UI / Hybrid-UI (Grill 3C) — funktional, nicht ausgereift
+- Design-Vorgaben: docs/design/ui.md (Art Paper / Stone, 5 Bereiche, keine Sidebar, Karten ohne linken Farbstreifen)
+- Domain: CONTEXT.md, CRUD/Rollen: docs/design/phase-2-crud-roles.md
+- Code-Review-Hinweise: docs/code-reviews/review_260915.md (z. B. Heute read-only, Web/Mobile-Parität)
+
+Ziel dieses Chats:
+- Gemeinsam durchgehen, was an UI/UX nach User-Test nervt oder fehlt
+- Priorisieren: Quick Wins vs. größere Umbauten
+- Ergebnis: konkrete Issues oder ein Phasen-WP (z. B. 2.1), noch kein Implementierungs-Sprint ohne Freigabe
+
+Screens / Bereiche (Web + Mobile):
+- Heute (Check-in-Chips, Tagesliste, Vorschläge bestätigen/ablehnen)
+- Kalender, Todos, Listen (Formulare, leere Zustände, Fehlercopy, Abhaken)
+- Navigation / Chrome / Tabs
+- Rollen sichtbar? (Löschen nur Inhaber — verständlich?)
+
+Arbeitsweise:
+- AGENTS.md: Branch pro Phase; hier erst Spec/Backlog, Code nur wenn ich es explizit bitte
+- Keine neuen Features (Pro, KI, Energie-Budget) — nur UX zu bestehendem Phase-2-Scope
+- Web und Mobile sollten gleichwertig werden, wo sinnvoll
+
+Bitte mit: Kurzüberblick lesen, dann meine Test-Notizen abfragen oder ich liste sie — danach priorisierte Liste + Vorschlag für Issues/WP.

@@ -1,7 +1,7 @@
 # Phase 2 — Alltag: Kalender, Todos, Listen, Morgen (Free)
 
-- Status: **erledigt** *(PR aus `phase-2-alltag`)*
-- Branch: `phase-2-alltag` *(von `main` nach Merge [PR #4](https://github.com/ktauchert/family-companion/pull/4))*
+- Status: **erledigt** *(gemerged [PR #11](https://github.com/ktauchert/family-companion/pull/11), 2026-09-15)*
+- Branch: `phase-2-alltag` *(geschlossen)*
 - Ergebnis: Gemeinsamer Alltag auf Web und Mobile, Morgen-Dashboard per Algo
 - ADRs: [0003](../adr/0003-kalender-und-todos-sind-kern.md), [0004](../adr/0004-per-member-habits-und-kaizen.md), [0005](../adr/0005-morgen-check-in-und-priorisierung.md), [0006](../adr/0006-kategorisierte-einkaufslisten.md), [0011](../adr/0011-morgen-priorisierung-vorschlaege.md), [0012](../adr/0012-tages-energie-budget.md) *(Proposed: dynamisches Budget Phase 4)*
 - **Grill-Entscheidungen:** 1B Algo+Vorschläge · 2B Habits ohne Kaizen · 3C Hybrid-UI · 4B `assignedTo: string[]` · 5A `energyHint` optional (Default `medium`) · 6A Wiederholung `none\|daily\|weekly` — [CONTEXT.md](../../CONTEXT.md)
