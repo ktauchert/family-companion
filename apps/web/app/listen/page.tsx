@@ -14,7 +14,7 @@ import {
   shoppingAddedByLabel,
 } from '@family-companion/shared';
 import { onAuthStateChanged } from 'firebase/auth';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { Chrome } from '../../components/Chrome';
 import { auth } from '../../lib/firebase';
@@ -45,6 +45,7 @@ function sortItems(items: ShoppingItem[]): ShoppingItem[] {
 
 export default function ListenPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [household, setHousehold] = useState<Household | null>(null);
   const [uid, setUid] = useState<string | null>(null);
   const [items, setItems] = useState<ShoppingItem[]>([]);
@@ -83,6 +84,28 @@ export default function ListenPage() {
     });
   }, [router]);
 
+  const categoryFromUrl = searchParams.get('category');
+
+  useEffect(() => {
+    if (
+      categoryFromUrl &&
+      (SHOPPING_CATEGORIES as readonly string[]).includes(categoryFromUrl)
+    ) {
+      setFilter(categoryFromUrl as ShoppingCategory);
+      setDraft((current) => ({ ...current, category: categoryFromUrl as ShoppingCategory }));
+    }
+  }, [categoryFromUrl]);
+
+  function selectFilter(next: ShoppingCategory | 'all') {
+    setFilter(next);
+    if (next === 'all') {
+      router.replace('/listen');
+      return;
+    }
+    router.replace(`/listen?category=${next}`);
+    setDraft((current) => ({ ...current, category: next }));
+  }
+
   useEffect(() => {
     if (!household) {
       return;
@@ -111,7 +134,7 @@ export default function ListenPage() {
         household,
         itemId: crypto.randomUUID(),
         name: draft.name,
-        category: draft.category,
+        category: filter === 'all' ? draft.category : filter,
         createdAt: new Date().toISOString(),
       });
       if (!result.ok) {
@@ -200,7 +223,7 @@ export default function ListenPage() {
             <button
               className={`btn ${filter === 'all' ? '' : 'ghost'}`}
               type="button"
-              onClick={() => setFilter('all')}
+              onClick={() => selectFilter('all')}
             >
               Alle
             </button>
@@ -209,7 +232,7 @@ export default function ListenPage() {
                 key={category}
                 className={`btn ${filter === category ? '' : 'ghost'}`}
                 type="button"
-                onClick={() => setFilter(category)}
+                onClick={() => selectFilter(category)}
               >
                 {SHOPPING_CATEGORY_LABELS[category]}
               </button>

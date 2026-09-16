@@ -156,7 +156,7 @@ Immer zusätzlich Kurzlabel oder `aria-label` („Energie: niedrig“) — nicht
 
 ---
 
-## Heute-Dashboard (Phase 2.1)
+## Heute-Dashboard (Phase 2.1) — umgesetzt
 
 Nach User-Test und [02.1-heute-ux.md](../phasen/02.1-heute-ux.md):
 
@@ -166,7 +166,7 @@ Nach User-Test und [02.1-heute-ux.md](../phasen/02.1-heute-ux.md):
 4. **Einkauf** auf dem Tagesplan: nur **Kategorie + Anzahl offen** (z. B. „Supermarkt · 3 offen“), keine Produktnamen
 5. **Summary-Cards** (Web Raster, App Spalte): Kalender, Listen, Todos — je eine Zeile + Tap zum Tab
 
-Heute bleibt primär **Überblick**; Abhaken optional später (Issue #20). Detail-CRUD in den Tabs.
+Heute bleibt primär **Überblick**; Abhaken auf Heute für Events/Todos umgesetzt (Issue #20). Einkauf: Tap-through zu Listen. Detail-CRUD in den Tabs.
 
 ---
 

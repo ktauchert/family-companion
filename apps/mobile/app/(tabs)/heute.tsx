@@ -1,6 +1,7 @@
 import type {
   CalendarEvent,
   DayPlanItem,
+  HeuteAreaSummary,
   Household,
   MorningCheckIn,
   MorningCheckInBand,
@@ -11,14 +12,13 @@ import type {
 import {
   applySuggestionToEvent,
   applySuggestionToTodo,
-  calendarAssigneeLabel,
+  buildHeuteAreaSummaries,
+  dayPlanItemTarget,
   ENERGY_CHECK_IN_OPTIONS,
   energyBandToValue,
   ensureMemberEmail,
-  formatCalendarEventRange,
-  ENERGY_HINT_LABELS,
-  formatDueDate,
-  householdMemberLabel,
+  isCalendarEventDoneForUser,
+  isTodoDoneForUser,
   localDateString,
   messageFromStoreError,
   MOOD_CHECK_IN_OPTIONS,
@@ -26,15 +26,20 @@ import {
   morningCheckInErrorMessage,
   morningCheckInId,
   prepareCreateMorningCheckIn,
+  prepareToggleCalendarEventCompletion,
+  prepareToggleTodoCompletion,
   prepareUpdateCalendarEvent,
   prepareUpdateTodo,
   prioritizeDay,
-  SHOPPING_CATEGORY_LABELS,
 } from '@family-companion/shared';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { AreaSummaryCards } from '../../components/heute/AreaSummaryCards';
+import { CheckInChip } from '../../components/heute/CheckInChip';
+import { DayPlanItemCard } from '../../components/heute/DayPlanItemCard';
+import { SuggestionCard } from '../../components/heute/SuggestionCard';
 import { calendar } from '../../lib/calendar';
 import { auth } from '../../lib/firebase';
 import { households } from '../../lib/households';
@@ -43,14 +48,21 @@ import { shopping } from '../../lib/shopping';
 import { todos } from '../../lib/todos';
 import { useTheme } from '../../lib/theme';
 
-function dayPlanKindLabel(item: DayPlanItem): string {
+function isDayPlanItemDone(
+  item: DayPlanItem,
+  events: CalendarEvent[],
+  todoItems: TodoItem[],
+  actorId: string,
+): boolean {
   if (item.kind === 'event') {
-    return 'Termin';
+    const event = events.find((entry) => entry.id === item.id);
+    return event ? isCalendarEventDoneForUser(event, actorId) : false;
   }
-  if (item.kind === 'shopping') {
-    return 'Einkauf';
+  if (item.kind === 'todo') {
+    const todo = todoItems.find((entry) => entry.id === item.id);
+    return todo ? isTodoDoneForUser(todo, actorId) : false;
   }
-  return 'Todo';
+  return false;
 }
 
 export default function HeuteScreen() {
@@ -67,6 +79,7 @@ export default function HeuteScreen() {
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const today = localDateString();
 
@@ -120,12 +133,26 @@ export default function HeuteScreen() {
     });
   }, [household, uid, today, checkIns, events, todoItems, shoppingItems]);
 
+  const areaSummaries = useMemo(() => {
+    if (!household || !uid) return [];
+    const summaries = buildHeuteAreaSummaries({
+      household,
+      actorId: uid,
+      date: today,
+      events,
+      todos: todoItems,
+      shoppingItems,
+    });
+    return [summaries.kalender, summaries.todos, summaries.listen];
+  }, [household, uid, today, events, todoItems, shoppingItems]);
+
   const visibleSuggestions = plan.suggestions.filter((s) => !dismissed.has(s.id));
 
   const styles = StyleSheet.create({
     page: { flex: 1, backgroundColor: theme.paper },
     content: { padding: 24, gap: 16 },
     card: { backgroundColor: theme.sheet, borderRadius: 20, padding: 22, gap: 12 },
+    headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 },
     title: { fontSize: 28, fontFamily: 'Georgia', color: theme.ink },
     heading: { fontSize: 20, fontFamily: 'Georgia', color: theme.ink },
     muted: { color: theme.inkSoft },
@@ -148,17 +175,13 @@ export default function HeuteScreen() {
     chipText: { color: theme.inkSoft, fontSize: 15 },
     chipTextSelected: { color: theme.ink, fontWeight: '600' },
     btn: { backgroundColor: theme.sage, borderRadius: 12, paddingVertical: 12, alignItems: 'center' },
-    btnText: { color: theme.paper },
-    ghost: { backgroundColor: theme.well, borderRadius: 12, paddingVertical: 10, alignItems: 'center' },
-    ghostText: { color: theme.ink },
-    row: { gap: 8, paddingVertical: 10, borderTopWidth: 1, borderTopColor: theme.rule },
-    actions: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
+    btnText: { color: theme.paper, fontWeight: '600' },
+    stack: { gap: 12 },
+    dayPlanStack: { gap: 10 },
   });
 
   async function saveCheckIn() {
     if (!household || !uid || actorCheckIn) return;
-    const moodValue = moodBandToValue(moodBand);
-    const energyValue = energyBandToValue(energyBand);
     setBusy(true);
     setError(null);
     try {
@@ -166,8 +189,8 @@ export default function HeuteScreen() {
         actorId: uid,
         household,
         checkInId: morningCheckInId(household.id, uid, today),
-        mood: moodValue,
-        energy: energyValue,
+        mood: moodBandToValue(moodBand),
+        energy: energyBandToValue(energyBand),
         date: today,
         existingForUserOnDate: actorCheckIn,
       });
@@ -227,6 +250,56 @@ export default function HeuteScreen() {
     }
   }
 
+  async function toggleDayPlanItem(item: DayPlanItem) {
+    if (!household || !uid) return;
+    setTogglingId(item.id);
+    setError(null);
+    try {
+      const doneAt = new Date().toISOString();
+      if (item.kind === 'event') {
+        const event = events.find((entry) => entry.id === item.id);
+        if (!event) return;
+        const done = isCalendarEventDoneForUser(event, uid);
+        const result = prepareToggleCalendarEventCompletion({
+          actorId: uid,
+          household,
+          event,
+          done: !done,
+          doneAt,
+        });
+        if (!result.ok) {
+          setError('Erledigt-Status konnte nicht geändert werden.');
+          return;
+        }
+        await calendar.saveEvent(result.event);
+      } else if (item.kind === 'todo') {
+        const todo = todoItems.find((entry) => entry.id === item.id);
+        if (!todo) return;
+        const done = isTodoDoneForUser(todo, uid);
+        const result = prepareToggleTodoCompletion({
+          actorId: uid,
+          household,
+          todo,
+          done: !done,
+          doneAt,
+        });
+        if (!result.ok) {
+          setError('Erledigt-Status konnte nicht geändert werden.');
+          return;
+        }
+        await todos.saveTodo(result.todo);
+      }
+    } catch (err) {
+      setError(messageFromStoreError(err, 'Erledigt-Status konnte nicht geändert werden.'));
+    } finally {
+      setTogglingId(null);
+    }
+  }
+
+  function openSummary(summary: HeuteAreaSummary) {
+    router.push(summary.mobilePath as '/kalender');
+  }
+
   if (!household || !uid) {
     return (
       <View style={[styles.page, styles.content]}>
@@ -238,12 +311,17 @@ export default function HeuteScreen() {
   return (
     <ScrollView style={styles.page} contentContainerStyle={styles.content}>
       <View style={styles.card}>
-        <Text style={styles.title}>Guten Tag</Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.title}>Guten Tag</Text>
+          <Text style={styles.stamp}>{household.plan}</Text>
+        </View>
         <Text style={styles.muted}>{household.name}</Text>
         {error ? <Text style={styles.err}>{error}</Text> : null}
 
+        {actorCheckIn ? <CheckInChip checkIns={checkIns} household={household} /> : null}
+
         {!actorCheckIn ? (
-          <>
+          <View style={styles.stack}>
             <Text style={styles.heading}>Morgen-Check-in</Text>
             <Text style={styles.small}>Stimmung</Text>
             <View style={styles.chipRow}>
@@ -278,59 +356,48 @@ export default function HeuteScreen() {
               })}
             </View>
             <Pressable style={styles.btn} disabled={busy} onPress={() => void saveCheckIn()}>
-              <Text style={styles.btnText}>Speichern</Text>
+              <Text style={styles.btnText}>Check-in speichern</Text>
             </Pressable>
-          </>
+          </View>
         ) : null}
 
-        {visibleSuggestions.map((suggestion) => (
-          <View key={suggestion.id} style={styles.row}>
-            <Text style={styles.muted}>{suggestion.message}</Text>
-            {suggestion.suggestedAssignee ? (
-              <Text style={styles.small}>
-                {householdMemberLabel(household.memberEmails?.[suggestion.suggestedAssignee] ?? null)}
-              </Text>
-            ) : null}
-            <View style={styles.actions}>
-              <Pressable style={styles.btn} disabled={busy} onPress={() => void confirmSuggestion(suggestion)}>
-                <Text style={styles.btnText}>Bestätigen</Text>
-              </Pressable>
-              <Pressable
-                style={styles.ghost}
-                disabled={busy}
-                onPress={() => setDismissed((prev) => new Set(prev).add(suggestion.id))}
-              >
-                <Text style={styles.ghostText}>Ablehnen</Text>
-              </Pressable>
-            </View>
+        {visibleSuggestions.length > 0 ? (
+          <View style={styles.stack}>
+            <Text style={styles.heading}>Vorschläge</Text>
+            {visibleSuggestions.map((suggestion) => (
+              <SuggestionCard
+                key={suggestion.id}
+                suggestion={suggestion}
+                household={household}
+                busy={busy}
+                onConfirm={() => void confirmSuggestion(suggestion)}
+                onDismiss={() => setDismissed((prev) => new Set(prev).add(suggestion.id))}
+              />
+            ))}
           </View>
-        ))}
+        ) : null}
 
         <Text style={styles.heading}>Dein Tag</Text>
         {plan.items.length === 0 ? (
           <Text style={styles.muted}>Keine offenen Termine, Todos oder Einkäufe für heute.</Text>
         ) : (
-          plan.items.map((item) => (
-            <View key={`${item.kind}_${item.id}`} style={styles.row}>
-              <Text style={styles.stamp}>{dayPlanKindLabel(item)}</Text>
-              <Text style={styles.heading}>{item.title}</Text>
-              {item.shoppingCategory ? (
-                <Text style={styles.small}>{SHOPPING_CATEGORY_LABELS[item.shoppingCategory]}</Text>
-              ) : null}
-              {item.startsAt ? <Text style={styles.small}>{formatCalendarEventRange(item.startsAt)}</Text> : null}
-              {item.dueDate ? <Text style={styles.small}>Fällig {formatDueDate(item.dueDate)}</Text> : null}
-              {item.kind !== 'shopping' ? (
-                <Text style={styles.small}>
-                  {ENERGY_HINT_LABELS[item.energyHint]}
-                  {item.assignedTo && item.assignedTo.length > 0
-                    ? ` · ${calendarAssigneeLabel(household, item.assignedTo)}`
-                    : ''}
-                </Text>
-              ) : null}
-            </View>
-          ))
+          <View style={styles.dayPlanStack}>
+            {plan.items.map((item) => (
+              <DayPlanItemCard
+                key={`${item.kind}_${item.id}`}
+                item={item}
+                household={household}
+                done={isDayPlanItemDone(item, events, todoItems, uid)}
+                toggling={togglingId === item.id}
+                onPress={() => router.push(dayPlanItemTarget(item).mobilePath as '/kalender')}
+                onToggleDone={() => void toggleDayPlanItem(item)}
+              />
+            ))}
+          </View>
         )}
       </View>
+
+      <AreaSummaryCards summaries={areaSummaries} onPressSummary={openSummary} />
     </ScrollView>
   );
 }

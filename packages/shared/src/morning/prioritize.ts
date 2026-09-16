@@ -1,11 +1,13 @@
 import { isCalendarEventDoneForUser } from '../calendar/completion';
 import { isTodoDoneForUser } from '../todos/completion';
+import { SHOPPING_CATEGORY_LABELS } from '../shopping/display';
 import type {
   CalendarEvent,
   CompletionMode,
   EnergyBand,
   Household,
   MorningCheckIn,
+  ShoppingCategory,
   ShoppingItem,
   TodoItem,
 } from '../types';
@@ -22,6 +24,8 @@ export type DayPlanItem = {
   entityKind?: CalendarEvent['kind'] | TodoItem['kind'];
   completionMode?: CompletionMode;
   shoppingCategory?: ShoppingItem['category'];
+  /** Aggregated open shopping items in this category. */
+  openCount?: number;
 };
 
 export type PrioritizationSuggestion = {
@@ -144,20 +148,33 @@ function buildDayItems(input: PrioritizeDayInput): DayPlanItem[] {
     });
   }
 
-  for (const item of input.shoppingItems ?? []) {
-    if (item.checked) {
-      continue;
-    }
-    items.push({
-      kind: 'shopping',
-      id: item.id,
-      title: item.name,
-      energyHint: 'medium',
-      shoppingCategory: item.category,
-    });
+  for (const item of aggregateShoppingItems(input.shoppingItems ?? [])) {
+    items.push(item);
   }
 
   return items;
+}
+
+function aggregateShoppingItems(shoppingItems: ShoppingItem[]): DayPlanItem[] {
+  const counts = new Map<ShoppingCategory, number>();
+
+  for (const item of shoppingItems) {
+    if (item.checked) {
+      continue;
+    }
+    counts.set(item.category, (counts.get(item.category) ?? 0) + 1);
+  }
+
+  return [...counts.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([category, openCount]) => ({
+      kind: 'shopping' as const,
+      id: `shopping_${category}`,
+      title: SHOPPING_CATEGORY_LABELS[category],
+      energyHint: 'medium' as const,
+      shoppingCategory: category,
+      openCount,
+    }));
 }
 
 function sortWithEnergy(items: DayPlanItem[], minEnergy: number): DayPlanItem[] {

@@ -9,6 +9,7 @@ const paper = {
   inkFaint: '#8A8274',
   rule: '#D3C9B8',
   sage: '#6E7F6A',
+  clay: '#B08968',
   rust: '#9A5B4A',
 };
 
@@ -21,6 +22,7 @@ const stone = {
   inkFaint: '#7A7368',
   rule: '#454039',
   sage: '#9AA890',
+  clay: '#C4A27A',
   rust: '#C48978',
 };
 

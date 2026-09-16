@@ -12,7 +12,7 @@ import {
   shoppingAddedByLabel,
 } from '@family-companion/shared';
 import { onAuthStateChanged } from 'firebase/auth';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
@@ -35,6 +35,7 @@ function randomId(): string {
 
 export default function ListenScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ category?: string }>();
   const theme = useTheme();
   const [household, setHousehold] = useState<Household | null>(null);
   const [uid, setUid] = useState<string | null>(null);
@@ -64,6 +65,33 @@ export default function ListenScreen() {
     });
   }, [router]);
 
+  const categoryFromUrl =
+    typeof params.category === 'string'
+      ? params.category
+      : Array.isArray(params.category)
+        ? params.category[0]
+        : undefined;
+
+  useEffect(() => {
+    if (
+      categoryFromUrl &&
+      (SHOPPING_CATEGORIES as readonly string[]).includes(categoryFromUrl)
+    ) {
+      setFilter(categoryFromUrl as ShoppingCategory);
+      setCategory(categoryFromUrl as ShoppingCategory);
+    }
+  }, [categoryFromUrl]);
+
+  function selectFilter(next: ShoppingCategory | 'all') {
+    setFilter(next);
+    if (next === 'all') {
+      router.setParams({ category: undefined });
+      return;
+    }
+    router.setParams({ category: next });
+    setCategory(next);
+  }
+
   useEffect(() => {
     if (!household) return;
     return shopping.subscribeForHousehold(household.id, setItems);
@@ -87,6 +115,8 @@ export default function ListenScreen() {
     btnText: { color: theme.paper },
     ghost: { backgroundColor: theme.well, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 12 },
     ghostText: { color: theme.ink },
+    chipSelected: { borderWidth: 1, borderColor: theme.sage, backgroundColor: theme.well },
+    chipTextSelected: { color: theme.ink, fontWeight: '600' },
     row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
     eventRow: { gap: 6, paddingVertical: 12, borderTopWidth: 1, borderTopColor: theme.rule },
@@ -101,7 +131,7 @@ export default function ListenScreen() {
       household,
       itemId: randomId(),
       name,
-      category,
+      category: filter === 'all' ? category : filter,
       createdAt: new Date().toISOString(),
     });
     if (!result.ok) {
@@ -137,25 +167,50 @@ export default function ListenScreen() {
         </View>
         {error ? <Text style={styles.err}>{error}</Text> : null}
         <View style={styles.chips}>
-          <Pressable style={styles.ghost} onPress={() => setFilter('all')}>
-            <Text style={styles.ghostText}>Alle</Text>
+          <Pressable
+            style={[styles.ghost, filter === 'all' && styles.chipSelected]}
+            onPress={() => selectFilter('all')}
+          >
+            <Text style={[styles.ghostText, filter === 'all' && styles.chipTextSelected]}>Alle</Text>
           </Pressable>
-          {SHOPPING_CATEGORIES.map((cat) => (
-            <Pressable key={cat} style={styles.ghost} onPress={() => setFilter(cat)}>
-              <Text style={styles.ghostText}>{SHOPPING_CATEGORY_LABELS[cat]}</Text>
-            </Pressable>
-          ))}
+          {SHOPPING_CATEGORIES.map((cat) => {
+            const selected = filter === cat;
+            return (
+              <Pressable
+                key={cat}
+                style={[styles.ghost, selected && styles.chipSelected]}
+                onPress={() => selectFilter(cat)}
+              >
+                <Text style={[styles.ghostText, selected && styles.chipTextSelected]}>
+                  {SHOPPING_CATEGORY_LABELS[cat]}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
         {showForm ? (
           <View style={{ gap: 8 }}>
             <TextInput style={styles.input} placeholder="Artikel" placeholderTextColor={theme.inkFaint} value={name} onChangeText={setName} />
-            <View style={styles.chips}>
-              {SHOPPING_CATEGORIES.map((cat) => (
-                <Pressable key={cat} style={styles.ghost} onPress={() => setCategory(cat)}>
-                  <Text style={styles.ghostText}>{SHOPPING_CATEGORY_LABELS[cat]}</Text>
-                </Pressable>
-              ))}
-            </View>
+            {filter === 'all' ? (
+              <View style={styles.chips}>
+                {SHOPPING_CATEGORIES.map((cat) => {
+                  const selected = category === cat;
+                  return (
+                    <Pressable
+                      key={cat}
+                      style={[styles.ghost, selected && styles.chipSelected]}
+                      onPress={() => setCategory(cat)}
+                    >
+                      <Text style={[styles.ghostText, selected && styles.chipTextSelected]}>
+                        {SHOPPING_CATEGORY_LABELS[cat]}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            ) : (
+              <Text style={styles.small}>Liste: {SHOPPING_CATEGORY_LABELS[filter]}</Text>
+            )}
             <Pressable style={styles.btn} disabled={busy} onPress={() => void addItem()}>
               <Text style={styles.btnText}>Anlegen</Text>
             </Pressable>
