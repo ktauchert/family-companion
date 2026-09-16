@@ -1,56 +1,43 @@
-import type { CalendarEvent, CompletionMode, EnergyBand, Household, Recurrence } from '@family-companion/shared';
+import type { CalendarEvent, Household } from '@family-companion/shared';
 import {
-  CALENDAR_KIND_LABELS,
-  COMPLETION_MODE_LABELS,
-  ENERGY_HINT_LABELS,
-  RECURRENCE_LABELS,
-  calendarAssigneeLabel,
-  itemOpenClosedLabel,
-  perMemberCompletionLabel,
   canDeleteCalendarEvent,
   createCalendarEventErrorMessage,
   defaultStartsAtLocal,
   ensureMemberEmail,
-  formatCalendarEventRange,
   fromDatetimeLocalValue,
   householdMembers,
   isCalendarEventDoneForUser,
+  localDateString,
   messageFromStoreError,
   prepareCreateCalendarEvent,
   prepareToggleCalendarEventCompletion,
   prepareUpdateCalendarEvent,
-  toDatetimeLocalValue,
+  shiftWeekAnchor,
+  weekRange,
 } from '@family-companion/shared';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { PlusFab } from '../../components/Modal';
 import {
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+  CalendarEventModal,
+  calendarEventDraftFromEvent,
+  type CalendarEventDraft,
+} from '../../components/kalender/CalendarEventModal';
+import { CalendarWeekView } from '../../components/kalender/CalendarWeekView';
 import { calendar } from '../../lib/calendar';
 import { auth } from '../../lib/firebase';
 import { households } from '../../lib/households';
 import { useTheme } from '../../lib/theme';
 
-type EventDraft = {
-  title: string;
-  startsAtLocal: string;
-  endsAtLocal: string;
-  assignedTo: string[];
-  completionMode: CompletionMode;
-  recurrence: Recurrence;
-  kind: CalendarEvent['kind'];
-  energyHint: EnergyBand;
-};
+type ModalState =
+  | null
+  | { mode: 'create' }
+  | { mode: 'view'; eventId: string }
+  | { mode: 'edit'; eventId: string };
 
-function emptyDraft(): EventDraft {
+function emptyDraft(): CalendarEventDraft {
   return {
     title: '',
     startsAtLocal: defaultStartsAtLocal(),
@@ -60,27 +47,6 @@ function emptyDraft(): EventDraft {
     recurrence: 'none',
     kind: 'event',
     energyHint: 'medium',
-  };
-}
-
-function draftFromEvent(event: CalendarEvent): EventDraft {
-  return {
-    title: event.title,
-    startsAtLocal: toDatetimeLocalValue(event.startsAt),
-    endsAtLocal: event.endsAt ? toDatetimeLocalValue(event.endsAt) : '',
-    assignedTo: event.assignedTo ?? [],
-    completionMode: event.completionMode,
-    recurrence: event.recurrence,
-    kind: event.kind,
-    energyHint: event.energyHint ?? 'medium',
-  };
-}
-
-function toggleAssignee(draft: EventDraft, userId: string): EventDraft {
-  const has = draft.assignedTo.includes(userId);
-  return {
-    ...draft,
-    assignedTo: has ? draft.assignedTo.filter((id) => id !== userId) : [...draft.assignedTo, userId],
   };
 }
 
@@ -95,10 +61,11 @@ export default function KalenderScreen() {
   const [uid, setUid] = useState<string | null>(null);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [modalError, setModalError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [draft, setDraft] = useState<EventDraft>(emptyDraft);
+  const [weekAnchor, setWeekAnchor] = useState(() => localDateString());
+  const [modal, setModal] = useState<ModalState>(null);
+  const [draft, setDraft] = useState<CalendarEventDraft>(emptyDraft);
 
   useEffect(() => {
     return onAuthStateChanged(auth, (user) => {
@@ -149,82 +116,66 @@ export default function KalenderScreen() {
     () => (household ? householdMembers(household) : []),
     [household],
   );
+  const week = useMemo(() => weekRange(weekAnchor), [weekAnchor]);
+  const selectedEvent = useMemo(
+    () => (modal && modal.mode !== 'create' ? events.find((event) => event.id === modal.eventId) : undefined),
+    [events, modal],
+  );
 
   const styles = StyleSheet.create({
     page: { flex: 1, backgroundColor: theme.paper },
-    content: { padding: 24, gap: 16 },
-    card: {
-      backgroundColor: theme.sheet,
-      borderRadius: 20,
-      padding: 22,
-      gap: 12,
-    },
+    content: { padding: 24, paddingBottom: 120, gap: 16 },
+    card: { backgroundColor: theme.sheet, borderRadius: 20, padding: 22, gap: 12 },
     title: { fontSize: 28, fontFamily: 'Georgia', color: theme.ink },
-    heading: { fontSize: 18, fontFamily: 'Georgia', color: theme.ink },
     rule: { width: 48, height: 1, backgroundColor: theme.rule },
     muted: { color: theme.inkSoft },
-    small: { color: theme.inkSoft, fontSize: 14 },
     err: { color: theme.rust },
-    input: {
+    weekNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+    weekLabel: { flex: 1, textAlign: 'center', fontFamily: 'Georgia', fontSize: 16, color: theme.ink },
+    navBtn: {
       borderWidth: 1,
       borderColor: theme.rule,
       borderRadius: 12,
-      padding: 12,
-      color: theme.ink,
-      backgroundColor: theme.paper,
-    },
-    btn: {
-      backgroundColor: theme.sage,
-      borderRadius: 12,
-      paddingVertical: 12,
-      alignItems: 'center',
-    },
-    btnText: { color: theme.paper },
-    ghost: {
-      backgroundColor: theme.well,
-      borderRadius: 12,
+      paddingHorizontal: 12,
       paddingVertical: 10,
-      alignItems: 'center',
+      backgroundColor: theme.well,
     },
-    ghostText: { color: theme.ink },
-    row: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: 8,
-    },
-    eventRow: {
-      gap: 6,
-      paddingVertical: 12,
-      borderTopWidth: 1,
-      borderTopColor: theme.rule,
-    },
-    done: { textDecorationLine: 'line-through', color: theme.inkFaint },
-    actions: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
+    navBtnText: { color: theme.ink, fontSize: 16 },
   });
 
-  function resetForm() {
+  function closeModal() {
+    setModal(null);
+    setModalError(null);
     setDraft(emptyDraft());
-    setEditingId(null);
-    setShowForm(false);
-    setError(null);
+  }
+
+  function openCreate() {
+    setDraft(emptyDraft());
+    setModal({ mode: 'create' });
+    setModalError(null);
+  }
+
+  function openView(event: CalendarEvent) {
+    setDraft(calendarEventDraftFromEvent(event));
+    setModal({ mode: 'view', eventId: event.id });
+    setModalError(null);
   }
 
   async function saveEvent() {
-    if (!household || !uid) {
+    if (!household || !uid || !modal) {
       return;
     }
     setBusy(true);
-    setError(null);
+    setModalError(null);
     try {
       const startsAt = fromDatetimeLocalValue(draft.startsAtLocal);
       const endsAt = draft.endsAtLocal ? fromDatetimeLocalValue(draft.endsAtLocal) : undefined;
       const assignedTo = draft.assignedTo.length > 0 ? draft.assignedTo : undefined;
 
-      if (editingId) {
-        const existing = events.find((item) => item.id === editingId);
+      if (modal.mode === 'edit') {
+        const existing = events.find((item) => item.id === modal.eventId);
         if (!existing) {
-          setError('Termin nicht gefunden.');
+          setModalError('Termin nicht gefunden.');
           return;
         }
         const result = prepareUpdateCalendarEvent({
@@ -243,7 +194,7 @@ export default function KalenderScreen() {
           },
         });
         if (!result.ok) {
-          setError(createCalendarEventErrorMessage(result.reason));
+          setModalError(createCalendarEventErrorMessage(result.reason));
           return;
         }
         await calendar.saveEvent(result.event);
@@ -262,28 +213,28 @@ export default function KalenderScreen() {
           energyHint: draft.energyHint,
         });
         if (!result.ok) {
-          setError(createCalendarEventErrorMessage(result.reason));
+          setModalError(createCalendarEventErrorMessage(result.reason));
           return;
         }
         await calendar.createEvent(result.event);
       }
-      resetForm();
+      closeModal();
     } catch (err) {
       console.error('[calendar save]', err);
-      setError(messageFromStoreError(err, 'Termin konnte nicht gespeichert werden.'));
+      setModalError(messageFromStoreError(err, 'Termin konnte nicht gespeichert werden.'));
     } finally {
       setBusy(false);
     }
   }
 
-  function removeEvent(event: CalendarEvent) {
-    if (!household || !uid) {
+  function deleteEvent() {
+    if (!household || !uid || !selectedEvent) {
       return;
     }
-    if (!canDeleteCalendarEvent({ actorId: uid, household, event })) {
+    if (!canDeleteCalendarEvent({ actorId: uid, household, event: selectedEvent })) {
       return;
     }
-    Alert.alert('Löschen', `„${event.title}" löschen?`, [
+    Alert.alert('Löschen', `„${selectedEvent.title}" löschen?`, [
       { text: 'Abbrechen', style: 'cancel' },
       {
         text: 'Löschen',
@@ -291,10 +242,11 @@ export default function KalenderScreen() {
         onPress: () => {
           setBusy(true);
           void calendar
-            .deleteEvent(event.id)
+            .deleteEvent(selectedEvent.id)
+            .then(() => closeModal())
             .catch((err) => {
               console.error('[calendar delete]', err);
-              setError(messageFromStoreError(err, 'Termin konnte nicht gelöscht werden.'));
+              setModalError(messageFromStoreError(err, 'Termin konnte nicht gelöscht werden.'));
             })
             .finally(() => setBusy(false));
         },
@@ -302,20 +254,20 @@ export default function KalenderScreen() {
     ]);
   }
 
-  async function toggleDone(event: CalendarEvent) {
-    if (!household || !uid) {
+  async function toggleDone() {
+    if (!household || !uid || !selectedEvent) {
       return;
     }
-    const done = !isCalendarEventDoneForUser(event, uid);
+    const done = !isCalendarEventDoneForUser(selectedEvent, uid);
     const result = prepareToggleCalendarEventCompletion({
       actorId: uid,
       household,
-      event,
+      event: selectedEvent,
       done,
       doneAt: new Date().toISOString(),
     });
     if (!result.ok) {
-      setError(createCalendarEventErrorMessage(result.reason));
+      setModalError(createCalendarEventErrorMessage(result.reason));
       return;
     }
     setBusy(true);
@@ -323,7 +275,7 @@ export default function KalenderScreen() {
       await calendar.saveEvent(result.event);
     } catch (err) {
       console.error('[calendar toggle]', err);
-      setError(messageFromStoreError(err, 'Erledigung konnte nicht gespeichert werden.'));
+      setModalError(messageFromStoreError(err, 'Erledigung konnte nicht gespeichert werden.'));
     } finally {
       setBusy(false);
     }
@@ -337,156 +289,72 @@ export default function KalenderScreen() {
     );
   }
 
+  const modalMode = modal?.mode === 'edit' ? 'edit' : modal?.mode === 'create' ? 'create' : 'view';
+
   return (
-    <ScrollView style={styles.page} contentContainerStyle={styles.content}>
-      <View style={styles.card}>
-        <View style={styles.row}>
+    <View style={styles.page}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.card}>
           <Text style={styles.title}>Kalender</Text>
-          {!showForm ? (
-            <Pressable style={styles.btn} onPress={() => setShowForm(true)}>
-              <Text style={styles.btnText}>Neu</Text>
+          <View style={styles.rule} />
+          {error ? <Text style={styles.err}>{error}</Text> : null}
+
+          <View style={styles.weekNav}>
+            <Pressable
+              style={styles.navBtn}
+              accessibilityLabel="Vorherige Woche"
+              onPress={() => setWeekAnchor((current) => shiftWeekAnchor(current, -1))}
+            >
+              <Text style={styles.navBtnText}>←</Text>
             </Pressable>
-          ) : null}
-        </View>
-        <View style={styles.rule} />
-        {error ? <Text style={styles.err}>{error}</Text> : null}
-
-        {showForm ? (
-          <View style={{ gap: 10 }}>
-            <Text style={styles.heading}>{editingId ? 'Bearbeiten' : 'Neuer Termin'}</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Titel"
-              placeholderTextColor={theme.inkFaint}
-              value={draft.title}
-              onChangeText={(title) => setDraft({ ...draft, title })}
-            />
-            <Text style={styles.small}>Beginn (YYYY-MM-DDTHH:mm)</Text>
-            <TextInput
-              style={styles.input}
-              value={draft.startsAtLocal}
-              onChangeText={(startsAtLocal) => setDraft({ ...draft, startsAtLocal })}
-            />
-            <Text style={styles.small}>Ende optional</Text>
-            <TextInput
-              style={styles.input}
-              value={draft.endsAtLocal}
-              onChangeText={(endsAtLocal) => setDraft({ ...draft, endsAtLocal })}
-            />
-            <Text style={styles.small}>Zuweisung (leer = Haushalt)</Text>
-            {members.map((member) => (
-              <View key={member.userId} style={styles.row}>
-                <Text style={styles.muted}>
-                  {member.email ?? 'E-Mail unbekannt'}
-                  {member.userId === uid ? ' · du' : ''}
-                </Text>
-                <Switch
-                  value={draft.assignedTo.includes(member.userId)}
-                  onValueChange={() => setDraft(toggleAssignee(draft, member.userId))}
-                />
-              </View>
-            ))}
-            <Text style={styles.small}>Wiederholung: {RECURRENCE_LABELS[draft.recurrence]}</Text>
-            <View style={styles.actions}>
-              {(['none', 'daily', 'weekly'] as Recurrence[]).map((value) => (
-                <Pressable
-                  key={value}
-                  style={styles.ghost}
-                  onPress={() => setDraft({ ...draft, recurrence: value })}
-                >
-                  <Text style={styles.ghostText}>{RECURRENCE_LABELS[value]}</Text>
-                </Pressable>
-              ))}
-            </View>
-            <Text style={styles.small}>Erledigung: {COMPLETION_MODE_LABELS[draft.completionMode]}</Text>
-            <View style={styles.actions}>
-              {(['household', 'per_member'] as CompletionMode[]).map((value) => (
-                <Pressable
-                  key={value}
-                  style={styles.ghost}
-                  onPress={() => setDraft({ ...draft, completionMode: value })}
-                >
-                  <Text style={styles.ghostText}>{COMPLETION_MODE_LABELS[value]}</Text>
-                </Pressable>
-              ))}
-            </View>
-            <Text style={styles.small}>Energie: {ENERGY_HINT_LABELS[draft.energyHint]}</Text>
-            <View style={styles.actions}>
-              {(['low', 'medium', 'high'] as EnergyBand[]).map((value) => (
-                <Pressable
-                  key={value}
-                  style={styles.ghost}
-                  onPress={() => setDraft({ ...draft, energyHint: value })}
-                >
-                  <Text style={styles.ghostText}>{ENERGY_HINT_LABELS[value]}</Text>
-                </Pressable>
-              ))}
-            </View>
-            <Text style={styles.small}>Art: {CALENDAR_KIND_LABELS[draft.kind]}</Text>
-            <View style={styles.actions}>
-              {(['event', 'habit'] as CalendarEvent['kind'][]).map((value) => (
-                <Pressable key={value} style={styles.ghost} onPress={() => setDraft({ ...draft, kind: value })}>
-                  <Text style={styles.ghostText}>{CALENDAR_KIND_LABELS[value]}</Text>
-                </Pressable>
-              ))}
-            </View>
-            <View style={styles.actions}>
-              <Pressable style={styles.btn} disabled={busy} onPress={() => void saveEvent()}>
-                <Text style={styles.btnText}>{editingId ? 'Speichern' : 'Anlegen'}</Text>
-              </Pressable>
-              <Pressable style={styles.ghost} disabled={busy} onPress={resetForm}>
-                <Text style={styles.ghostText}>Abbrechen</Text>
-              </Pressable>
-            </View>
+            <Text style={styles.weekLabel}>{week.headerLabel}</Text>
+            <Pressable
+              style={styles.navBtn}
+              accessibilityLabel="Nächste Woche"
+              onPress={() => setWeekAnchor((current) => shiftWeekAnchor(current, 1))}
+            >
+              <Text style={styles.navBtnText}>→</Text>
+            </Pressable>
           </View>
-        ) : null}
 
-        {events.length === 0 ? (
-          <Text style={styles.muted}>Noch keine Termine.</Text>
-        ) : (
-          events.map((event) => {
-            const done = isCalendarEventDoneForUser(event, uid);
-            const canDelete = canDeleteCalendarEvent({ actorId: uid, household, event });
-            return (
-              <View key={event.id} style={styles.eventRow}>
-                <View style={styles.row}>
-                  <Switch value={done} disabled={busy} onValueChange={() => void toggleDone(event)} />
-                  <Text style={[styles.heading, done ? styles.done : undefined]}>{event.title}</Text>
-                </View>
-                <Text style={styles.small}>{formatCalendarEventRange(event.startsAt, event.endsAt)}</Text>
-                <Text style={styles.small}>
-                  {itemOpenClosedLabel(done)}
-                  {event.completionMode === 'per_member'
-                    ? ` · ${perMemberCompletionLabel(household, event.completions)}`
-                    : ''}
-                  {' · '}
-                  {calendarAssigneeLabel(household, event.assignedTo)} · {RECURRENCE_LABELS[event.recurrence]} ·{' '}
-                  {COMPLETION_MODE_LABELS[event.completionMode]} · {ENERGY_HINT_LABELS[event.energyHint ?? 'medium']}
-                  {event.kind === 'habit' ? ` · ${CALENDAR_KIND_LABELS.habit}` : ''}
-                </Text>
-                <View style={styles.actions}>
-                  <Pressable
-                    style={styles.ghost}
-                    disabled={busy}
-                    onPress={() => {
-                      setDraft(draftFromEvent(event));
-                      setEditingId(event.id);
-                      setShowForm(true);
-                    }}
-                  >
-                    <Text style={styles.ghostText}>Bearbeiten</Text>
-                  </Pressable>
-                  {canDelete ? (
-                    <Pressable style={styles.ghost} disabled={busy} onPress={() => removeEvent(event)}>
-                      <Text style={styles.ghostText}>Löschen</Text>
-                    </Pressable>
-                  ) : null}
-                </View>
-              </View>
-            );
-          })
-        )}
-      </View>
-    </ScrollView>
+          <CalendarWeekView
+            week={week}
+            events={events}
+            household={household}
+            actorId={uid}
+            onSelectEvent={openView}
+          />
+        </View>
+      </ScrollView>
+
+      <PlusFab label="Neuer Termin" onPress={openCreate} />
+
+      <CalendarEventModal
+        open={modal !== null}
+        mode={modalMode}
+        event={selectedEvent}
+        draft={draft}
+        household={household}
+        actorId={uid}
+        members={members}
+        busy={busy}
+        modalError={modalError}
+        done={selectedEvent ? isCalendarEventDoneForUser(selectedEvent, uid) : false}
+        canDelete={
+          selectedEvent ? canDeleteCalendarEvent({ actorId: uid, household, event: selectedEvent }) : false
+        }
+        onClose={closeModal}
+        onDraftChange={setDraft}
+        onSave={() => void saveEvent()}
+        onDelete={deleteEvent}
+        onToggleDone={() => void toggleDone()}
+        onEdit={() => {
+          if (selectedEvent) {
+            setModal({ mode: 'edit', eventId: selectedEvent.id });
+            setDraft(calendarEventDraftFromEvent(selectedEvent));
+          }
+        }}
+      />
+    </View>
   );
 }

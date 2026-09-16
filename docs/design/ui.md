@@ -174,6 +174,24 @@ Heute bleibt primär **Überblick**; Abhaken auf Heute für Events/Todos umgeset
 
 [02.2-kalender-todos-ux.md](../phasen/02.2-kalender-todos-ux.md)
 
+### EventCard / TodoCard (T1)
+
+Gemeinsame Card-Sprache für Kalender- und Todo-Listen. Shared-Helfer: `eventCardPills`, `todoCardPills`, `assigneeCountDisplay` in `@family-companion/shared`.
+
+| Prop | EventCard | TodoCard |
+| --- | --- | --- |
+| `event` / `todo` | `CalendarEvent` | `TodoItem` |
+| `household` | `Household` | `Household` |
+| `actorId` | aktuelle User-ID (Zuweisung fett wenn dabei) | aktuelle User-ID |
+| `done?` | erledigt-Stempel, durchgestrichener Titel | erledigt-Stempel, durchgestrichener Titel |
+| `onPress?` | öffnet View-Modal (#23 / #27) | öffnet View-Modal |
+| `onToggleDone?` | — (Kalender: kein Abhaken in der Liste) | Checkbox/Switch auf der Card |
+| `toggling?` | — | deaktiviert Toggle während Save |
+
+Meta als **Pills** unter dem Titel (Form: `pill` / `soft` / `tag` je Typ). Typ-Icon + `EnergyHintBadge` wie Heute. Zuweisung: **Anzahl Personen** (`1 Person` / `n Personen`), fett wenn Actor in `assignedTo` oder leer (= Haushalt).
+
+Web: `apps/web/components/cards/` · Mobile: `apps/mobile/components/cards/`
+
 - **Wochenansicht:** KW-Header mit Vor/Zurück; Termine pro Tag als **EventCards** (nicht Endlosliste).
 - **Liste:** keine Checkbox, keine Text-Buttons — Tap öffnet **View-Modal**.
 - **View-Modal:** Infos ausführlich (Pills), **Erledigt**-Chip, Bearbeiten/Löschen (Löschen `rust`).

@@ -1,48 +1,44 @@
 'use client';
 
-import type { CalendarEvent, CompletionMode, EnergyBand, Household, Recurrence } from '@family-companion/shared';
+import type { CalendarEvent, Household } from '@family-companion/shared';
 import {
-  CALENDAR_KIND_LABELS,
-  COMPLETION_MODE_LABELS,
-  ENERGY_HINT_LABELS,
-  RECURRENCE_LABELS,
-  calendarAssigneeLabel,
-  itemOpenClosedLabel,
-  perMemberCompletionLabel,
   canDeleteCalendarEvent,
   createCalendarEventErrorMessage,
   defaultStartsAtLocal,
   ensureMemberEmail,
-  formatCalendarEventRange,
   fromDatetimeLocalValue,
   householdMembers,
   isCalendarEventDoneForUser,
+  localDateString,
   messageFromStoreError,
   prepareCreateCalendarEvent,
   prepareToggleCalendarEventCompletion,
   prepareUpdateCalendarEvent,
-  toDatetimeLocalValue,
+  shiftWeekAnchor,
+  weekRange,
 } from '@family-companion/shared';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { Chrome } from '../../components/Chrome';
+import { PlusIconButton } from '../../components/PlusIconButton';
+import {
+  CalendarEventModal,
+  calendarEventDraftFromEvent,
+  type CalendarEventDraft,
+} from '../../components/kalender/CalendarEventModal';
+import { CalendarWeekView } from '../../components/kalender/CalendarWeekView';
 import { calendar } from '../../lib/calendar';
 import { auth } from '../../lib/firebase';
 import { households } from '../../lib/households';
 
-type EventDraft = {
-  title: string;
-  startsAtLocal: string;
-  endsAtLocal: string;
-  assignedTo: string[];
-  completionMode: CompletionMode;
-  recurrence: Recurrence;
-  kind: CalendarEvent['kind'];
-  energyHint: EnergyBand;
-};
+type ModalState =
+  | null
+  | { mode: 'create' }
+  | { mode: 'view'; eventId: string }
+  | { mode: 'edit'; eventId: string };
 
-function emptyDraft(): EventDraft {
+function emptyDraft(): CalendarEventDraft {
   return {
     title: '',
     startsAtLocal: defaultStartsAtLocal(),
@@ -55,37 +51,17 @@ function emptyDraft(): EventDraft {
   };
 }
 
-function draftFromEvent(event: CalendarEvent): EventDraft {
-  return {
-    title: event.title,
-    startsAtLocal: toDatetimeLocalValue(event.startsAt),
-    endsAtLocal: event.endsAt ? toDatetimeLocalValue(event.endsAt) : '',
-    assignedTo: event.assignedTo ?? [],
-    completionMode: event.completionMode,
-    recurrence: event.recurrence,
-    kind: event.kind,
-    energyHint: event.energyHint ?? 'medium',
-  };
-}
-
-function toggleAssignee(draft: EventDraft, userId: string): EventDraft {
-  const has = draft.assignedTo.includes(userId);
-  return {
-    ...draft,
-    assignedTo: has ? draft.assignedTo.filter((id) => id !== userId) : [...draft.assignedTo, userId],
-  };
-}
-
 export default function KalenderPage() {
   const router = useRouter();
   const [household, setHousehold] = useState<Household | null>(null);
   const [uid, setUid] = useState<string | null>(null);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [modalError, setModalError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [draft, setDraft] = useState<EventDraft>(emptyDraft);
+  const [weekAnchor, setWeekAnchor] = useState(() => localDateString());
+  const [modal, setModal] = useState<ModalState>(null);
+  const [draft, setDraft] = useState<CalendarEventDraft>(emptyDraft);
 
   useEffect(() => {
     return onAuthStateChanged(auth, async (user) => {
@@ -124,9 +100,7 @@ export default function KalenderPage() {
     return calendar.subscribeForHousehold(
       household.id,
       (next) => {
-        setEvents(
-          [...next].sort((a, b) => a.startsAt.localeCompare(b.startsAt)),
-        );
+        setEvents([...next].sort((a, b) => a.startsAt.localeCompare(b.startsAt)));
       },
       (err) => {
         console.error('[calendar subscribe]', err);
@@ -139,43 +113,45 @@ export default function KalenderPage() {
     () => (household ? householdMembers(household) : []),
     [household],
   );
+  const week = useMemo(() => weekRange(weekAnchor), [weekAnchor]);
+  const selectedEvent = useMemo(
+    () => (modal && modal.mode !== 'create' ? events.find((event) => event.id === modal.eventId) : undefined),
+    [events, modal],
+  );
 
-  function resetForm() {
+  function closeModal() {
+    setModal(null);
+    setModalError(null);
     setDraft(emptyDraft());
-    setEditingId(null);
-    setShowForm(false);
-    setError(null);
   }
 
-  function startCreate() {
+  function openCreate() {
     setDraft(emptyDraft());
-    setEditingId(null);
-    setShowForm(true);
-    setError(null);
+    setModal({ mode: 'create' });
+    setModalError(null);
   }
 
-  function startEdit(event: CalendarEvent) {
-    setDraft(draftFromEvent(event));
-    setEditingId(event.id);
-    setShowForm(true);
-    setError(null);
+  function openView(event: CalendarEvent) {
+    setDraft(calendarEventDraftFromEvent(event));
+    setModal({ mode: 'view', eventId: event.id });
+    setModalError(null);
   }
 
   async function saveEvent() {
-    if (!household || !uid) {
+    if (!household || !uid || !modal) {
       return;
     }
     setBusy(true);
-    setError(null);
+    setModalError(null);
     try {
       const startsAt = fromDatetimeLocalValue(draft.startsAtLocal);
       const endsAt = draft.endsAtLocal ? fromDatetimeLocalValue(draft.endsAtLocal) : undefined;
       const assignedTo = draft.assignedTo.length > 0 ? draft.assignedTo : undefined;
 
-      if (editingId) {
-        const existing = events.find((item) => item.id === editingId);
+      if (modal.mode === 'edit') {
+        const existing = events.find((item) => item.id === modal.eventId);
         if (!existing) {
-          setError('Termin nicht gefunden.');
+          setModalError('Termin nicht gefunden.');
           return;
         }
         const result = prepareUpdateCalendarEvent({
@@ -194,7 +170,7 @@ export default function KalenderPage() {
           },
         });
         if (!result.ok) {
-          setError(createCalendarEventErrorMessage(result.reason));
+          setModalError(createCalendarEventErrorMessage(result.reason));
           return;
         }
         await calendar.saveEvent(result.event);
@@ -213,62 +189,57 @@ export default function KalenderPage() {
           energyHint: draft.energyHint,
         });
         if (!result.ok) {
-          setError(createCalendarEventErrorMessage(result.reason));
+          setModalError(createCalendarEventErrorMessage(result.reason));
           return;
         }
         await calendar.createEvent(result.event);
       }
-      resetForm();
+      closeModal();
     } catch (err) {
       console.error('[calendar save]', err);
-      setError(messageFromStoreError(err, 'Termin konnte nicht gespeichert werden.'));
+      setModalError(messageFromStoreError(err, 'Termin konnte nicht gespeichert werden.'));
     } finally {
       setBusy(false);
     }
   }
 
-  async function removeEvent(event: CalendarEvent) {
-    if (!household || !uid) {
+  async function deleteEvent() {
+    if (!household || !uid || !selectedEvent) {
       return;
     }
-    if (
-      !canDeleteCalendarEvent({
-        actorId: uid,
-        household,
-        event,
-      })
-    ) {
+    if (!canDeleteCalendarEvent({ actorId: uid, household, event: selectedEvent })) {
       return;
     }
-    if (!window.confirm(`„${event.title}" löschen?`)) {
+    if (!window.confirm(`„${selectedEvent.title}" löschen?`)) {
       return;
     }
     setBusy(true);
-    setError(null);
+    setModalError(null);
     try {
-      await calendar.deleteEvent(event.id);
+      await calendar.deleteEvent(selectedEvent.id);
+      closeModal();
     } catch (err) {
       console.error('[calendar delete]', err);
-      setError(messageFromStoreError(err, 'Termin konnte nicht gelöscht werden.'));
+      setModalError(messageFromStoreError(err, 'Termin konnte nicht gelöscht werden.'));
     } finally {
       setBusy(false);
     }
   }
 
-  async function toggleDone(event: CalendarEvent) {
-    if (!household || !uid) {
+  async function toggleDone() {
+    if (!household || !uid || !selectedEvent) {
       return;
     }
-    const done = !isCalendarEventDoneForUser(event, uid);
+    const done = !isCalendarEventDoneForUser(selectedEvent, uid);
     const result = prepareToggleCalendarEventCompletion({
       actorId: uid,
       household,
-      event,
+      event: selectedEvent,
       done,
       doneAt: new Date().toISOString(),
     });
     if (!result.ok) {
-      setError(createCalendarEventErrorMessage(result.reason));
+      setModalError(createCalendarEventErrorMessage(result.reason));
       return;
     }
     setBusy(true);
@@ -276,7 +247,7 @@ export default function KalenderPage() {
       await calendar.saveEvent(result.event);
     } catch (err) {
       console.error('[calendar toggle]', err);
-      setError(messageFromStoreError(err, 'Erledigung konnte nicht gespeichert werden.'));
+      setModalError(messageFromStoreError(err, 'Erledigung konnte nicht gespeichert werden.'));
     } finally {
       setBusy(false);
     }
@@ -290,17 +261,16 @@ export default function KalenderPage() {
     );
   }
 
+  const modalMode = modal?.mode === 'edit' ? 'edit' : modal?.mode === 'create' ? 'create' : 'view';
+  const modalOpen = modal !== null;
+
   return (
     <Chrome crumb="Kalender" current="kalender">
       <div className="cards wide">
         <article className="card stack wide">
           <header className="row-between">
             <h1>Kalender</h1>
-            {!showForm ? (
-              <button className="btn" type="button" onClick={startCreate}>
-                Neuer Termin
-              </button>
-            ) : null}
+            <PlusIconButton label="Neuer Termin" onClick={openCreate} />
           </header>
           <hr className="rule" />
           {error ? (
@@ -309,174 +279,62 @@ export default function KalenderPage() {
             </p>
           ) : null}
 
-          {showForm ? (
-            <form
-              className="stack wide"
-              onSubmit={(event) => {
-                event.preventDefault();
-                void saveEvent();
-              }}
+          <div className="week-nav" aria-label="Kalenderwoche">
+            <button
+              type="button"
+              className="icon-btn"
+              aria-label="Vorherige Woche"
+              onClick={() => setWeekAnchor((current) => shiftWeekAnchor(current, -1))}
             >
-              <label className="field">
-                Titel
-                <input
-                  value={draft.title}
-                  onChange={(e) => setDraft({ ...draft, title: e.target.value })}
-                  required
-                />
-              </label>
-              <label className="field">
-                Beginn
-                <input
-                  type="datetime-local"
-                  value={draft.startsAtLocal}
-                  onChange={(e) => setDraft({ ...draft, startsAtLocal: e.target.value })}
-                  required
-                />
-              </label>
-              <label className="field">
-                Ende (optional)
-                <input
-                  type="datetime-local"
-                  value={draft.endsAtLocal}
-                  onChange={(e) => setDraft({ ...draft, endsAtLocal: e.target.value })}
-                />
-              </label>
-              <fieldset className="field">
-                <legend>Zuweisung</legend>
-                <p className="muted small">Leer = ganzer Haushalt</p>
-                {members.map((member) => (
-                  <label className="check-row" key={member.userId}>
-                    <input
-                      type="checkbox"
-                      checked={draft.assignedTo.includes(member.userId)}
-                      onChange={() => setDraft(toggleAssignee(draft, member.userId))}
-                    />
-                    {member.email ?? 'E-Mail unbekannt'}
-                    {member.userId === uid ? ' · du' : ''}
-                  </label>
-                ))}
-              </fieldset>
-              <label className="field">
-                Wiederholung
-                <select
-                  value={draft.recurrence}
-                  onChange={(e) => setDraft({ ...draft, recurrence: e.target.value as Recurrence })}
-                >
-                  {Object.entries(RECURRENCE_LABELS).map(([value, label]) => (
-                    <option key={value} value={value}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="field">
-                Erledigung
-                <select
-                  value={draft.completionMode}
-                  onChange={(e) =>
-                    setDraft({ ...draft, completionMode: e.target.value as CompletionMode })
-                  }
-                >
-                  {Object.entries(COMPLETION_MODE_LABELS).map(([value, label]) => (
-                    <option key={value} value={value}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="field">
-                Art
-                <select
-                  value={draft.kind}
-                  onChange={(e) => setDraft({ ...draft, kind: e.target.value as CalendarEvent['kind'] })}
-                >
-                  {Object.entries(CALENDAR_KIND_LABELS).map(([value, label]) => (
-                    <option key={value} value={value}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="field">
-                Energie-Hinweis
-                <select
-                  value={draft.energyHint}
-                  onChange={(e) => setDraft({ ...draft, energyHint: e.target.value as EnergyBand })}
-                >
-                  {Object.entries(ENERGY_HINT_LABELS).map(([value, label]) => (
-                    <option key={value} value={value}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <div className="row-actions">
-                <button className="btn" type="submit" disabled={busy}>
-                  {editingId ? 'Speichern' : 'Anlegen'}
-                </button>
-                <button className="btn ghost" type="button" disabled={busy} onClick={resetForm}>
-                  Abbrechen
-                </button>
-              </div>
-            </form>
-          ) : null}
+              ←
+            </button>
+            <span className="week-nav-label">{week.headerLabel}</span>
+            <button
+              type="button"
+              className="icon-btn"
+              aria-label="Nächste Woche"
+              onClick={() => setWeekAnchor((current) => shiftWeekAnchor(current, 1))}
+            >
+              →
+            </button>
+          </div>
 
-          {events.length === 0 ? (
-            <p className="muted">Noch keine Termine.</p>
-          ) : (
-            <ul className="plain-list event-list">
-              {events.map((event) => {
-                const done = isCalendarEventDoneForUser(event, uid);
-                const canDelete = canDeleteCalendarEvent({ actorId: uid, household, event });
-                return (
-                  <li className="event-row" key={event.id}>
-                    <label className="check-row">
-                      <input
-                        type="checkbox"
-                        checked={done}
-                        disabled={busy}
-                        onChange={() => void toggleDone(event)}
-                      />
-                      <span className={done ? 'done' : undefined}>{event.title}</span>
-                    </label>
-                    <p className="muted small">
-                      {formatCalendarEventRange(event.startsAt, event.endsAt)}
-                    </p>
-                    <p className="muted small">
-                      {itemOpenClosedLabel(done)}
-                      {event.completionMode === 'per_member'
-                        ? ` · ${perMemberCompletionLabel(household, event.completions)}`
-                        : ''}
-                      {' · '}
-                      {calendarAssigneeLabel(household, event.assignedTo)} ·{' '}
-                      {RECURRENCE_LABELS[event.recurrence]} · {COMPLETION_MODE_LABELS[event.completionMode]}
-                      {' · '}
-                      {ENERGY_HINT_LABELS[event.energyHint ?? 'medium']}
-                      {event.kind === 'habit' ? ` · ${CALENDAR_KIND_LABELS.habit}` : ''}
-                    </p>
-                    <div className="row-actions">
-                      <button className="btn ghost" type="button" disabled={busy} onClick={() => startEdit(event)}>
-                        Bearbeiten
-                      </button>
-                      {canDelete ? (
-                        <button
-                          className="btn ghost"
-                          type="button"
-                          disabled={busy}
-                          onClick={() => void removeEvent(event)}
-                        >
-                          Löschen
-                        </button>
-                      ) : null}
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
+          <CalendarWeekView
+            week={week}
+            events={events}
+            household={household}
+            actorId={uid}
+            onSelectEvent={openView}
+          />
         </article>
       </div>
+
+      <CalendarEventModal
+        open={modalOpen}
+        mode={modalMode}
+        event={selectedEvent}
+        draft={draft}
+        household={household}
+        actorId={uid}
+        members={members}
+        busy={busy}
+        modalError={modalError}
+        done={selectedEvent ? isCalendarEventDoneForUser(selectedEvent, uid) : false}
+        canDelete={
+          selectedEvent ? canDeleteCalendarEvent({ actorId: uid, household, event: selectedEvent }) : false
+        }
+        onClose={closeModal}
+        onDraftChange={setDraft}
+        onSave={() => void saveEvent()}
+        onDelete={() => void deleteEvent()}
+        onToggleDone={() => void toggleDone()}
+        onEdit={() => {
+          if (selectedEvent) {
+            setModal({ mode: 'edit', eventId: selectedEvent.id });
+            setDraft(calendarEventDraftFromEvent(selectedEvent));
+          }
+        }}
+      />
     </Chrome>
   );
 }
