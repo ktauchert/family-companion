@@ -40,6 +40,7 @@ const config: ExpoConfig = {
     'expo-router',
     'expo-web-browser',
     '@react-native-google-signin/google-signin',
+    '@react-native-community/datetimepicker',
   ],
   experiments: {
     typedRoutes: false,

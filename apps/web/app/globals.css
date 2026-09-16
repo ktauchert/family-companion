@@ -408,6 +408,285 @@ a {
   flex-shrink: 0;
 }
 
+.item-card-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.item-card {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--rule);
+  border-radius: 20px;
+  background: var(--paper);
+}
+
+.item-card-main {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+}
+
+button.item-card-main {
+  cursor: pointer;
+}
+
+button.item-card-main:hover .item-card-title {
+  color: var(--ink);
+}
+
+.item-card-icon {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 2px;
+  color: var(--ink-soft);
+}
+
+.item-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.item-card-title {
+  font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.item-card--done .item-card-title.done {
+  text-decoration: line-through;
+  color: var(--ink-faint);
+}
+
+.item-card-status {
+  color: var(--sage);
+}
+
+.item-card-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.item-card-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--ink-soft);
+  background: var(--well);
+  border: 1px solid var(--rule);
+}
+
+.item-card-pill--pill {
+  border-radius: 999px;
+}
+
+.item-card-pill--soft {
+  border-radius: 12px;
+}
+
+.item-card-pill--tag {
+  border-radius: 12px 4px 12px 12px;
+}
+
+.item-card-pill--emphasis {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.item-card-toggle {
+  align-self: center;
+  flex-shrink: 0;
+}
+
+.item-card--past {
+  opacity: 0.72;
+}
+
+.item-card--past .item-card-title {
+  color: var(--ink-soft);
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: var(--well);
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+}
+
+.icon-btn:hover {
+  background: var(--sheet);
+}
+
+.btn.danger {
+  background: transparent;
+  color: var(--rust);
+  border: 1px solid var(--rust);
+}
+
+.week-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.week-nav-label {
+  font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+  font-size: 1.05rem;
+  text-align: center;
+  flex: 1;
+}
+
+.week-view {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.week-day {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.week-day--today {
+  padding: 12px;
+  border-radius: 16px;
+  background: var(--well);
+}
+
+.week-day-heading {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.week-past-label {
+  margin: 4px 0 0;
+}
+
+.modal {
+  border: none;
+  padding: 24px;
+  background: transparent;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.modal::backdrop {
+  background: rgb(43 38 31 / 42%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.modal-panel {
+  width: min(36rem, calc(100vw - 48px));
+  max-height: min(calc(100vh - 48px), calc(100dvh - 48px));
+  overflow: auto;
+  margin: 0;
+  padding: 20px 22px 24px;
+  border: 1px solid var(--rule);
+  border-radius: 20px;
+  background: var(--sheet);
+  box-shadow: var(--shadow);
+}
+
+.modal-header {
+  margin-bottom: 4px;
+}
+
+.modal-title {
+  margin: 0;
+  font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+  font-size: 1.35rem;
+  color: var(--ink);
+}
+
+.modal-action-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 4px;
+  padding-top: 16px;
+  border-top: 1px solid var(--rule);
+}
+
+.modal-done-toggle {
+  width: 100%;
+}
+
+.modal-footer-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.modal-footer-actions .btn,
+.modal-footer-actions .btn.ghost {
+  flex: 1;
+}
+
+.modal-footer-actions--single .btn {
+  width: 100%;
+}
+
+.modal-delete-link {
+  appearance: none;
+  border: 0;
+  background: none;
+  color: var(--rust);
+  font: inherit;
+  font-size: 15px;
+  text-align: center;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.modal-delete-link:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.modal-delete-link:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.modal-lead {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.modal-close {
+  flex-shrink: 0;
+}
+
 .heute-summary-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

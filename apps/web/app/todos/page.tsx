@@ -1,44 +1,40 @@
 'use client';
 
-import type { CompletionMode, EnergyBand, Household, Recurrence, TodoItem } from '@family-companion/shared';
+import type { Household, TodoItem } from '@family-companion/shared';
 import {
-  COMPLETION_MODE_LABELS,
-  ENERGY_HINT_LABELS,
-  RECURRENCE_LABELS,
-  TODO_KIND_LABELS,
-  itemOpenClosedLabel,
-  perMemberCompletionLabel,
   canDeleteTodo,
   createTodoErrorMessage,
   ensureMemberEmail,
-  formatDueDate,
   householdMembers,
   isTodoDoneForUser,
   messageFromStoreError,
+  newEntityId,
   prepareCreateTodo,
   prepareToggleTodoCompletion,
   prepareUpdateTodo,
-  todoAssigneeLabel,
 } from '@family-companion/shared';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { Chrome } from '../../components/Chrome';
+import { PlusIconButton } from '../../components/PlusIconButton';
+import { TodoCard } from '../../components/cards/TodoCard';
+import {
+  TodoItemModal,
+  todoItemDraftFromItem,
+  type TodoItemDraft,
+} from '../../components/todos/TodoItemModal';
 import { auth } from '../../lib/firebase';
 import { households } from '../../lib/households';
 import { todos } from '../../lib/todos';
 
-type TodoDraft = {
-  title: string;
-  dueDate: string;
-  assignedTo: string[];
-  completionMode: CompletionMode;
-  recurrence: Recurrence;
-  kind: TodoItem['kind'];
-  energyHint: EnergyBand;
-};
+type ModalState =
+  | null
+  | { mode: 'create' }
+  | { mode: 'view'; todoId: string }
+  | { mode: 'edit'; todoId: string };
 
-function emptyDraft(): TodoDraft {
+function emptyDraft(): TodoItemDraft {
   return {
     title: '',
     dueDate: '',
@@ -47,26 +43,6 @@ function emptyDraft(): TodoDraft {
     recurrence: 'none',
     kind: 'task',
     energyHint: 'medium',
-  };
-}
-
-function draftFromTodo(todo: TodoItem): TodoDraft {
-  return {
-    title: todo.title,
-    dueDate: todo.dueDate ?? '',
-    assignedTo: todo.assignedTo ?? [],
-    completionMode: todo.completionMode,
-    recurrence: todo.recurrence,
-    kind: todo.kind,
-    energyHint: todo.energyHint ?? 'medium',
-  };
-}
-
-function toggleAssignee(draft: TodoDraft, userId: string): TodoDraft {
-  const has = draft.assignedTo.includes(userId);
-  return {
-    ...draft,
-    assignedTo: has ? draft.assignedTo.filter((id) => id !== userId) : [...draft.assignedTo, userId],
   };
 }
 
@@ -91,10 +67,11 @@ export default function TodosPage() {
   const [uid, setUid] = useState<string | null>(null);
   const [items, setItems] = useState<TodoItem[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [modalError, setModalError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [draft, setDraft] = useState<TodoDraft>(emptyDraft);
+  const [togglingTodoId, setTogglingTodoId] = useState<string | null>(null);
+  const [modal, setModal] = useState<ModalState>(null);
+  const [draft, setDraft] = useState<TodoItemDraft>(emptyDraft);
 
   useEffect(() => {
     return onAuthStateChanged(auth, async (user) => {
@@ -144,28 +121,47 @@ export default function TodosPage() {
     () => (household ? householdMembers(household) : []),
     [household],
   );
+  const selectedTodo = useMemo(
+    () => (modal && modal.mode !== 'create' ? items.find((item) => item.id === modal.todoId) : undefined),
+    [items, modal],
+  );
 
-  function resetForm() {
+  function closeModal() {
+    setModal(null);
+    setModalError(null);
     setDraft(emptyDraft());
-    setEditingId(null);
-    setShowForm(false);
-    setError(null);
+  }
+
+  function openCreate() {
+    setDraft(emptyDraft());
+    setModal({ mode: 'create' });
+    setModalError(null);
+  }
+
+  function openView(todo: TodoItem) {
+    setDraft(todoItemDraftFromItem(todo));
+    setModal({ mode: 'view', todoId: todo.id });
+    setModalError(null);
   }
 
   async function saveTodo() {
-    if (!household || !uid) {
+    if (!household || !uid || !modal) {
+      return;
+    }
+    if (!draft.title.trim()) {
+      setModalError(createTodoErrorMessage('title_required'));
       return;
     }
     setBusy(true);
-    setError(null);
+    setModalError(null);
     try {
       const assignedTo = draft.assignedTo.length > 0 ? draft.assignedTo : undefined;
       const dueDate = draft.dueDate || undefined;
 
-      if (editingId) {
-        const existing = items.find((item) => item.id === editingId);
+      if (modal.mode === 'edit') {
+        const existing = items.find((item) => item.id === modal.todoId);
         if (!existing) {
-          setError('Todo nicht gefunden.');
+          setModalError('Todo nicht gefunden.');
           return;
         }
         const result = prepareUpdateTodo({
@@ -183,7 +179,7 @@ export default function TodosPage() {
           },
         });
         if (!result.ok) {
-          setError(createTodoErrorMessage(result.reason));
+          setModalError(createTodoErrorMessage(result.reason));
           return;
         }
         await todos.saveTodo(result.todo);
@@ -191,7 +187,7 @@ export default function TodosPage() {
         const result = prepareCreateTodo({
           actorId: uid,
           household,
-          todoId: crypto.randomUUID(),
+          todoId: newEntityId('todo'),
           title: draft.title,
           dueDate,
           assignedTo,
@@ -201,40 +197,51 @@ export default function TodosPage() {
           energyHint: draft.energyHint,
         });
         if (!result.ok) {
-          setError(createTodoErrorMessage(result.reason));
+          setModalError(createTodoErrorMessage(result.reason));
           return;
         }
         await todos.createTodo(result.todo);
       }
-      resetForm();
+      closeModal();
     } catch (err) {
       console.error('[todo save]', err);
-      setError(messageFromStoreError(err, 'Todo konnte nicht gespeichert werden.'));
+      setModalError(messageFromStoreError(err, 'Todo konnte nicht gespeichert werden.'));
     } finally {
       setBusy(false);
     }
   }
 
-  async function removeTodo(todo: TodoItem) {
-    if (!household || !uid || !canDeleteTodo({ actorId: uid, household, todo })) {
+  async function deleteTodo() {
+    if (!household || !uid || !selectedTodo) {
       return;
     }
-    if (!window.confirm(`„${todo.title}" löschen?`)) {
+    if (!canDeleteTodo({ actorId: uid, household, todo: selectedTodo })) {
+      return;
+    }
+    if (!window.confirm(`„${selectedTodo.title}" löschen?`)) {
       return;
     }
     setBusy(true);
+    setModalError(null);
     try {
-      await todos.deleteTodo(todo.id);
+      await todos.deleteTodo(selectedTodo.id);
+      closeModal();
     } catch (err) {
-      setError(messageFromStoreError(err, 'Todo konnte nicht gelöscht werden.'));
+      setModalError(messageFromStoreError(err, 'Todo konnte nicht gelöscht werden.'));
     } finally {
       setBusy(false);
     }
   }
 
-  async function toggleDone(todo: TodoItem) {
+  async function toggleDone(todo: TodoItem, options?: { inModal?: boolean }) {
     if (!household || !uid) {
       return;
+    }
+    const reportError = options?.inModal ? setModalError : setError;
+    if (options?.inModal) {
+      setModalError(null);
+    } else {
+      setError(null);
     }
     const result = prepareToggleTodoCompletion({
       actorId: uid,
@@ -244,17 +251,32 @@ export default function TodosPage() {
       doneAt: new Date().toISOString(),
     });
     if (!result.ok) {
-      setError(createTodoErrorMessage(result.reason));
+      reportError(createTodoErrorMessage(result.reason));
       return;
     }
-    setBusy(true);
+    if (options?.inModal) {
+      setBusy(true);
+    } else {
+      setTogglingTodoId(todo.id);
+    }
     try {
       await todos.saveTodo(result.todo);
     } catch (err) {
-      setError(messageFromStoreError(err, 'Erledigung konnte nicht gespeichert werden.'));
+      reportError(messageFromStoreError(err, 'Erledigung konnte nicht gespeichert werden.'));
     } finally {
-      setBusy(false);
+      if (options?.inModal) {
+        setBusy(false);
+      } else {
+        setTogglingTodoId(null);
+      }
     }
+  }
+
+  async function toggleDoneInModal() {
+    if (!selectedTodo) {
+      return;
+    }
+    await toggleDone(selectedTodo, { inModal: true });
   }
 
   if (!household || !uid) {
@@ -265,181 +287,69 @@ export default function TodosPage() {
     );
   }
 
+  const modalMode = modal?.mode === 'edit' ? 'edit' : modal?.mode === 'create' ? 'create' : 'view';
+  const modalOpen = modal !== null;
+
   return (
     <Chrome crumb="Todos" current="todos">
       <div className="cards wide">
         <article className="card stack wide">
           <header className="row-between">
             <h1>Todos</h1>
-            {!showForm ? (
-              <button className="btn" type="button" onClick={() => setShowForm(true)}>
-                Neues Todo
-              </button>
-            ) : null}
+            <PlusIconButton label="Neues Todo" onClick={openCreate} />
           </header>
           <hr className="rule" />
-          {error ? <p className="err" role="alert">{error}</p> : null}
-
-          {showForm ? (
-            <form
-              className="stack wide"
-              onSubmit={(e) => {
-                e.preventDefault();
-                void saveTodo();
-              }}
-            >
-              <label className="field">
-                Titel
-                <input
-                  value={draft.title}
-                  onChange={(e) => setDraft({ ...draft, title: e.target.value })}
-                  required
-                />
-              </label>
-              <label className="field">
-                Fälligkeit (optional)
-                <input
-                  type="date"
-                  value={draft.dueDate}
-                  onChange={(e) => setDraft({ ...draft, dueDate: e.target.value })}
-                />
-              </label>
-              <fieldset className="field">
-                <legend>Zuweisung</legend>
-                <p className="muted small">Leer = ganzer Haushalt</p>
-                {members.map((member) => (
-                  <label className="check-row" key={member.userId}>
-                    <input
-                      type="checkbox"
-                      checked={draft.assignedTo.includes(member.userId)}
-                      onChange={() => setDraft(toggleAssignee(draft, member.userId))}
-                    />
-                    {member.email ?? 'E-Mail unbekannt'}
-                    {member.userId === uid ? ' · du' : ''}
-                  </label>
-                ))}
-              </fieldset>
-              <label className="field">
-                Wiederholung
-                <select
-                  value={draft.recurrence}
-                  onChange={(e) => setDraft({ ...draft, recurrence: e.target.value as Recurrence })}
-                >
-                  {Object.entries(RECURRENCE_LABELS).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
-                  ))}
-                </select>
-              </label>
-              <label className="field">
-                Erledigung
-                <select
-                  value={draft.completionMode}
-                  onChange={(e) =>
-                    setDraft({ ...draft, completionMode: e.target.value as CompletionMode })
-                  }
-                >
-                  {Object.entries(COMPLETION_MODE_LABELS).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
-                  ))}
-                </select>
-              </label>
-              <label className="field">
-                Art
-                <select
-                  value={draft.kind}
-                  onChange={(e) => setDraft({ ...draft, kind: e.target.value as TodoItem['kind'] })}
-                >
-                  {Object.entries(TODO_KIND_LABELS).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
-                  ))}
-                </select>
-              </label>
-              <label className="field">
-                Energie-Hinweis
-                <select
-                  value={draft.energyHint}
-                  onChange={(e) => setDraft({ ...draft, energyHint: e.target.value as EnergyBand })}
-                >
-                  {Object.entries(ENERGY_HINT_LABELS).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
-                  ))}
-                </select>
-              </label>
-              <div className="row-actions">
-                <button className="btn" type="submit" disabled={busy}>
-                  {editingId ? 'Speichern' : 'Anlegen'}
-                </button>
-                <button className="btn ghost" type="button" disabled={busy} onClick={resetForm}>
-                  Abbrechen
-                </button>
-              </div>
-            </form>
+          {error ? (
+            <p className="err" role="alert">
+              {error}
+            </p>
           ) : null}
 
           {items.length === 0 ? (
             <p className="muted">Noch keine Todos.</p>
           ) : (
-            <ul className="plain-list event-list">
-              {items.map((todo) => {
-                const done = isTodoDoneForUser(todo, uid);
-                const canDelete = canDeleteTodo({ actorId: uid, household, todo });
-                return (
-                  <li className="event-row" key={todo.id}>
-                    <label className="check-row">
-                      <input
-                        type="checkbox"
-                        checked={done}
-                        disabled={busy}
-                        onChange={() => void toggleDone(todo)}
-                      />
-                      <span className={done ? 'done' : undefined}>{todo.title}</span>
-                    </label>
-                    {todo.dueDate ? (
-                      <p className="muted small">Fällig {formatDueDate(todo.dueDate)}</p>
-                    ) : null}
-                    <p className="muted small">
-                      {itemOpenClosedLabel(done)}
-                      {todo.completionMode === 'per_member'
-                        ? ` · ${perMemberCompletionLabel(household, todo.completions)}`
-                        : ''}
-                      {' · '}
-                      {todoAssigneeLabel(household, todo.assignedTo)} ·{' '}
-                      {RECURRENCE_LABELS[todo.recurrence]} · {COMPLETION_MODE_LABELS[todo.completionMode]}
-                      {' · '}
-                      {ENERGY_HINT_LABELS[todo.energyHint ?? 'medium']}
-                      {todo.kind === 'habit' ? ` · ${TODO_KIND_LABELS.habit}` : ''}
-                    </p>
-                    <div className="row-actions">
-                      <button
-                        className="btn ghost"
-                        type="button"
-                        disabled={busy}
-                        onClick={() => {
-                          setDraft(draftFromTodo(todo));
-                          setEditingId(todo.id);
-                          setShowForm(true);
-                        }}
-                      >
-                        Bearbeiten
-                      </button>
-                      {canDelete ? (
-                        <button
-                          className="btn ghost"
-                          type="button"
-                          disabled={busy}
-                          onClick={() => void removeTodo(todo)}
-                        >
-                          Löschen
-                        </button>
-                      ) : null}
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
+            <div className="item-card-stack">
+              {items.map((todo) => (
+                <TodoCard
+                  key={todo.id}
+                  todo={todo}
+                  household={household}
+                  actorId={uid}
+                  done={isTodoDoneForUser(todo, uid)}
+                  toggling={togglingTodoId === todo.id}
+                  onPress={() => openView(todo)}
+                  onToggleDone={() => void toggleDone(todo)}
+                />
+              ))}
+            </div>
           )}
         </article>
       </div>
+
+      <TodoItemModal
+        open={modalOpen}
+        mode={modalMode}
+        todo={selectedTodo}
+        draft={draft}
+        household={household}
+        actorId={uid}
+        members={members}
+        busy={busy}
+        modalError={modalError}
+        done={selectedTodo ? isTodoDoneForUser(selectedTodo, uid) : false}
+        canDelete={selectedTodo ? canDeleteTodo({ actorId: uid, household, todo: selectedTodo }) : false}
+        onClose={closeModal}
+        onDraftChange={setDraft}
+        onSave={() => void saveTodo()}
+        onDelete={() => void deleteTodo()}
+        onToggleDone={() => void toggleDoneInModal()}
+        onEdit={() => {
+          if (selectedTodo) {
+            setModal({ mode: 'edit', todoId: selectedTodo.id });
+            setDraft(todoItemDraftFromItem(selectedTodo));
+          }
+        }}
+      />
     </Chrome>
   );
 }

@@ -65,7 +65,17 @@ export function ShoppingCategoryIconGlyph({
 }
 
 export function navAreaTabIcon(icon: NavIcon) {
-  return ({ color, size, focused }: { color: ColorValue; size: number; focused: boolean }) => (
-    <NavAreaIcon icon={icon} color={color} size={size} focused={focused} />
-  );
+  function NavAreaTabIcon({
+    color,
+    size,
+    focused,
+  }: {
+    color: ColorValue;
+    size: number;
+    focused: boolean;
+  }) {
+    return <NavAreaIcon icon={icon} color={color} size={size} focused={focused} />;
+  }
+  NavAreaTabIcon.displayName = `NavAreaTabIcon(${icon})`;
+  return NavAreaTabIcon;
 }

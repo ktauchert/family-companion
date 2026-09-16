@@ -20,8 +20,11 @@ Es gibt noch kein GitHub-Remote und kaum testbare Logik. Ein volles CD-Setup (De
 **CI (GitHub Actions), sobald das Repo auf GitHub liegt:**
 
 - Trigger: Push und Pull Request.
-- Schritte: `npm ci`, `npm run type-check`, `npm run test`.
+- Schritte: `npm ci`, `npm run check`.
+- `check` = `type-check` → `lint` → `test` (Root-Script; lokal und CI identisch).
 - Kein Deploy in dieser Entscheidung.
+
+*(Ergänzt 2026-09-16: Lint in CI aufgenommen; ein `check`-Script statt drei getrennte CI-Schritte.)*
 
 **Später, nicht jetzt:**
 
@@ -33,7 +36,7 @@ Es gibt noch kein GitHub-Remote und kaum testbare Logik. Ein volles CD-Setup (De
 
 - Ein Stack, den Turbo und CI gleich aufrufen.
 - Shared wird zur ersten Testfläche; Types allein brauchen kaum Tests, Zod- und Limit-Logik schon.
-- CI setzt ein GitHub-Repo voraus. Bis dahin lokal: `npm run type-check` und später `npm run test`.
+- CI setzt ein GitHub-Repo voraus. Bis dahin lokal: `npm run check` (vor PR/Push).
 - Kein Release-Gate durch CD; das bleibt eine spätere Entscheidung.
 
 ## Alternativen
