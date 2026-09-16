@@ -3,6 +3,7 @@ import {
   eventsForDay,
   eventsInWeek,
   formatDayHeading,
+  isCalendarEventDoneForUser,
   isToday,
   type WeekRange,
 } from '@family-companion/shared';
@@ -49,6 +50,7 @@ export function CalendarWeekView({
                   event={event}
                   household={household}
                   actorId={actorId}
+                  done={isCalendarEventDoneForUser(event, actorId)}
                   onPress={() => onSelectEvent(event)}
                 />
               ))}
@@ -61,6 +63,7 @@ export function CalendarWeekView({
                       event={event}
                       household={household}
                       actorId={actorId}
+                      done={isCalendarEventDoneForUser(event, actorId)}
                       past
                       onPress={() => onSelectEvent(event)}
                     />

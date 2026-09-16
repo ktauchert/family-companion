@@ -21,6 +21,7 @@ import {
 } from '@family-companion/shared';
 import { ChipSelector } from '../ChipSelector';
 import { Modal } from '../Modal';
+import { ModalActionBar } from '../ModalActionBar';
 import { ItemCardPills } from '../cards/ItemCardPills';
 import { EnergyHintBadge } from '../heute/EnergyHintBadge';
 
@@ -123,19 +124,17 @@ export function CalendarEventModal({
             {' · '}
             {CALENDAR_KIND_LABELS[event.kind]}
           </p>
-          <div className="row-actions">
-            <button type="button" className="chip selected" disabled={busy} onClick={onToggleDone}>
-              {done ? 'Erledigt' : 'Als erledigt markieren'}
-            </button>
-            <button type="button" className="btn ghost" disabled={busy} onClick={onEdit}>
-              Bearbeiten
-            </button>
-            {canDelete ? (
-              <button type="button" className="btn danger" disabled={busy} onClick={onDelete}>
-                Löschen
-              </button>
-            ) : null}
-          </div>
+          <ModalActionBar
+            mode="view"
+            done={done}
+            busy={busy}
+            canDelete={canDelete}
+            primaryLabel="Bearbeiten"
+            deleteLabel="Termin löschen"
+            onToggleDone={onToggleDone}
+            onPrimary={onEdit}
+            onDelete={onDelete}
+          />
         </div>
       ) : (
         <form
@@ -221,14 +220,18 @@ export function CalendarEventModal({
             }))}
             onChange={(energyHint) => onDraftChange({ ...draft, energyHint })}
           />
-          <div className="row-actions">
-            <button className="btn" type="submit" disabled={busy}>
-              {mode === 'edit' ? 'Speichern' : 'Anlegen'}
-            </button>
-            <button className="btn ghost" type="button" disabled={busy} onClick={onClose}>
-              Abbrechen
-            </button>
-          </div>
+          <ModalActionBar
+            mode={mode}
+            done={done}
+            busy={busy}
+            canDelete={canDelete}
+            primaryLabel={mode === 'edit' ? 'Speichern' : 'Anlegen'}
+            deleteLabel="Termin löschen"
+            primaryType="submit"
+            onToggleDone={mode === 'edit' ? onToggleDone : undefined}
+            onCancel={onClose}
+            onDelete={onDelete}
+          />
         </form>
       )}
     </Modal>

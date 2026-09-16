@@ -1,4 +1,5 @@
 export * from './src/types';
+export * from './src/id';
 export * from './src/display/status';
 export * from './src/display/icons';
 export * from './src/display/energy-hint';

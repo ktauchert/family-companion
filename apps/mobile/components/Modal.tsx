@@ -16,16 +16,26 @@ export function Modal({
 }) {
   const theme = useTheme();
   const styles = StyleSheet.create({
-    backdrop: { flex: 1, backgroundColor: 'rgba(43, 38, 31, 0.35)', justifyContent: 'flex-end' },
-    panel: {
+    root: { flex: 1, justifyContent: 'flex-end' },
+    backdrop: {
+      ...StyleSheet.absoluteFill,
+      backgroundColor: 'rgba(43, 38, 31, 0.35)',
+    },
+    sheet: {
       maxHeight: '88%',
       borderTopLeftRadius: 20,
       borderTopRightRadius: 20,
       backgroundColor: theme.sheet,
-      padding: 20,
-      gap: 12,
+      paddingTop: 20,
+      paddingHorizontal: 20,
     },
-    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: 12,
+      marginBottom: 12,
+    },
     title: { flex: 1, fontSize: 22, fontFamily: 'Georgia', color: theme.ink },
     close: {
       borderWidth: 1,
@@ -35,22 +45,30 @@ export function Modal({
       paddingVertical: 8,
       backgroundColor: theme.well,
     },
-    closeText: { color: theme.ink, fontSize: 16 },
+    scrollContent: { gap: 12, paddingBottom: 28 },
   });
 
   return (
     <RNModal visible={open} animationType="slide" transparent onRequestClose={onClose}>
-      <Pressable style={styles.backdrop} onPress={onClose}>
-        <Pressable style={styles.panel} onPress={(event) => event.stopPropagation()}>
+      <View style={styles.root}>
+        <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Schließen" />
+        <View style={styles.sheet}>
           <View style={styles.header}>
             <Text style={styles.title}>{title}</Text>
             <Pressable style={styles.close} onPress={onClose} accessibilityLabel="Schließen">
-              <Text style={styles.closeText}>✕</Text>
+              <Text style={{ color: theme.ink, fontSize: 16 }}>✕</Text>
             </Pressable>
           </View>
-          <ScrollView contentContainerStyle={{ gap: 12, paddingBottom: 24 }}>{children}</ScrollView>
-        </Pressable>
-      </Pressable>
+          <ScrollView
+            keyboardShouldPersistTaps="handled"
+            nestedScrollEnabled
+            showsVerticalScrollIndicator
+            contentContainerStyle={styles.scrollContent}
+          >
+            {children}
+          </ScrollView>
+        </View>
+      </View>
     </RNModal>
   );
 }

@@ -3,6 +3,7 @@ import {
   eventsForDay,
   eventsInWeek,
   formatDayHeading,
+  isCalendarEventDoneForUser,
   isToday,
 } from '@family-companion/shared';
 import { StyleSheet, Text, View } from 'react-native';
@@ -59,6 +60,7 @@ export function CalendarWeekView({
                   event={event}
                   household={household}
                   actorId={actorId}
+                  done={isCalendarEventDoneForUser(event, actorId)}
                   onPress={() => onSelectEvent(event)}
                 />
               ))}
@@ -71,6 +73,7 @@ export function CalendarWeekView({
                       event={event}
                       household={household}
                       actorId={actorId}
+                      done={isCalendarEventDoneForUser(event, actorId)}
                       past
                       onPress={() => onSelectEvent(event)}
                     />

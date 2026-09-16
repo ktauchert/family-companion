@@ -7,6 +7,7 @@ import {
   createShoppingItemErrorMessage,
   ensureMemberEmail,
   messageFromStoreError,
+  newEntityId,
   prepareCreateShoppingItem,
   prepareToggleShoppingItemChecked,
   shoppingAddedByLabel,
@@ -28,10 +29,6 @@ import { auth } from '../../lib/firebase';
 import { households } from '../../lib/households';
 import { shopping } from '../../lib/shopping';
 import { useTheme } from '../../lib/theme';
-
-function randomId(): string {
-  return globalThis.crypto?.randomUUID?.() ?? `shop_${Date.now()}`;
-}
 
 export default function ListenScreen() {
   const router = useRouter();
@@ -129,7 +126,7 @@ export default function ListenScreen() {
     const result = prepareCreateShoppingItem({
       actorId: uid,
       household,
-      itemId: randomId(),
+      itemId: newEntityId('shop'),
       name,
       category: filter === 'all' ? category : filter,
       createdAt: new Date().toISOString(),

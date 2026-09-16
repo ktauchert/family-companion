@@ -19,6 +19,7 @@ import {
 } from '@family-companion/shared';
 import { ChipSelector } from '../ChipSelector';
 import { Modal } from '../Modal';
+import { ModalActionBar } from '../ModalActionBar';
 import { ItemCardPills } from '../cards/ItemCardPills';
 import { EnergyHintBadge } from '../heute/EnergyHintBadge';
 
@@ -117,19 +118,17 @@ export function TodoItemModal({
             {' · '}
             {TODO_KIND_LABELS[todo.kind]}
           </p>
-          <div className="row-actions">
-            <button type="button" className="chip selected" disabled={busy} onClick={onToggleDone}>
-              {done ? 'Erledigt' : 'Als erledigt markieren'}
-            </button>
-            <button type="button" className="btn ghost" disabled={busy} onClick={onEdit}>
-              Bearbeiten
-            </button>
-            {canDelete ? (
-              <button type="button" className="btn danger" disabled={busy} onClick={onDelete}>
-                Löschen
-              </button>
-            ) : null}
-          </div>
+          <ModalActionBar
+            mode="view"
+            done={done}
+            busy={busy}
+            canDelete={canDelete}
+            primaryLabel="Bearbeiten"
+            deleteLabel="Todo löschen"
+            onToggleDone={onToggleDone}
+            onPrimary={onEdit}
+            onDelete={onDelete}
+          />
         </div>
       ) : (
         <form
@@ -206,14 +205,18 @@ export function TodoItemModal({
             }))}
             onChange={(energyHint) => onDraftChange({ ...draft, energyHint })}
           />
-          <div className="row-actions">
-            <button className="btn" type="submit" disabled={busy}>
-              {mode === 'edit' ? 'Speichern' : 'Anlegen'}
-            </button>
-            <button className="btn ghost" type="button" disabled={busy} onClick={onClose}>
-              Abbrechen
-            </button>
-          </div>
+          <ModalActionBar
+            mode={mode}
+            done={done}
+            busy={busy}
+            canDelete={canDelete}
+            primaryLabel={mode === 'edit' ? 'Speichern' : 'Anlegen'}
+            deleteLabel="Todo löschen"
+            primaryType="submit"
+            onToggleDone={mode === 'edit' ? onToggleDone : undefined}
+            onCancel={onClose}
+            onDelete={onDelete}
+          />
         </form>
       )}
     </Modal>

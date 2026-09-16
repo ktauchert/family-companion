@@ -6,6 +6,7 @@ import {
   householdMembers,
   isTodoDoneForUser,
   messageFromStoreError,
+  newEntityId,
   prepareCreateTodo,
   prepareToggleTodoCompletion,
   prepareUpdateTodo,
@@ -44,10 +45,6 @@ function emptyDraft(): TodoItemDraft {
   };
 }
 
-function randomId(): string {
-  return globalThis.crypto?.randomUUID?.() ?? `todo_${Date.now()}`;
-}
-
 function sortTodos(items: TodoItem[]): TodoItem[] {
   return [...items].sort((a, b) => (a.dueDate ?? '').localeCompare(b.dueDate ?? '') || a.title.localeCompare(b.title));
 }
@@ -61,6 +58,7 @@ export default function TodosScreen() {
   const [error, setError] = useState<string | null>(null);
   const [modalError, setModalError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [togglingTodoId, setTogglingTodoId] = useState<string | null>(null);
   const [modal, setModal] = useState<ModalState>(null);
   const [draft, setDraft] = useState<TodoItemDraft>(emptyDraft);
 
@@ -131,6 +129,10 @@ export default function TodosScreen() {
     if (!household || !uid || !modal) {
       return;
     }
+    if (!draft.title.trim()) {
+      setModalError(createTodoErrorMessage('title_required'));
+      return;
+    }
     setBusy(true);
     setModalError(null);
     try {
@@ -159,7 +161,7 @@ export default function TodosScreen() {
         const result = prepareCreateTodo({
           actorId: uid,
           household,
-          todoId: randomId(),
+          todoId: newEntityId('todo'),
           ...patch,
           title: draft.title,
         });
@@ -201,9 +203,15 @@ export default function TodosScreen() {
     ]);
   }
 
-  async function toggleDone(todo: TodoItem) {
+  async function toggleDone(todo: TodoItem, options?: { inModal?: boolean }) {
     if (!household || !uid) {
       return;
+    }
+    const reportError = options?.inModal ? setModalError : setError;
+    if (options?.inModal) {
+      setModalError(null);
+    } else {
+      setError(null);
     }
     const result = prepareToggleTodoCompletion({
       actorId: uid,
@@ -213,16 +221,24 @@ export default function TodosScreen() {
       doneAt: new Date().toISOString(),
     });
     if (!result.ok) {
-      setError(createTodoErrorMessage(result.reason));
+      reportError(createTodoErrorMessage(result.reason));
       return;
     }
-    setBusy(true);
+    if (options?.inModal) {
+      setBusy(true);
+    } else {
+      setTogglingTodoId(todo.id);
+    }
     try {
       await todos.saveTodo(result.todo);
     } catch (err) {
-      setError(messageFromStoreError(err, 'Erledigung konnte nicht gespeichert werden.'));
+      reportError(messageFromStoreError(err, 'Erledigung konnte nicht gespeichert werden.'));
     } finally {
-      setBusy(false);
+      if (options?.inModal) {
+        setBusy(false);
+      } else {
+        setTogglingTodoId(null);
+      }
     }
   }
 
@@ -253,7 +269,7 @@ export default function TodosScreen() {
                   household={household}
                   actorId={uid}
                   done={isTodoDoneForUser(todo, uid)}
-                  toggling={busy}
+                  toggling={togglingTodoId === todo.id}
                   onPress={() => openView(todo)}
                   onToggleDone={() => void toggleDone(todo)}
                 />
@@ -281,7 +297,7 @@ export default function TodosScreen() {
         onDraftChange={setDraft}
         onSave={() => void saveTodo()}
         onDelete={deleteTodo}
-        onToggleDone={() => selectedTodo && void toggleDone(selectedTodo)}
+        onToggleDone={() => selectedTodo && void toggleDone(selectedTodo, { inModal: true })}
         onEdit={() => {
           if (selectedTodo) {
             setModal({ mode: 'edit', todoId: selectedTodo.id });

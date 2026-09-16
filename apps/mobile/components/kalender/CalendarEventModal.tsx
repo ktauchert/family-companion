@@ -17,9 +17,11 @@ import {
   perMemberCompletionLabel,
   toDatetimeLocalValue,
 } from '@family-companion/shared';
-import { Pressable, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { DateTimeField } from '../DateTimeField';
 import { ChipRow } from '../ChipRow';
 import { Modal } from '../Modal';
+import { ModalActionBar } from '../ModalActionBar';
 import { ItemCardPills } from '../cards/ItemCardPills';
 import { EnergyHintBadge } from '../heute/EnergyHintBadge';
 import { useTheme } from '../../lib/theme';
@@ -108,14 +110,7 @@ export function CalendarEventModal({
       color: theme.ink,
       backgroundColor: theme.paper,
     },
-    btn: { backgroundColor: theme.sage, borderRadius: 12, paddingVertical: 12, alignItems: 'center' },
-    btnText: { color: theme.paper },
-    ghost: { backgroundColor: theme.well, borderRadius: 12, paddingVertical: 10, alignItems: 'center' },
-    ghostText: { color: theme.ink },
-    danger: { borderWidth: 1, borderColor: theme.rust, backgroundColor: 'transparent' },
-    dangerText: { color: theme.rust },
     row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-    actions: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
   });
 
   return (
@@ -135,19 +130,17 @@ export function CalendarEventModal({
             {' · '}
             {assigneeCountDisplay(household, event.assignedTo, actorId).label}
           </Text>
-          <View style={styles.actions}>
-            <Pressable style={styles.btn} disabled={busy} onPress={onToggleDone}>
-              <Text style={styles.btnText}>{done ? 'Erledigt' : 'Als erledigt markieren'}</Text>
-            </Pressable>
-            <Pressable style={styles.ghost} disabled={busy} onPress={onEdit}>
-              <Text style={styles.ghostText}>Bearbeiten</Text>
-            </Pressable>
-            {canDelete ? (
-              <Pressable style={[styles.ghost, styles.danger]} disabled={busy} onPress={onDelete}>
-                <Text style={styles.dangerText}>Löschen</Text>
-              </Pressable>
-            ) : null}
-          </View>
+          <ModalActionBar
+            mode="view"
+            done={done}
+            busy={busy}
+            canDelete={canDelete}
+            primaryLabel="Bearbeiten"
+            deleteLabel="Termin löschen"
+            onToggleDone={onToggleDone}
+            onPrimary={onEdit}
+            onDelete={onDelete}
+          />
         </View>
       ) : (
         <View style={{ gap: 10 }}>
@@ -158,17 +151,19 @@ export function CalendarEventModal({
             value={draft.title}
             onChangeText={(value) => onDraftChange({ ...draft, title: value })}
           />
-          <Text style={styles.muted}>Beginn (YYYY-MM-DDTHH:mm)</Text>
-          <TextInput
-            style={styles.input}
+          <DateTimeField
+            label="Beginn"
+            mode="datetime"
             value={draft.startsAtLocal}
-            onChangeText={(startsAtLocal) => onDraftChange({ ...draft, startsAtLocal })}
+            onChange={(startsAtLocal) => onDraftChange({ ...draft, startsAtLocal })}
           />
-          <Text style={styles.muted}>Ende optional</Text>
-          <TextInput
-            style={styles.input}
+          <DateTimeField
+            label="Ende (optional)"
+            mode="datetime"
             value={draft.endsAtLocal}
-            onChangeText={(endsAtLocal) => onDraftChange({ ...draft, endsAtLocal })}
+            optional
+            onChange={(endsAtLocal) => onDraftChange({ ...draft, endsAtLocal })}
+            onClear={() => onDraftChange({ ...draft, endsAtLocal: '' })}
           />
           <Text style={styles.muted}>Zuweisung (leer = Haushalt)</Text>
           {members.map((member) => (
@@ -219,14 +214,18 @@ export function CalendarEventModal({
             }))}
             onChange={(energyHint) => onDraftChange({ ...draft, energyHint })}
           />
-          <View style={styles.actions}>
-            <Pressable style={styles.btn} disabled={busy} onPress={onSave}>
-              <Text style={styles.btnText}>{mode === 'edit' ? 'Speichern' : 'Anlegen'}</Text>
-            </Pressable>
-            <Pressable style={styles.ghost} disabled={busy} onPress={onClose}>
-              <Text style={styles.ghostText}>Abbrechen</Text>
-            </Pressable>
-          </View>
+          <ModalActionBar
+            mode={mode}
+            done={done}
+            busy={busy}
+            canDelete={canDelete}
+            primaryLabel={mode === 'edit' ? 'Speichern' : 'Anlegen'}
+            deleteLabel="Termin löschen"
+            onToggleDone={mode === 'edit' ? onToggleDone : undefined}
+            onPrimary={onSave}
+            onCancel={onClose}
+            onDelete={onDelete}
+          />
         </View>
       )}
     </Modal>

@@ -9,6 +9,7 @@ import {
   isCalendarEventDoneForUser,
   localDateString,
   messageFromStoreError,
+  newEntityId,
   prepareCreateCalendarEvent,
   prepareToggleCalendarEventCompletion,
   prepareUpdateCalendarEvent,
@@ -48,10 +49,6 @@ function emptyDraft(): CalendarEventDraft {
     kind: 'event',
     energyHint: 'medium',
   };
-}
-
-function randomId(): string {
-  return globalThis.crypto?.randomUUID?.() ?? `evt_${Date.now()}`;
 }
 
 export default function KalenderScreen() {
@@ -165,6 +162,10 @@ export default function KalenderScreen() {
     if (!household || !uid || !modal) {
       return;
     }
+    if (!draft.title.trim()) {
+      setModalError(createCalendarEventErrorMessage('title_required'));
+      return;
+    }
     setBusy(true);
     setModalError(null);
     try {
@@ -202,7 +203,7 @@ export default function KalenderScreen() {
         const result = prepareCreateCalendarEvent({
           actorId: uid,
           household,
-          eventId: randomId(),
+          eventId: newEntityId('evt'),
           title: draft.title,
           startsAt,
           endsAt,

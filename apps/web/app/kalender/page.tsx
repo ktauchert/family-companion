@@ -11,6 +11,7 @@ import {
   isCalendarEventDoneForUser,
   localDateString,
   messageFromStoreError,
+  newEntityId,
   prepareCreateCalendarEvent,
   prepareToggleCalendarEventCompletion,
   prepareUpdateCalendarEvent,
@@ -141,6 +142,10 @@ export default function KalenderPage() {
     if (!household || !uid || !modal) {
       return;
     }
+    if (!draft.title.trim()) {
+      setModalError(createCalendarEventErrorMessage('title_required'));
+      return;
+    }
     setBusy(true);
     setModalError(null);
     try {
@@ -178,7 +183,7 @@ export default function KalenderPage() {
         const result = prepareCreateCalendarEvent({
           actorId: uid,
           household,
-          eventId: crypto.randomUUID(),
+          eventId: newEntityId('evt'),
           title: draft.title,
           startsAt,
           endsAt,

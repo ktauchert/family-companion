@@ -589,26 +589,34 @@ button.item-card-main:hover .item-card-title {
 
 .modal {
   border: none;
-  padding: 0;
+  padding: 24px;
   background: transparent;
+  width: 100%;
   max-width: none;
+  height: 100%;
   max-height: none;
+  margin: 0;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
 }
 
 .modal::backdrop {
-  background: rgb(43 38 31 / 35%);
+  background: rgb(43 38 31 / 42%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .modal-panel {
-  width: min(36rem, calc(100vw - 32px));
-  max-height: calc(100vh - 64px);
+  width: min(36rem, calc(100vw - 48px));
+  max-height: min(calc(100vh - 48px), calc(100dvh - 48px));
   overflow: auto;
-  margin: auto;
+  margin: 0;
   padding: 20px 22px 24px;
   border: 1px solid var(--rule);
   border-radius: 20px;
   background: var(--sheet);
-  box-shadow: 0 12px 32px -16px rgb(43 38 31 / 18%);
+  box-shadow: var(--shadow);
 }
 
 .modal-header {
@@ -619,6 +627,55 @@ button.item-card-main:hover .item-card-title {
   margin: 0;
   font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
   font-size: 1.35rem;
+  color: var(--ink);
+}
+
+.modal-action-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 4px;
+  padding-top: 16px;
+  border-top: 1px solid var(--rule);
+}
+
+.modal-done-toggle {
+  width: 100%;
+}
+
+.modal-footer-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.modal-footer-actions .btn,
+.modal-footer-actions .btn.ghost {
+  flex: 1;
+}
+
+.modal-footer-actions--single .btn {
+  width: 100%;
+}
+
+.modal-delete-link {
+  appearance: none;
+  border: 0;
+  background: none;
+  color: var(--rust);
+  font: inherit;
+  font-size: 15px;
+  text-align: center;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.modal-delete-link:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.modal-delete-link:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .modal-lead {
