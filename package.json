@@ -13,6 +13,7 @@
     "lint": "turbo lint",
     "type-check": "turbo type-check",
     "test": "turbo test",
+    "check": "npm run type-check && npm run lint && npm run test",
     "firebase:sha1": "keytool -list -v -keystore \"$HOME/.android/debug.keystore\" -alias androiddebugkey -storepass android"
   },
   "devDependencies": {

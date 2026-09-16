@@ -15,6 +15,7 @@ Arbeitsregeln für Agenten in diesem Repo. Menschliche Ergänzung: [CONTRIBUTING
 - Immer auch **Negativfälle**: ungültiges Input, falsches Tier, Limit überschritten, fremdes Haushaltsmitglied, fehlender Check-in.
 - **TDD in Shared:** Neue oder geänderte Logik in `@family-companion/shared` (nicht reines Durchreichen in Stores/UI-Bindern): **erst failing Test, dann Implementierung** — red → green, ein Slice pro Zyklus. Skill: [`.agents/skills/tdd/SKILL.md`](./.agents/skills/tdd/SKILL.md); Beispiele/Mocks nur bei Bedarf (`tests.md`, `mocking.md` im gleichen Ordner).
 - Stack laut [ADR 0002](./docs/adr/0002-unit-tests-und-github-ci.md): Vitest, `turbo test`.
+- **Vor Push/PR:** `npm run check` (type-check + lint + test — identisch zu CI). Vitest allein ersetzt kein `type-check`; ESLint ersetzt keins von beidem.
 
 ## Persistenz: CRUD vor der Umsetzung
 

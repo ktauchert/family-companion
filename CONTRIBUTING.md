@@ -9,11 +9,12 @@ Family Companion wird **phasenweise** gebaut. Eine Phase, ein Branch, ein PR nac
 
 ```bash
 npm install
-npm run type-check
-npm run lint
+npm run check
 ```
 
-`npm run test` läuft Vitest über Turbo (zuerst `@family-companion/shared`). Dev: `npm run dev` (beide über Turbo), `npm run dev:web`, `npm run dev:mobile` (Expo direkt, QR für Expo Go).
+`npm run check` führt **type-check**, **lint** und **test** in derselben Reihenfolge wie CI aus — vor Push/PR immer diesen einen Befehl.
+
+Einzeln bei Bedarf: `npm run type-check`, `npm run lint`, `npm run test`. Dev: `npm run dev` (beide über Turbo), `npm run dev:web`, `npm run dev:mobile` (Expo direkt, QR für Expo Go).
 
 ## Branch und PR
 
