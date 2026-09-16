@@ -84,12 +84,27 @@ export default function ListenPage() {
     });
   }, [router]);
 
+  const categoryFromUrl = searchParams.get('category');
+
   useEffect(() => {
-    const category = searchParams.get('category');
-    if (category && (SHOPPING_CATEGORIES as readonly string[]).includes(category)) {
-      setFilter(category as ShoppingCategory);
+    if (
+      categoryFromUrl &&
+      (SHOPPING_CATEGORIES as readonly string[]).includes(categoryFromUrl)
+    ) {
+      setFilter(categoryFromUrl as ShoppingCategory);
+      setDraft((current) => ({ ...current, category: categoryFromUrl as ShoppingCategory }));
     }
-  }, [searchParams]);
+  }, [categoryFromUrl]);
+
+  function selectFilter(next: ShoppingCategory | 'all') {
+    setFilter(next);
+    if (next === 'all') {
+      router.replace('/listen');
+      return;
+    }
+    router.replace(`/listen?category=${next}`);
+    setDraft((current) => ({ ...current, category: next }));
+  }
 
   useEffect(() => {
     if (!household) {
@@ -119,7 +134,7 @@ export default function ListenPage() {
         household,
         itemId: crypto.randomUUID(),
         name: draft.name,
-        category: draft.category,
+        category: filter === 'all' ? draft.category : filter,
         createdAt: new Date().toISOString(),
       });
       if (!result.ok) {
@@ -208,7 +223,7 @@ export default function ListenPage() {
             <button
               className={`btn ${filter === 'all' ? '' : 'ghost'}`}
               type="button"
-              onClick={() => setFilter('all')}
+              onClick={() => selectFilter('all')}
             >
               Alle
             </button>
@@ -217,7 +232,7 @@ export default function ListenPage() {
                 key={category}
                 className={`btn ${filter === category ? '' : 'ghost'}`}
                 type="button"
-                onClick={() => setFilter(category)}
+                onClick={() => selectFilter(category)}
               >
                 {SHOPPING_CATEGORY_LABELS[category]}
               </button>
