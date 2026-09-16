@@ -147,7 +147,54 @@ describe('prioritizeDay', () => {
       shoppingItems,
     });
 
-    expect(result.items.map((item) => item.id)).toEqual(['todo_low', 'shop_1']);
+    expect(result.items.map((item) => item.id)).toEqual(['todo_low', 'shopping_supermarket']);
+  });
+
+  it('aggregates open shopping items by category', () => {
+    const shoppingItems: ShoppingItem[] = [
+      {
+        id: 'shop_1',
+        householdId: 'hh_1',
+        name: 'Milch',
+        category: 'supermarket',
+        checked: false,
+        addedBy: 'user_julian',
+        createdAt: '2026-09-15T08:00:00.000Z',
+      },
+      {
+        id: 'shop_2',
+        householdId: 'hh_1',
+        name: 'Brot',
+        category: 'supermarket',
+        checked: false,
+        addedBy: 'user_julian',
+        createdAt: '2026-09-15T08:05:00.000Z',
+      },
+      {
+        id: 'shop_3',
+        householdId: 'hh_1',
+        name: 'Shampoo',
+        category: 'drugstore',
+        checked: false,
+        addedBy: 'user_julian',
+        createdAt: '2026-09-15T08:10:00.000Z',
+      },
+    ];
+
+    const result = prioritizeDay({
+      household,
+      actorId: 'user_julian',
+      date,
+      checkIns: [],
+      events: [],
+      todos: [],
+      shoppingItems,
+    });
+
+    expect(result.items).toHaveLength(2);
+    const supermarket = result.items.find((item) => item.shoppingCategory === 'supermarket');
+    expect(supermarket?.openCount).toBe(2);
+    expect(supermarket?.title).toBe('Supermarkt');
   });
 
   it('suggests reassign when only one member has low energy', () => {

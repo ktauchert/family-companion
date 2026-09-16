@@ -1,4 +1,10 @@
+import {
+  NAV_AREA_KEYS,
+  NAV_ICON_TO_MOBILE_TAB,
+  navAreaMobileTabLabel,
+} from '@family-companion/shared';
 import { Tabs } from 'expo-router';
+import { navAreaTabIcon } from '../../components/nav-icons';
 import { useTheme } from '../../lib/theme';
 
 export default function TabLayout() {
@@ -18,11 +24,19 @@ export default function TabLayout() {
         tabBarInactiveTintColor: theme.inkFaint,
       }}
     >
-      <Tabs.Screen name="heute" options={{ title: 'Heute' }} />
-      <Tabs.Screen name="kalender" options={{ title: 'Kalender' }} />
-      <Tabs.Screen name="todos" options={{ title: 'Todos' }} />
-      <Tabs.Screen name="listen" options={{ title: 'Listen' }} />
-      <Tabs.Screen name="mehr" options={{ title: 'Mehr' }} />
+      {NAV_AREA_KEYS.map((key) => {
+        const tabName = NAV_ICON_TO_MOBILE_TAB[key];
+        return (
+          <Tabs.Screen
+            key={tabName}
+            name={tabName}
+            options={{
+              title: navAreaMobileTabLabel(key),
+              tabBarIcon: navAreaTabIcon(key),
+            }}
+          />
+        );
+      })}
     </Tabs>
   );
 }

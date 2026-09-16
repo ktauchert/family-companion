@@ -14,7 +14,7 @@ import {
   shoppingAddedByLabel,
 } from '@family-companion/shared';
 import { onAuthStateChanged } from 'firebase/auth';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { Chrome } from '../../components/Chrome';
 import { auth } from '../../lib/firebase';
@@ -45,6 +45,7 @@ function sortItems(items: ShoppingItem[]): ShoppingItem[] {
 
 export default function ListenPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [household, setHousehold] = useState<Household | null>(null);
   const [uid, setUid] = useState<string | null>(null);
   const [items, setItems] = useState<ShoppingItem[]>([]);
@@ -82,6 +83,13 @@ export default function ListenPage() {
       setHousehold(found);
     });
   }, [router]);
+
+  useEffect(() => {
+    const category = searchParams.get('category');
+    if (category && (SHOPPING_CATEGORIES as readonly string[]).includes(category)) {
+      setFilter(category as ShoppingCategory);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (!household) {

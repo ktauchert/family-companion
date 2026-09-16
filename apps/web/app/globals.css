@@ -76,6 +76,12 @@ a {
   font-size: 15px;
 }
 
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .top a {
   color: var(--ink-soft);
   text-decoration: none;
@@ -300,4 +306,138 @@ a {
 .event-row .done {
   text-decoration: line-through;
   color: var(--ink-faint);
+}
+
+.check-in-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: var(--well);
+  color: var(--ink-soft);
+  font-size: 14px;
+  width: fit-content;
+}
+
+.energy-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.energy-hint-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.energy-hint--sage {
+  color: var(--sage);
+}
+
+.energy-hint--clay {
+  color: var(--clay);
+}
+
+.energy-hint--rust {
+  color: var(--rust);
+}
+
+.day-plan-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.day-plan-card {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--rule);
+  border-radius: 20px;
+  background: var(--paper);
+}
+
+.day-plan-card-link {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  text-decoration: none;
+  color: inherit;
+}
+
+.day-plan-card-link:hover .day-plan-card-title {
+  color: var(--ink);
+}
+
+.day-plan-card-icon {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 2px;
+  color: var(--ink-soft);
+}
+
+.day-plan-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.day-plan-card-title {
+  font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.day-plan-card--done .day-plan-card-title.done {
+  text-decoration: line-through;
+  color: var(--ink-faint);
+}
+
+.day-plan-card-toggle {
+  align-self: center;
+  flex-shrink: 0;
+}
+
+.heute-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.heute-summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-decoration: none;
+  color: inherit;
+  padding: 16px;
+}
+
+.heute-summary-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.heute-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 36rem;
+}
+
+@media (max-width: 640px) {
+  .heute-summary-grid {
+    grid-template-columns: 1fr;
+  }
 }

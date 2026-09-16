@@ -12,7 +12,7 @@ import {
   shoppingAddedByLabel,
 } from '@family-companion/shared';
 import { onAuthStateChanged } from 'firebase/auth';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
@@ -35,6 +35,7 @@ function randomId(): string {
 
 export default function ListenScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ category?: string }>();
   const theme = useTheme();
   const [household, setHousehold] = useState<Household | null>(null);
   const [uid, setUid] = useState<string | null>(null);
@@ -63,6 +64,13 @@ export default function ListenScreen() {
       });
     });
   }, [router]);
+
+  useEffect(() => {
+    const category = params.category;
+    if (typeof category === 'string' && (SHOPPING_CATEGORIES as readonly string[]).includes(category)) {
+      setFilter(category as ShoppingCategory);
+    }
+  }, [params.category]);
 
   useEffect(() => {
     if (!household) return;
