@@ -1,0 +1,42 @@
+Phase 2.2 — Kalender & Todos UX umsetzen (family-companion)
+
+Kontext:
+- main: Phase 2.1 erledigt (PR #44) — Icons, ENERGY_HINT_VISUAL, DayPlanItemCard als Referenz
+- Spec: docs/phasen/02.2-kalender-todos-ux.md, docs/design/ui.md (Abschnitte Kalender/Todos Phase 2.2)
+- CRUD/Rollen unverändert: docs/design/phase-2-crud-roles.md
+- Milestone: Phase 2.2 — Kalender & Todos UX (GitHub #21–#28)
+- Vorgänger 2.1: erledigt; #21 baut auf NavIcon/DayPlanKindIcon (#12) und ENERGY_HINT_VISUAL (#15) auf
+
+Branch:
+- Neu von aktuellem main: phase-2.2-kalender-todos-ux
+- Ein PR nach main wenn Milestone erledigt oder in sinnvollen Slices (z. B. Cards+KW | Kalender-Modals | Todos)
+
+Reihenfolge:
+1. #21 EventCard & TodoCard (Shared Display-Helfer wo sinnvoll; Web + Mobile; Pills, Energie, Zuweisung als Anzahl)
+2. #22 Kalender Wochenansicht (Shared weekRange + Tests) — parallel startbar nach #21
+3. #27 Todos TodoCard + View-Modal + Abhaken auf Card — parallel zu #22 nach #21
+4. #23 Kalender View-Modal → #24 Add/Edit-Modal (Chips) → #25 Plus-FAB
+5. #26 Todos Add/Edit-Modal + FAB — nach #27
+6. #28 Domain & Docs (Kalender vs. Todo, View-Modal, CONTEXT/ADR-Verweis)
+
+Regeln:
+- AGENTS.md: TDD in @family-companion/shared für neue Logik (weekRange, Assignee-Anzeige, Filter nach KW)
+- Kein Pro, kein Monats-/Jahreskalender, keine Sidebar
+- Kalender-Liste: kein Abhaken in der Liste — nur im View-Modal (Entscheidung 2.2)
+- Todos: Checkbox auf Card erlaubt + View-Modal
+- Keine Inline-Formulare — Add/Edit nur Modal; Chips statt Dropdowns (Web)
+- Plus: Web oben rechts in Card, Mobile FAB unten rechts
+- Web und Mobile: gleiche Semantik/Copy; Layout darf unterscheiden (KW-Raster vs. Spalte)
+- Wiederverwenden aus 2.1: NavAreaIcon/DayPlanKindIcon, EnergyHintBadge, prepareToggle* aus Shared
+- Docs: Haken in 02.2-kalender-todos-ux.md; features.md/ui.md/CONTEXT bei Abweichung
+- Issues schließen wenn erledigt; gh issue close mit Kurzkommentar
+
+Ist-Zustand (kurz):
+- apps/web/app/kalender/page.tsx + apps/mobile/app/(tabs)/kalender.tsx: flache event-list, Inline-Form
+- apps/web/app/todos/page.tsx + apps/mobile/app/(tabs)/todos.tsx: analog minimal
+- Heute-Cards unter apps/*/components/heute/ als Stil-Referenz, nicht 1:1 kopieren (EventCard/TodoCard eigene Spec)
+
+Start:
+- git pull auf main; Branch phase-2.2-kalender-todos-ux
+- Lies 02.2-kalender-todos-ux.md und issue #21
+- Kurz Plan zeigen, dann mit #21 beginnen
