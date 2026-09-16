@@ -58,6 +58,7 @@ describe('eventInWeek', () => {
   const event: CalendarEvent = {
     id: 'ev_1',
     householdId: 'hh_1',
+    createdBy: 'user_julian',
     title: 'Test',
     startsAt: '2026-09-16T10:00:00.000Z',
     completionMode: 'household',
@@ -65,8 +66,6 @@ describe('eventInWeek', () => {
     kind: 'event',
     energyHint: 'medium',
     completions: [],
-    createdAt: '2026-09-15T08:00:00.000Z',
-    updatedAt: '2026-09-15T08:00:00.000Z',
   };
 
   it('matches events whose local start falls in the week', () => {
@@ -79,6 +78,7 @@ describe('eventsForDay', () => {
   const mk = (id: string, startsAt: string, endsAt?: string): CalendarEvent => ({
     id,
     householdId: 'hh_1',
+    createdBy: 'user_julian',
     title: id,
     startsAt,
     endsAt,
@@ -87,8 +87,6 @@ describe('eventsForDay', () => {
     kind: 'event',
     energyHint: 'medium',
     completions: [],
-    createdAt: '2026-09-15T08:00:00.000Z',
-    updatedAt: '2026-09-15T08:00:00.000Z',
   });
 
   it('splits same-day events into upcoming and past buckets', () => {

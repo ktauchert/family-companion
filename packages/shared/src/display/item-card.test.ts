@@ -25,6 +25,7 @@ describe('eventCardPills', () => {
     const event: CalendarEvent = {
       id: 'ev_1',
       householdId: 'hh_1',
+      createdBy: 'user_julian',
       title: 'Elternabend',
       startsAt: '2026-09-16T18:00:00.000Z',
       assignedTo: ['user_julian'],
@@ -33,8 +34,6 @@ describe('eventCardPills', () => {
       kind: 'event',
       energyHint: 'medium',
       completions: [],
-      createdAt: '2026-09-15T08:00:00.000Z',
-      updatedAt: '2026-09-15T08:00:00.000Z',
     };
 
     const pills = eventCardPills(event, { household: householdOf(), actorId: 'user_julian' });
@@ -55,6 +54,7 @@ describe('eventCardPills', () => {
     const event: CalendarEvent = {
       id: 'ev_h',
       householdId: 'hh_1',
+      createdBy: 'user_julian',
       title: 'Fitness',
       startsAt: '2026-09-16T18:00:00.000Z',
       assignedTo: [],
@@ -63,8 +63,6 @@ describe('eventCardPills', () => {
       kind: 'habit',
       energyHint: 'high',
       completions: [],
-      createdAt: '2026-09-15T08:00:00.000Z',
-      updatedAt: '2026-09-15T08:00:00.000Z',
     };
 
     expect(eventCardPills(event, { household: householdOf(), actorId: 'user_julian' }).find((pill) => pill.key === 'kind')).toMatchObject({
@@ -79,7 +77,9 @@ describe('todoCardPills', () => {
     const todo: TodoItem = {
       id: 'todo_1',
       householdId: 'hh_1',
+      createdBy: 'user_sophie',
       title: 'Post abholen',
+      status: 'todo',
       dueDate: '2026-09-17',
       assignedTo: ['user_sophie'],
       completionMode: 'household',
@@ -87,8 +87,6 @@ describe('todoCardPills', () => {
       kind: 'task',
       energyHint: 'low',
       completions: [],
-      createdAt: '2026-09-15T08:00:00.000Z',
-      updatedAt: '2026-09-15T08:00:00.000Z',
     };
 
     const pills = todoCardPills(todo, { household: householdOf(), actorId: 'user_julian' });
