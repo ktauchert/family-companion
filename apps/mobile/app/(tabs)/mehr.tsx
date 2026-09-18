@@ -1,7 +1,6 @@
 import type { Household } from '@family-companion/shared';
 import {
   ensureMemberEmail,
-  householdMemberLabel,
   householdMembers,
   messageFromStoreError,
   removeHouseholdMember,
@@ -10,7 +9,8 @@ import {
 import { onAuthStateChanged } from 'firebase/auth';
 import { Link, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { MemberRow } from '../../components/haushalt/MemberRow';
 import { auth } from '../../lib/firebase';
 import { households } from '../../lib/households';
 import { useTheme } from '../../lib/theme';
@@ -140,21 +140,6 @@ export default function MehrScreen() {
       color: theme.inkSoft,
       fontSize: 15,
     },
-    row: {
-      gap: 8,
-      paddingTop: 8,
-      borderTopWidth: 1,
-      borderTopColor: theme.rule,
-    },
-    ghost: {
-      backgroundColor: theme.well,
-      borderRadius: 12,
-      paddingVertical: 10,
-      alignItems: 'center',
-    },
-    ghostText: {
-      color: theme.ink,
-    },
   });
 
   if (!household || !uid) {
@@ -179,29 +164,16 @@ export default function MehrScreen() {
         </Text>
         <Text style={styles.heading}>Mitglieder</Text>
         {error ? <Text style={styles.err}>{error}</Text> : null}
-        {members.map((member) => {
-          const emailLabel = householdMemberLabel(member.email);
-          const canKick = isOwner && member.role !== 'owner';
-          const canLeave = member.userId === uid && member.role !== 'owner';
-          return (
-            <View key={member.userId} style={styles.row}>
-              <Text style={styles.muted}>
-                {emailLabel}
-                {member.role === 'owner' ? ' · Inhaber' : ''}
-                {member.userId === uid ? ' · du' : ''}
-              </Text>
-              {canKick || canLeave ? (
-                <Pressable
-                  style={styles.ghost}
-                  disabled={busy}
-                  onPress={() => removeMember(member.userId, emailLabel)}
-                >
-                  <Text style={styles.ghostText}>{canLeave ? 'Austreten' : 'Entfernen'}</Text>
-                </Pressable>
-              ) : null}
-            </View>
-          );
-        })}
+        {members.map((member) => (
+          <MemberRow
+            key={member.userId}
+            member={member}
+            actorId={uid}
+            isOwner={isOwner}
+            busy={busy}
+            onRemove={removeMember}
+          />
+        ))}
       </View>
       <View style={styles.card}>
         <Text style={styles.heading}>Einladungen</Text>

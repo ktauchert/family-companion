@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Source_Sans_3 } from 'next/font/google';
+import { ThemeProvider } from '../components/ThemeProvider';
 import './globals.css';
 
 const sourceSans = Source_Sans_3({
@@ -19,7 +20,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="de">
-      <body className={sourceSans.className}>{children}</body>
+      <body className={sourceSans.className}>
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
     </html>
   );
 }
