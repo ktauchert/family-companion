@@ -23,7 +23,13 @@ export interface Household {
   createdAt: string;
   invitePin: string;
   invitedEmails: string[];
+  /** @deprecated Phase 4: pro User — siehe User-Präferenz `kaizenNudgesEnabled` */
   kaizenNudgesEnabled?: boolean;
+}
+
+export interface UserPreferences {
+  userId: string;
+  kaizenNudgesEnabled: boolean;
 }
 
 export type HouseholdDraft = Omit<Household, 'id'>;

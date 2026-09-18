@@ -9,6 +9,7 @@ import type {
   ShoppingItem,
   ShoppingList,
   TodoItem,
+  UserPreferences,
 } from '@family-companion/shared';
 import {
   applySuggestionToEvent,
@@ -18,8 +19,11 @@ import {
   ENERGY_CHECK_IN_OPTIONS,
   energyBandToValue,
   ensureMemberEmail,
+  evaluateKaizenNudge,
   isCalendarEventDoneForUser,
+  isKaizenNudgesEnabled,
   isTodoDoneForUser,
+  listOpenMandatoryHabitsForUser,
   localDateString,
   messageFromStoreError,
   missingDefaultShoppingLists,
@@ -39,6 +43,7 @@ import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { AreaSummaryCards } from '../../components/heute/AreaSummaryCards';
+import { KaizenNudgeCard } from '../../components/heute/KaizenNudgeCard';
 import { ProTeaserCards } from '../../components/heute/ProTeaserCards';
 import { CheckInChip } from '../../components/heute/CheckInChip';
 import { DayPlanItemCard } from '../../components/heute/DayPlanItemCard';
@@ -50,6 +55,7 @@ import { morning } from '../../lib/morning';
 import { shopping } from '../../lib/shopping';
 import { shoppingLists } from '../../lib/shoppingLists';
 import { todos } from '../../lib/todos';
+import { userPreferences } from '../../lib/userPreferences';
 import { useTheme } from '../../lib/theme';
 
 function isDayPlanItemDone(
@@ -85,8 +91,15 @@ export default function HeuteScreen() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [prefs, setPrefs] = useState<UserPreferences | null>(null);
 
   const today = localDateString();
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     return onAuthStateChanged(auth, (user) => {
@@ -140,6 +153,40 @@ export default function HeuteScreen() {
       unsubLists();
     };
   }, [household, today, uid]);
+
+  useEffect(() => {
+    if (!uid) {
+      return;
+    }
+    return userPreferences.subscribeForUser(uid, setPrefs);
+  }, [uid]);
+
+  const openMandatoryHabits = useMemo(() => {
+    if (!uid || household?.plan !== 'pro') {
+      return [];
+    }
+    return listOpenMandatoryHabitsForUser({
+      actorId: uid,
+      date: today,
+      events,
+      todos: todoItems,
+    });
+  }, [household?.plan, uid, today, events, todoItems]);
+
+  const kaizenNudge = useMemo(() => {
+    if (!household || !uid) {
+      return null;
+    }
+    return evaluateKaizenNudge({
+      household,
+      actorId: uid,
+      date: today,
+      now,
+      events,
+      todos: todoItems,
+      kaizenNudgesEnabled: isKaizenNudgesEnabled(prefs ?? undefined),
+    });
+  }, [household, uid, today, now, events, todoItems, prefs]);
 
   const actorCheckIn = useMemo(
     () => checkIns.find((entry) => entry.userId === uid) ?? null,
@@ -387,6 +434,50 @@ export default function HeuteScreen() {
             </Pressable>
           </View>
         ) : null}
+
+        {openMandatoryHabits.length > 0 ? (
+          <View style={styles.stack}>
+            <Text style={styles.heading}>Pflicht-Habits</Text>
+            <View style={styles.dayPlanStack}>
+              {openMandatoryHabits.map((habit) => {
+                const item: DayPlanItem =
+                  habit.targetKind === 'event'
+                    ? {
+                        kind: 'event',
+                        id: habit.id,
+                        title: habit.title,
+                        startsAt: events.find((entry) => entry.id === habit.id)?.startsAt,
+                        energyHint:
+                          events.find((entry) => entry.id === habit.id)?.energyHint ?? 'medium',
+                        completionMode: habit.completionMode,
+                        entityKind: 'habit',
+                      }
+                    : {
+                        kind: 'todo',
+                        id: habit.id,
+                        title: habit.title,
+                        dueDate: todoItems.find((entry) => entry.id === habit.id)?.dueDate,
+                        energyHint: todoItems.find((entry) => entry.id === habit.id)?.energyHint ?? 'medium',
+                        completionMode: habit.completionMode,
+                        entityKind: 'habit',
+                      };
+                return (
+                  <DayPlanItemCard
+                    key={`${habit.targetKind}_${habit.id}`}
+                    item={item}
+                    household={household}
+                    done={isDayPlanItemDone(item, events, todoItems, uid)}
+                    toggling={togglingId === item.id}
+                    onPress={() => router.push(dayPlanItemTarget(item).mobilePath as '/kalender')}
+                    onToggleDone={() => void toggleDayPlanItem(item)}
+                  />
+                );
+              })}
+            </View>
+          </View>
+        ) : null}
+
+        {kaizenNudge ? <KaizenNudgeCard nudge={kaizenNudge} /> : null}
 
         {visibleSuggestions.length > 0 ? (
           <View style={styles.stack}>

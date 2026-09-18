@@ -6,6 +6,7 @@ import type {
   Recurrence,
 } from '@family-companion/shared';
 import {
+  MANDATORY_DAILY_LABEL,
   CALENDAR_KIND_LABELS,
   COMPLETION_MODE_LABELS,
   ENERGY_HINT_LABELS,
@@ -35,6 +36,7 @@ export type CalendarEventDraft = {
   recurrence: Recurrence;
   kind: CalendarEvent['kind'];
   energyHint: EnergyBand;
+  mandatoryDaily?: boolean;
 };
 
 export function calendarEventDraftFromEvent(event: CalendarEvent): CalendarEventDraft {
@@ -47,6 +49,7 @@ export function calendarEventDraftFromEvent(event: CalendarEvent): CalendarEvent
     recurrence: event.recurrence,
     kind: event.kind,
     energyHint: event.energyHint ?? 'medium',
+    mandatoryDaily: event.mandatoryDaily,
   };
 }
 
@@ -65,6 +68,7 @@ export function CalendarEventModal({
   draft,
   household,
   actorId,
+  isPro,
   members,
   busy,
   modalError,
@@ -83,6 +87,7 @@ export function CalendarEventModal({
   draft: CalendarEventDraft;
   household: Household;
   actorId: string;
+  isPro: boolean;
   members: { userId: string; email: string | null }[];
   busy: boolean;
   modalError?: string | null;
@@ -185,7 +190,14 @@ export function CalendarEventModal({
               value: value as Recurrence,
               label,
             }))}
-            onChange={(recurrence) => onDraftChange({ ...draft, recurrence })}
+            onChange={(recurrence) =>
+              onDraftChange({
+                ...draft,
+                recurrence,
+                mandatoryDaily:
+                  draft.kind === 'habit' && recurrence === 'daily' ? draft.mandatoryDaily : undefined,
+              })
+            }
           />
           <ChipRow
             label="Erledigung"
@@ -203,8 +215,25 @@ export function CalendarEventModal({
               value: value as CalendarEvent['kind'],
               label,
             }))}
-            onChange={(kind) => onDraftChange({ ...draft, kind })}
+            onChange={(kind) =>
+              onDraftChange({
+                ...draft,
+                kind,
+                mandatoryDaily: kind === 'habit' && draft.recurrence === 'daily' ? draft.mandatoryDaily : undefined,
+              })
+            }
           />
+          {isPro && draft.kind === 'habit' && draft.recurrence === 'daily' ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <Text style={{ color: theme.ink, flex: 1 }}>{MANDATORY_DAILY_LABEL}</Text>
+              <Switch
+                value={draft.mandatoryDaily === true}
+                onValueChange={(value) =>
+                  onDraftChange({ ...draft, mandatoryDaily: value ? true : undefined })
+                }
+              />
+            </View>
+          ) : null}
           <ChipRow
             label="Energie"
             value={draft.energyHint}

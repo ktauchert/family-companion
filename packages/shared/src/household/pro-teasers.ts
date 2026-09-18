@@ -1,5 +1,5 @@
 export type ProTeaser = {
-  id: 'ki-plan' | 'per-member-habits' | 'smart-shopping';
+  id: 'ki-plan' | 'pflicht-habits' | 'smart-shopping';
   title: string;
   line: string;
 };
@@ -8,16 +8,16 @@ export const PRO_TEASERS: ProTeaser[] = [
   {
     id: 'ki-plan',
     title: 'KI-Tagesplan',
-    line: 'Feinere Reihenfolge und Umverteilung nach Stimmung und Energie.',
+    line: 'Briefing und feinere Umverteilung — ergänzt den Free-Algo.',
   },
   {
-    id: 'per-member-habits',
-    title: 'Per-Member-Habits',
-    line: 'Jede Person hakte denselben Termin oder Todo selbst ab.',
+    id: 'pflicht-habits',
+    title: 'Pflicht-Habits & Kaizen',
+    line: 'Täglich sichtbar bis erledigt; abends sanfter Ikigai-Nudge.',
   },
   {
     id: 'smart-shopping',
     title: 'Smart Shopping',
-    line: 'Freitext und Muster aus Listen — z. B. „Wir kochen Lasagne.“',
+    line: 'Freitext und Muster — KI schlägt Liste und Zutaten vor.',
   },
 ];

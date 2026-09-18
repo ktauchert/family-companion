@@ -114,6 +114,38 @@ describe('prioritizeDay', () => {
     );
   });
 
+  it('excludes mandatory daily habits from Dein Tag — they appear only in Pflicht-Habits', () => {
+    const result = prioritizeDay({
+      household,
+      actorId: 'user_julian',
+      date,
+      checkIns: [],
+      events: [
+        eventOf({
+          id: 'evt_mandatory',
+          title: 'Fitness',
+          startsAt: '2026-09-15T07:00:00.000Z',
+          kind: 'habit',
+          recurrence: 'daily',
+          mandatoryDaily: true,
+          completionMode: 'per_member',
+        }),
+      ],
+      todos: [
+        todoOf({
+          id: 'todo_mandatory',
+          title: 'Journal',
+          kind: 'habit',
+          recurrence: 'daily',
+          mandatoryDaily: true,
+        }),
+        todoOf({ id: 'todo_task', title: 'Post abholen', kind: 'task' }),
+      ],
+    });
+
+    expect(result.items.map((item) => item.id)).toEqual(['todo_task']);
+  });
+
   it('prioritizes open per_member habits before regular tasks', () => {
     const checkIns: MorningCheckIn[] = [
       { id: 'ci_j', householdId: 'hh_1', userId: 'user_julian', date, mood: 3, energy: 3 },

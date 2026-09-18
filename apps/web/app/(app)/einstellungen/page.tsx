@@ -1,10 +1,14 @@
 'use client';
 
-import type { Household } from '@family-companion/shared';
+import type { Household, UserPreferences } from '@family-companion/shared';
 import {
+  defaultUserPreferences,
+  isKaizenNudgesEnabled,
   messageFromStoreError,
+  prepareSaveUserPreferences,
   upgradeHouseholdPlanMessage,
   upgradeHouseholdToPro,
+  userPreferencesErrorMessage,
 } from '@family-companion/shared';
 import {
   THEME_PREFERENCE_LABELS,
@@ -19,6 +23,7 @@ import { useEffect, useState } from 'react';
 import { Chrome } from '../../../components/Chrome';
 import { auth } from '../../../lib/firebase';
 import { households } from '../../../lib/households';
+import { userPreferences } from '../../../lib/userPreferences';
 
 export default function EinstellungenPage() {
   const router = useRouter();
@@ -28,6 +33,7 @@ export default function EinstellungenPage() {
   const [theme, setTheme] = useState<ThemePreference>('system');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [prefs, setPrefs] = useState<UserPreferences | null>(null);
 
   useEffect(() => {
     setTheme(readThemePreference());
@@ -46,6 +52,13 @@ export default function EinstellungenPage() {
       setHousehold(found);
     });
   }, [router]);
+
+  useEffect(() => {
+    if (!uid) {
+      return;
+    }
+    return userPreferences.subscribeForUser(uid, setPrefs);
+  }, [uid]);
 
   function selectTheme(next: ThemePreference) {
     setTheme(next);
@@ -69,6 +82,35 @@ export default function EinstellungenPage() {
     } catch (err) {
       console.error('[upgrade plan]', err);
       setError(messageFromStoreError(err, 'Family+ konnte nicht aktiviert werden.'));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function setKaizenNudgesEnabled(enabled: boolean) {
+    if (!uid) {
+      return;
+    }
+    const result = prepareSaveUserPreferences({
+      actorId: uid,
+      preferences: {
+        ...defaultUserPreferences(uid),
+        ...prefs,
+        userId: uid,
+        kaizenNudgesEnabled: enabled,
+      },
+    });
+    if (!result.ok) {
+      setError(userPreferencesErrorMessage(result.reason));
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      await userPreferences.savePreferences(result.preferences);
+      setPrefs(result.preferences);
+    } catch (err) {
+      setError(messageFromStoreError(err, 'Einstellung konnte nicht gespeichert werden.'));
     } finally {
       setBusy(false);
     }
@@ -120,6 +162,18 @@ export default function EinstellungenPage() {
                   </button>
                 ))}
               </div>
+            </div>
+            <div className="settings-row">
+              <span className="settings-row-label">Kaizen-Nudges</span>
+              <label className="check-row">
+                <input
+                  type="checkbox"
+                  checked={isKaizenNudgesEnabled(prefs ?? undefined)}
+                  disabled={busy}
+                  onChange={(e) => void setKaizenNudgesEnabled(e.target.checked)}
+                />
+                Abends erinnern, wenn ein Pflicht-Habit offen ist
+              </label>
             </div>
             <div className="settings-row">
               <span className="settings-row-label">Family+</span>

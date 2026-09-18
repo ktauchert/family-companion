@@ -144,6 +144,7 @@ export default function TodosScreen() {
         recurrence: draft.recurrence,
         kind: draft.kind,
         energyHint: draft.energyHint,
+        mandatoryDaily: draft.mandatoryDaily,
       };
       if (modal.mode === 'edit') {
         const existing = items.find((item) => item.id === modal.todoId);
@@ -288,6 +289,7 @@ export default function TodosScreen() {
         draft={draft}
         household={household}
         actorId={uid}
+        isPro={household.plan === 'pro'}
         members={members}
         busy={busy}
         modalError={modalError}

@@ -1,4 +1,5 @@
 import { isHouseholdMember } from '../household/access';
+import { resolveMandatoryDaily } from '../habits/mandatory-daily';
 import type { CalendarEvent, CompletionMode, EnergyBand, Household, Recurrence } from '../types';
 import { initialCompletionsForMode } from './completion';
 import { canUpdateCalendarEvent } from './permissions';
@@ -22,7 +23,13 @@ export type CreateCalendarEventResult =
   | { ok: true; event: CalendarEvent }
   | {
       ok: false;
-      reason: 'not_member' | 'title_required' | 'invalid_dates' | 'invalid_assignee';
+      reason:
+        | 'not_member'
+        | 'title_required'
+        | 'invalid_dates'
+        | 'invalid_assignee'
+        | 'pro_required'
+        | 'invalid_mandatory';
     };
 
 export type UpdateCalendarEventResult =
@@ -33,7 +40,9 @@ export type UpdateCalendarEventResult =
         | 'not_allowed'
         | 'title_required'
         | 'invalid_dates'
-        | 'invalid_assignee';
+        | 'invalid_assignee'
+        | 'pro_required'
+        | 'invalid_mandatory';
     };
 
 export function prepareCreateCalendarEvent(
@@ -61,6 +70,17 @@ export function prepareCreateCalendarEvent(
   }
 
   const completionMode = input.completionMode ?? 'household';
+  const kind = input.kind ?? 'event';
+  const recurrence = input.recurrence ?? 'none';
+
+  const mandatory = resolveMandatoryDaily(input.household, {
+    mandatoryDaily: input.mandatoryDaily,
+    kind,
+    recurrence,
+  });
+  if (!mandatory.ok) {
+    return { ok: false, reason: mandatory.reason };
+  }
 
   const event: CalendarEvent = {
     id: input.eventId,
@@ -70,9 +90,9 @@ export function prepareCreateCalendarEvent(
     endsAt: input.endsAt,
     assignedTo: input.assignedTo,
     completionMode,
-    recurrence: input.recurrence ?? 'none',
-    kind: input.kind ?? 'event',
-    mandatoryDaily: input.mandatoryDaily,
+    recurrence,
+    kind,
+    mandatoryDaily: mandatory.mandatoryDaily,
     energyHint: input.energyHint,
     completions: initialCompletionsForMode(input.household, completionMode),
     createdBy: input.actorId,
@@ -118,6 +138,16 @@ export function prepareUpdateCalendarEvent(
       }
     }
   }
+
+  const mandatory = resolveMandatoryDaily(input.household, {
+    mandatoryDaily: next.mandatoryDaily,
+    kind: next.kind,
+    recurrence: next.recurrence,
+  });
+  if (!mandatory.ok) {
+    return { ok: false, reason: mandatory.reason };
+  }
+  next.mandatoryDaily = mandatory.mandatoryDaily;
 
   return { ok: true, event: { ...next, title } };
 }

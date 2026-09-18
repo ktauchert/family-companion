@@ -8,6 +8,7 @@ import type {
   TodoItem,
 } from '@family-companion/shared';
 import {
+  MANDATORY_DAILY_LABEL,
   COMPLETION_MODE_LABELS,
   ENERGY_HINT_LABELS,
   RECURRENCE_LABELS,
@@ -31,6 +32,7 @@ export type TodoItemDraft = {
   recurrence: Recurrence;
   kind: TodoItem['kind'];
   energyHint: EnergyBand;
+  mandatoryDaily?: boolean;
 };
 
 export function todoItemDraftFromItem(todo: TodoItem): TodoItemDraft {
@@ -42,6 +44,7 @@ export function todoItemDraftFromItem(todo: TodoItem): TodoItemDraft {
     recurrence: todo.recurrence,
     kind: todo.kind,
     energyHint: todo.energyHint ?? 'medium',
+    mandatoryDaily: todo.mandatoryDaily,
   };
 }
 
@@ -60,6 +63,7 @@ export function TodoItemModal({
   draft,
   household,
   actorId,
+  isPro,
   members,
   busy,
   modalError,
@@ -78,6 +82,7 @@ export function TodoItemModal({
   draft: TodoItemDraft;
   household: Household;
   actorId: string;
+  isPro: boolean;
   members: Array<{ userId: string; email: string | null }>;
   busy: boolean;
   modalError?: string | null;
@@ -117,6 +122,7 @@ export function TodoItemModal({
             {COMPLETION_MODE_LABELS[todo.completionMode]}
             {' · '}
             {TODO_KIND_LABELS[todo.kind]}
+            {todo.mandatoryDaily ? ` · ${MANDATORY_DAILY_LABEL}` : ''}
           </p>
           <ModalActionBar
             mode="view"
@@ -176,7 +182,14 @@ export function TodoItemModal({
               value: value as Recurrence,
               label,
             }))}
-            onChange={(recurrence) => onDraftChange({ ...draft, recurrence })}
+            onChange={(recurrence) =>
+              onDraftChange({
+                ...draft,
+                recurrence,
+                mandatoryDaily:
+                  draft.kind === 'habit' && recurrence === 'daily' ? draft.mandatoryDaily : undefined,
+              })
+            }
           />
           <ChipSelector
             label="Erledigung"
@@ -194,8 +207,26 @@ export function TodoItemModal({
               value: value as TodoItem['kind'],
               label,
             }))}
-            onChange={(kind) => onDraftChange({ ...draft, kind })}
+            onChange={(kind) =>
+              onDraftChange({
+                ...draft,
+                kind,
+                mandatoryDaily: kind === 'habit' && draft.recurrence === 'daily' ? draft.mandatoryDaily : undefined,
+              })
+            }
           />
+          {isPro && draft.kind === 'habit' && draft.recurrence === 'daily' ? (
+            <label className="check-row">
+              <input
+                type="checkbox"
+                checked={draft.mandatoryDaily === true}
+                onChange={(e) =>
+                  onDraftChange({ ...draft, mandatoryDaily: e.target.checked ? true : undefined })
+                }
+              />
+              {MANDATORY_DAILY_LABEL}
+            </label>
+          ) : null}
           <ChipSelector
             label="Energie-Hinweis"
             value={draft.energyHint}

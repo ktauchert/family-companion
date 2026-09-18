@@ -124,7 +124,8 @@ service cloud.firestore {
         && request.resource.data.completionMode in ['household', 'per_member']
         && request.resource.data.recurrence in ['none', 'daily', 'weekly']
         && request.resource.data.kind in ['task', 'habit']
-        && request.resource.data.completions is list;
+        && request.resource.data.completions is list
+        && validMandatoryDaily(request.resource.data.householdId);
     }
 
     function shoppingItemIdentityFrozen() {
@@ -196,6 +197,20 @@ service cloud.firestore {
         && request.resource.data.energy <= 5;
     }
 
+    function validOptionalEnergyHint() {
+      return !('energyHint' in request.resource.data)
+        || request.resource.data.energyHint in ['low', 'medium', 'high'];
+    }
+
+    function validMandatoryDaily(householdId) {
+      return request.resource.data.get('mandatoryDaily', false) != true
+        || (
+          householdData(householdId).plan == 'pro'
+          && request.resource.data.kind == 'habit'
+          && request.resource.data.recurrence == 'daily'
+        );
+    }
+
     function validCalendarEventCreate() {
       return request.resource.data.id is string
         && request.resource.data.householdId is string
@@ -206,7 +221,8 @@ service cloud.firestore {
         && request.resource.data.completionMode in ['household', 'per_member']
         && request.resource.data.recurrence in ['none', 'daily', 'weekly']
         && request.resource.data.kind in ['event', 'habit']
-        && request.resource.data.completions is list;
+        && request.resource.data.completions is list
+        && validMandatoryDaily(request.resource.data.householdId);
     }
 
     function pad2(value) {
@@ -279,11 +295,6 @@ service cloud.firestore {
         || validAssignedToList(householdId, request.resource.data.assignedTo);
     }
 
-    function validOptionalEnergyHint() {
-      return !('energyHint' in request.resource.data)
-        || request.resource.data.energyHint in ['low', 'medium', 'high'];
-    }
-
     function validCalendarEventUpdate(householdId) {
       return request.resource.data.title is string
         && request.resource.data.title.size() > 0
@@ -293,7 +304,8 @@ service cloud.firestore {
         && request.resource.data.kind in ['event', 'habit']
         && request.resource.data.completions is list
         && validOptionalAssignedTo(householdId)
-        && validOptionalEnergyHint();
+        && validOptionalEnergyHint()
+        && validMandatoryDaily(householdId);
     }
 
     function validTodoUpdate(householdId) {
@@ -305,7 +317,8 @@ service cloud.firestore {
         && request.resource.data.kind in ['task', 'habit']
         && request.resource.data.completions is list
         && validOptionalAssignedTo(householdId)
-        && validOptionalEnergyHint();
+        && validOptionalEnergyHint()
+        && validMandatoryDaily(householdId);
     }
 
     function validShoppingItemUpdate() {
@@ -406,6 +419,22 @@ service cloud.firestore {
         && resource.data.userId == request.auth.uid
         && morningCheckInIdentityFrozen()
         && validMorningCheckInUpdate();
+
+      allow delete: if false;
+    }
+
+    function validUserPreferencesWrite() {
+      return request.resource.data.userId == request.auth.uid
+        && request.resource.data.kaizenNudgesEnabled is bool;
+    }
+
+    match /user_preferences/{userId} {
+      allow read: if signedIn() && request.auth.uid == userId;
+
+      allow create, update: if signedIn()
+        && request.auth.uid == userId
+        && userId == request.auth.uid
+        && validUserPreferencesWrite();
 
       allow delete: if false;
     }

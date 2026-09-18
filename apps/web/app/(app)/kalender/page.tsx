@@ -172,6 +172,7 @@ export default function KalenderPage() {
             recurrence: draft.recurrence,
             kind: draft.kind,
             energyHint: draft.energyHint,
+            mandatoryDaily: draft.mandatoryDaily,
           },
         });
         if (!result.ok) {
@@ -192,6 +193,7 @@ export default function KalenderPage() {
           recurrence: draft.recurrence,
           kind: draft.kind,
           energyHint: draft.energyHint,
+          mandatoryDaily: draft.mandatoryDaily,
         });
         if (!result.ok) {
           setModalError(createCalendarEventErrorMessage(result.reason));
@@ -321,6 +323,7 @@ export default function KalenderPage() {
         draft={draft}
         household={household}
         actorId={uid}
+        isPro={household.plan === 'pro'}
         members={members}
         busy={busy}
         modalError={modalError}

@@ -32,7 +32,7 @@ Der Inhaber ist immer auch in `members[]`. „Mitglied“ meint hier **nicht-Inh
 ### Was nur der Inhaber zusätzlich darf
 
 - **Löschen** beliebiger Kalender-Events, Todos und Listenpunkte im Haushalt (nicht nur eigene)
-- Haushalts-Metadaten (bereits Phase 1: Plan, Einladungen, `kaizenNudgesEnabled` später)
+- Haushalts-Metadaten (bereits Phase 1: Plan, Einladungen). **`kaizenNudgesEnabled` pro User** (Phase 4), nicht am Household — siehe [04-pro-ki-habits.md](../phasen/04-pro-ki-habits.md) WP1.
 
 ### Durchsetzung
 
