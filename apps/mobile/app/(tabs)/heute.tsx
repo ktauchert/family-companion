@@ -39,6 +39,7 @@ import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { AreaSummaryCards } from '../../components/heute/AreaSummaryCards';
+import { ProTeaserCards } from '../../components/heute/ProTeaserCards';
 import { CheckInChip } from '../../components/heute/CheckInChip';
 import { DayPlanItemCard } from '../../components/heute/DayPlanItemCard';
 import { SuggestionCard } from '../../components/heute/SuggestionCard';
@@ -424,6 +425,9 @@ export default function HeuteScreen() {
       </View>
 
       <AreaSummaryCards summaries={areaSummaries} onPressSummary={openSummary} />
+      {household.plan === 'free' ? (
+        <ProTeaserCards onActivate={() => router.push('/einstellungen')} />
+      ) : null}
     </ScrollView>
   );
 }
