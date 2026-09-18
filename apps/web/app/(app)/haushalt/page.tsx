@@ -12,10 +12,10 @@ import { onAuthStateChanged } from 'firebase/auth';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Chrome } from '../../components/Chrome';
-import { MemberRow } from '../../components/haushalt/MemberRow';
-import { auth } from '../../lib/firebase';
-import { households } from '../../lib/households';
+import { Chrome } from '../../../components/Chrome';
+import { MemberRow } from '../../../components/haushalt/MemberRow';
+import { auth } from '../../../lib/firebase';
+import { households } from '../../../lib/households';
 
 export default function HaushaltPage() {
   const router = useRouter();

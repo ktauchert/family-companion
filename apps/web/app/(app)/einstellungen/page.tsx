@@ -5,13 +5,13 @@ import {
   type ThemePreference,
   readThemePreference,
   writeThemePreference,
-} from '../../lib/theme';
+} from '../../../lib/theme';
 import Link from 'next/link';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Chrome } from '../../components/Chrome';
-import { auth } from '../../lib/firebase';
+import { Chrome } from '../../../components/Chrome';
+import { auth } from '../../../lib/firebase';
 
 export default function EinstellungenPage() {
   const router = useRouter();

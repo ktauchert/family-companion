@@ -229,7 +229,7 @@ Web: `apps/web/components/cards/` · Mobile: `apps/mobile/components/cards/`
 
 ## Landing (Phase 2.5)
 
-[02.5-landing-scaffold.md](../phasen/02.5-landing-scaffold.md) — öffentliches `/`, Login/Register bzw. „Zur App“; Design später.
+Öffentliches `/` mit Hero, drei Feature-Karten (Listen, Kalender & Todos, Heute) und auth-abhängigen CTAs. Route-Gruppen `(marketing)` vs `(app)`; App-Chrome nur in `(app)`. Tokens wie die App — kein separates Marketing-Theme. Details: [02.5-landing-scaffold.md](../phasen/02.5-landing-scaffold.md). Finales Visual und SEO **später**.
 
 ---
 

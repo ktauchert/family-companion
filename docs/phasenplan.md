@@ -20,7 +20,7 @@ Quellen: [features.md](./features.md), [user-journey.md](./user-journey.md), [de
 | **2.2 Kalender & Todos UX** | erledigt | [02.2-kalender-todos-ux.md](./phasen/02.2-kalender-todos-ux.md) · Milestone [Phase 2.2](https://github.com/ktauchert/family-companion/milestone/2) · PR [#45](https://github.com/ktauchert/family-companion/pull/45) |
 | **2.3 Listen UX** | erledigt | [02.3-listen-ux.md](./phasen/02.3-listen-ux.md) · Milestone [Phase 2.3](https://github.com/ktauchert/family-companion/milestone/3) · PR [#46](https://github.com/ktauchert/family-companion/pull/46) |
 | **2.4 Haushalt, Nav & Shell** | erledigt | [02.4-haushalt-nav-shell.md](./phasen/02.4-haushalt-nav-shell.md) · Milestone [Phase 2.4](https://github.com/ktauchert/family-companion/milestone/4) · PR [#47](https://github.com/ktauchert/family-companion/pull/47) |
-| **2.5 Landing (Scaffold)** | offen | [02.5-landing-scaffold.md](./phasen/02.5-landing-scaffold.md) · Milestone [Phase 2.5](https://github.com/ktauchert/family-companion/milestone/5) |
+| **2.5 Landing (Scaffold)** | erledigt | [02.5-landing-scaffold.md](./phasen/02.5-landing-scaffold.md) · Milestone [Phase 2.5](https://github.com/ktauchert/family-companion/milestone/5) |
 | 3 Pro-Trigger | offen | [03-pro-trigger.md](./phasen/03-pro-trigger.md) |
 | 4 Pro: KI & Habits | offen | [04-pro-ki-habits.md](./phasen/04-pro-ki-habits.md) |
 
