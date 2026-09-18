@@ -22,18 +22,18 @@ import {
 import { onAuthStateChanged } from 'firebase/auth';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import { Chrome } from '../../components/Chrome';
-import { PlusIconButton } from '../../components/PlusIconButton';
-import { ShoppingListInlineAdd } from '../../components/listen/ShoppingListInlineAdd';
-import { ShoppingListItemRow } from '../../components/listen/ShoppingListItemRow';
+import { Chrome } from '../../../components/Chrome';
+import { PlusIconButton } from '../../../components/PlusIconButton';
+import { ShoppingListInlineAdd } from '../../../components/listen/ShoppingListInlineAdd';
+import { ShoppingListItemRow } from '../../../components/listen/ShoppingListItemRow';
 import {
   ShoppingListModal,
   type ShoppingListModalMode,
-} from '../../components/listen/ShoppingListModal';
-import { auth } from '../../lib/firebase';
-import { households } from '../../lib/households';
-import { shopping } from '../../lib/shopping';
-import { shoppingLists } from '../../lib/shoppingLists';
+} from '../../../components/listen/ShoppingListModal';
+import { auth } from '../../../lib/firebase';
+import { households } from '../../../lib/households';
+import { shopping } from '../../../lib/shopping';
+import { shoppingLists } from '../../../lib/shoppingLists';
 
 function sortItems(items: ShoppingItem[]): ShoppingItem[] {
   return [...items].sort((a, b) => {

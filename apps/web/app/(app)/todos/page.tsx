@@ -16,17 +16,17 @@ import {
 import { onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import { Chrome } from '../../components/Chrome';
-import { PlusIconButton } from '../../components/PlusIconButton';
-import { TodoCard } from '../../components/cards/TodoCard';
+import { Chrome } from '../../../components/Chrome';
+import { PlusIconButton } from '../../../components/PlusIconButton';
+import { TodoCard } from '../../../components/cards/TodoCard';
 import {
   TodoItemModal,
   todoItemDraftFromItem,
   type TodoItemDraft,
-} from '../../components/todos/TodoItemModal';
-import { auth } from '../../lib/firebase';
-import { households } from '../../lib/households';
-import { todos } from '../../lib/todos';
+} from '../../../components/todos/TodoItemModal';
+import { auth } from '../../../lib/firebase';
+import { households } from '../../../lib/households';
+import { todos } from '../../../lib/todos';
 
 type ModalState =
   | null

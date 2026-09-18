@@ -21,17 +21,17 @@ import {
 import { onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import { Chrome } from '../../components/Chrome';
-import { PlusIconButton } from '../../components/PlusIconButton';
+import { Chrome } from '../../../components/Chrome';
+import { PlusIconButton } from '../../../components/PlusIconButton';
 import {
   CalendarEventModal,
   calendarEventDraftFromEvent,
   type CalendarEventDraft,
-} from '../../components/kalender/CalendarEventModal';
-import { CalendarWeekView } from '../../components/kalender/CalendarWeekView';
-import { calendar } from '../../lib/calendar';
-import { auth } from '../../lib/firebase';
-import { households } from '../../lib/households';
+} from '../../../components/kalender/CalendarEventModal';
+import { CalendarWeekView } from '../../../components/kalender/CalendarWeekView';
+import { calendar } from '../../../lib/calendar';
+import { auth } from '../../../lib/firebase';
+import { households } from '../../../lib/households';
 
 type ModalState =
   | null

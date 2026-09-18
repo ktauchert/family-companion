@@ -37,18 +37,18 @@ import {
 import { onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import { Chrome } from '../../components/Chrome';
-import { AreaSummaryCards } from '../../components/heute/AreaSummaryCards';
-import { CheckInChip } from '../../components/heute/CheckInChip';
-import { DayPlanItemCard } from '../../components/heute/DayPlanItemCard';
-import { SuggestionCard } from '../../components/heute/SuggestionCard';
-import { calendar } from '../../lib/calendar';
-import { auth } from '../../lib/firebase';
-import { households } from '../../lib/households';
-import { morning } from '../../lib/morning';
-import { shopping } from '../../lib/shopping';
-import { shoppingLists } from '../../lib/shoppingLists';
-import { todos } from '../../lib/todos';
+import { Chrome } from '../../../components/Chrome';
+import { AreaSummaryCards } from '../../../components/heute/AreaSummaryCards';
+import { CheckInChip } from '../../../components/heute/CheckInChip';
+import { DayPlanItemCard } from '../../../components/heute/DayPlanItemCard';
+import { SuggestionCard } from '../../../components/heute/SuggestionCard';
+import { calendar } from '../../../lib/calendar';
+import { auth } from '../../../lib/firebase';
+import { households } from '../../../lib/households';
+import { morning } from '../../../lib/morning';
+import { shopping } from '../../../lib/shopping';
+import { shoppingLists } from '../../../lib/shoppingLists';
+import { todos } from '../../../lib/todos';
 
 function isDayPlanItemDone(
   item: DayPlanItem,

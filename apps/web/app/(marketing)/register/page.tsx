@@ -5,27 +5,23 @@ import {
   messageFromAuthError,
   parseEmailPassword,
 } from '@family-companion/shared';
-import {
-  GoogleAuthProvider,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-} from 'firebase/auth';
+import { createUserWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FormEvent, Suspense, useEffect, useState } from 'react';
-import { pathAfterAuth } from '../../lib/after-auth';
-import { auth } from '../../lib/firebase';
+import { pathAfterAuth } from '../../../lib/after-auth';
+import { auth } from '../../../lib/firebase';
 
-function LoginForm() {
+function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextParam = searchParams.get('next');
-  const registerHref = nextParam
-    ? `/register?next=${encodeURIComponent(nextParam)}`
-    : '/register';
+  const loginHref = nextParam
+    ? `/login?next=${encodeURIComponent(nextParam)}`
+    : '/login';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [ready, setReady] = useState(false);
@@ -42,13 +38,9 @@ function LoginForm() {
     });
   }, [nextParam, router]);
 
-  async function continueWith(uid: string) {
-    router.replace(await pathAfterAuth(uid, nextParam));
-  }
-
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const parsed = parseEmailPassword({ email, password });
+    const parsed = parseEmailPassword({ email, password, confirmPassword });
     if (!parsed.ok) {
       setError(emailPasswordReasonMessage(parsed.reason));
       return;
@@ -56,23 +48,14 @@ function LoginForm() {
     setBusy(true);
     setError(null);
     try {
-      const cred = await signInWithEmailAndPassword(auth, parsed.email, parsed.password);
-      await continueWith(cred.user.uid);
+      const cred = await createUserWithEmailAndPassword(
+        auth,
+        parsed.email,
+        parsed.password,
+      );
+      router.replace(await pathAfterAuth(cred.user.uid, nextParam));
     } catch (err) {
-      setError(messageFromAuthError(err, 'sign-in'));
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function signInGoogle() {
-    setBusy(true);
-    setError(null);
-    try {
-      const result = await signInWithPopup(auth, new GoogleAuthProvider());
-      await continueWith(result.user.uid);
-    } catch (err) {
-      setError(messageFromAuthError(err, 'google'));
+      setError(messageFromAuthError(err, 'register'));
     } finally {
       setBusy(false);
     }
@@ -89,18 +72,18 @@ function LoginForm() {
   return (
     <div className="wrap">
       <form className="card stack" onSubmit={onSubmit}>
-        <h1>Anmelden</h1>
+        <h1>Registrieren</h1>
         <hr className="rule" />
-        <p className="muted">Mit E-Mail oder Google. Neues Konto über Registrieren.</p>
+        <p className="muted">Neues Konto mit E-Mail und Passwort (mindestens 6 Zeichen).</p>
         {error ? (
           <p className="err" role="alert">
             {error}
           </p>
         ) : null}
-        <label className="field" htmlFor="login-email">
+        <label className="field" htmlFor="register-email">
           E-Mail
           <input
-            id="login-email"
+            id="register-email"
             name="email"
             type="email"
             autoComplete="email"
@@ -109,34 +92,42 @@ function LoginForm() {
             onChange={(event) => setEmail(event.target.value)}
           />
         </label>
-        <label className="field" htmlFor="login-password">
+        <label className="field" htmlFor="register-password">
           Passwort
           <input
-            id="login-password"
+            id="register-password"
             name="password"
             type="password"
-            autoComplete="current-password"
+            autoComplete="new-password"
             value={password}
             disabled={busy}
             onChange={(event) => setPassword(event.target.value)}
           />
         </label>
+        <label className="field" htmlFor="register-confirm">
+          Passwort wiederholen
+          <input
+            id="register-confirm"
+            name="confirmPassword"
+            type="password"
+            autoComplete="new-password"
+            value={confirmPassword}
+            disabled={busy}
+            onChange={(event) => setConfirmPassword(event.target.value)}
+          />
+        </label>
         <button className="btn" type="submit" disabled={busy}>
-          {busy ? 'Bitte warten…' : 'Anmelden'}
+          {busy ? 'Bitte warten…' : 'Konto erstellen'}
         </button>
-        <p className="or">oder</p>
-        <button className="btn ghost" type="button" disabled={busy} onClick={() => void signInGoogle()}>
-          Mit Google anmelden
-        </button>
-        <Link className="text-link" href={registerHref}>
-          Noch kein Konto? Registrieren
+        <Link className="text-link" href={loginHref}>
+          Schon ein Konto? Anmelden
         </Link>
       </form>
     </div>
   );
 }
 
-export default function LoginPage() {
+export default function RegisterPage() {
   return (
     <Suspense
       fallback={
@@ -145,7 +136,7 @@ export default function LoginPage() {
         </div>
       }
     >
-      <LoginForm />
+      <RegisterForm />
     </Suspense>
   );
 }
