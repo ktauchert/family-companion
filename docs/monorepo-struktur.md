@@ -6,18 +6,31 @@ Ziel: Types, Firebase-Konstanten und Validierungslogik zwischen Next.js (Web) un
 
 ---
 
-## Ziel-Dateibaum (spätere Phasen)
+## Ziel-Dateibaum (Ist-Stand Web-Routing ab 2.5)
 
-Scaffolds stehen (Phase 0.1). Der Ordnerbaum unten ist das Zielbild inkl. späterer Auth- und API-Routen.
+Scaffolds stehen (Phase 0.1). Web-App-Routen seit Phase 2.5 in Route-Gruppen; URLs bleiben flach (`/heute`, nicht `/app/heute`).
 
 ```text
 family-companion/
 ├── apps/
 │   ├── web/                        # Next.js App
 │   │   ├── app/
-│   │   │   ├── (auth)/login/
-│   │   │   ├── dashboard/
-│   │   │   └── api/ai/             # Next.js Route Handlers (OpenAI API)
+│   │   │   ├── (marketing)/        # Landing, Login, Register, Legal
+│   │   │   │   ├── page.tsx        # /
+│   │   │   │   ├── login/
+│   │   │   │   ├── register/
+│   │   │   │   ├── impressum/
+│   │   │   │   └── datenschutz/
+│   │   │   ├── (app)/              # Chrome + AppAuthGate
+│   │   │   │   ├── heute/
+│   │   │   │   ├── kalender/
+│   │   │   │   ├── todos/
+│   │   │   │   ├── listen/
+│   │   │   │   ├── haushalt/
+│   │   │   │   ├── onboarding/
+│   │   │   │   └── einstellungen/
+│   │   │   └── api/                # optional später (OpenAI serverseitig)
+│   │   ├── components/
 │   │   ├── lib/firebase.ts
 │   │   ├── package.json
 │   │   └── tsconfig.json
@@ -25,8 +38,8 @@ family-companion/
 │   └── mobile/                     # React Native (Expo) App
 │       ├── app/                    # Expo Router (file-based navigation)
 │       │   ├── _layout.tsx
-│       │   ├── (auth)/login.tsx
-│       │   └── (tabs)/index.tsx
+│       │   ├── login.tsx
+│       │   └── (tabs)/             # Heute, Kalender, …
 │       ├── lib/firebase.ts
 │       ├── app.json
 │       ├── package.json

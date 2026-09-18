@@ -15,7 +15,7 @@ Quellen: [features.md](./features.md), [user-journey.md](./user-journey.md), [de
 | 0.2 Tests und CI | erledigt | [00.2-tests-ci.md](./phasen/00.2-tests-ci.md) |
 | **1 Auth & Haushalt** | erledigt | [01-auth-haushalt.md](./phasen/01-auth-haushalt.md) |
 | **1.1 Dev-Build & Google nativ** | erledigt | [01.1-dev-build-google-native.md](./phasen/01.1-dev-build-google-native.md) |
-| 2 Alltag | erledigt | [02-alltag.md](./phasen/02-alltag.md) |
+| 2 Alltag (+ UX 2.1–2.5) | erledigt | [02-alltag.md](./phasen/02-alltag.md) · UX PRs [#44](https://github.com/ktauchert/family-companion/pull/44)–[#48](https://github.com/ktauchert/family-companion/pull/48) |
 | **2.1 Heute UX** | erledigt | [02.1-heute-ux.md](./phasen/02.1-heute-ux.md) · Milestone [Phase 2.1](https://github.com/ktauchert/family-companion/milestone/1) · PR [#44](https://github.com/ktauchert/family-companion/pull/44) |
 | **2.2 Kalender & Todos UX** | erledigt | [02.2-kalender-todos-ux.md](./phasen/02.2-kalender-todos-ux.md) · Milestone [Phase 2.2](https://github.com/ktauchert/family-companion/milestone/2) · PR [#45](https://github.com/ktauchert/family-companion/pull/45) |
 | **2.3 Listen UX** | erledigt | [02.3-listen-ux.md](./phasen/02.3-listen-ux.md) · Milestone [Phase 2.3](https://github.com/ktauchert/family-companion/milestone/3) · PR [#46](https://github.com/ktauchert/family-companion/pull/46) |
@@ -38,8 +38,9 @@ Quellen: [features.md](./features.md), [user-journey.md](./user-journey.md), [de
 
 ## Offene Entscheidungen (später)
 
-- **Landing Design (Marketing)** — nach [02.5 Scaffold](./phasen/02.5-landing-scaffold.md); finales Visual Pre-Launch
+- **Landing Design (Marketing)** — finales Visual, Screenshots, SEO Pre-Launch (Scaffold [02.5](./phasen/02.5-landing-scaffold.md) erledigt, PR [#48](https://github.com/ktauchert/family-companion/pull/48))
 - Kalender-Import (Google/Outlook) — eigenes ADR
 - Payment-Provider für Pro
 - Domain / Branding (Platzhalter: family-app.com)
 - Tages-Energie-Budget (Rest-Energie im Verlauf) — [ADR 0012](./adr/0012-tages-energie-budget.md), Arbeit Phase 4 WP3
+- E2E Web (Playwright) — nach Phase 2, siehe Qualitätssicherung

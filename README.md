@@ -6,7 +6,9 @@ Types, Zod-Schemas und Firestore-Konstanten liegen in `@family-companion/shared`
 
 ## Stand
 
-Phase 1 erledigt ([01-auth-haushalt](docs/phasen/01-auth-haushalt.md)): Auth & Haushalt. Phase **1.1** danach: Android Dev-Build + Google nativ ([01.1](docs/phasen/01.1-dev-build-google-native.md)). App in Expo Go: E-Mail; Google nur im Dev-Build ([ADR 0009](docs/adr/0009-auth-google-und-email.md)). Join: PIN + E-Mail-Whitelist ([ADR 0010](docs/adr/0010-invite-pin-und-email-whitelist.md)). Lessons: [docs/lessons-learned.md](docs/lessons-learned.md).
+Phase **2** erledigt — Alltag ([02-alltag](docs/phasen/02-alltag.md)) plus UX **2.1–2.5** (Heute, Kalender/Todos, Listen, Shell, Landing-Scaffold; PRs [#44](https://github.com/ktauchert/family-companion/pull/44)–[#48](https://github.com/ktauchert/family-companion/pull/48)). Web: öffentliche Landing `/`, App unter `(app)/…` mit Chrome. Nächster Block: [Phase 3 — Pro-Trigger](docs/phasen/03-pro-trigger.md).
+
+Phase 1 ([01-auth-haushalt](docs/phasen/01-auth-haushalt.md)) und **1.1** Dev-Build + Google nativ ([01.1](docs/phasen/01.1-dev-build-google-native.md)). App in Expo Go: E-Mail; Google nur im Dev-Build ([ADR 0009](docs/adr/0009-auth-google-und-email.md)). Join: PIN + E-Mail-Whitelist ([ADR 0010](docs/adr/0010-invite-pin-und-email-whitelist.md)). Lessons: [docs/lessons-learned.md](docs/lessons-learned.md).
 
 Produkt: [docs/features.md](docs/features.md) · Plan: [docs/phasenplan.md](docs/phasenplan.md)
 

@@ -19,7 +19,7 @@ Kalender und Todos sind Kern ([ADR 0003](./adr/0003-kalender-und-todos-sind-kern
 | **Einkaufslisten nach Thema** | Getrennt abhaken | Web + App; haushaltsspezifische Listen (`shopping_lists`), Inline-Add, Autocomplete ab 3 Zeichen; Heute aggregiert nach Listenname ([ADR 0006](./adr/0006-kategorisierte-einkaufslisten.md), [02.3-listen-ux.md](./phasen/02.3-listen-ux.md)) |
 | **Morgen-Check-in** | Stimmung + Energie nach dem Schlaf | Einmal pro Tag (drei Stufen je Feld); nach Speichern **Check-in-Chip** auf Heute (Phase 2.1), kein zweites Formular |
 | **Heute-Dashboard** | Priorisierter Tagesüberblick | Mini-Cards, Summary pro Bereich, Icons; [02.1-heute-ux.md](./phasen/02.1-heute-ux.md) |
-| **Einstellungen & Shell** | Konto, Theme, Abmelden, Legal | Web `/einstellungen`, Mobile Zahnrad auf Heute; Impressum/Datenschutz; Web-Footer ([02.4](./phasen/02.4-haushalt-nav-shell.md)) |
+| **Einstellungen & Shell** | Konto, Theme, Abmelden, Legal | Web `/einstellungen`, Mobile Zahnrad auf Heute; Impressum/Datenschutz im Marketing-Layout; App-Chrome nur in `(app)/…` ([02.4](./phasen/02.4-haushalt-nav-shell.md), [02.5](./phasen/02.5-landing-scaffold.md)) |
 | **Priorisierung (Algo)** | Passt den Tag an Energie an | Sortierung + Vorschläge mit Bestätigung ([ADR 0011](./adr/0011-morgen-priorisierung-vorschlaege.md)); nutzt **Morgen-Snapshot**, kein laufendes Budget ([ADR 0012](./adr/0012-tages-energie-budget.md)) |
 | Muster-Vorschläge Einkauf | „Milch ist oft nach 5 Tagen leer“ | Einfacher Algo, sobald genug Daten da sind |
 
@@ -48,6 +48,7 @@ Chat, Galerie, Locator, Budget, Dokumente, Rezeptbox/Meal-Planner als eigenes Mo
 
 ## Offene Punkte (nicht blockierend)
 
+- Landing-Design (Marketing): finales Visual, Screenshots, SEO — Scaffold [02.5](./phasen/02.5-landing-scaffold.md)
 - Kalender-Import (Google) — später, eigenes ADR
 - Payment-Provider
 - Domain / Branding

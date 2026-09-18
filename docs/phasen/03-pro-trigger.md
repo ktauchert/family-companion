@@ -1,6 +1,6 @@
 # Phase 3 — Pro-Upgrade-Trigger
 
-- Status: **offen**
+- Status: **offen** — nächster Block nach Phase 2 (Alltag + UX 2.1–2.5)
 - Branch: `phase-3-pro-trigger`
 - Ergebnis: Pro ist sichtbar, kaufbar (Feld), Limit fällt
 

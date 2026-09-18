@@ -14,4 +14,4 @@ Arbeitsdokumente für Family Companion. Hier landen Notizen, Journeys, der Phase
 | [lessons-learned.md](./lessons-learned.md) | Umwege und nächstes Mal |
 | [agents/](./agents/issue-tracker.md) | Skill-Config (Tracker, Domain-Docs) |
 
-Arbeitsregeln: [AGENTS.md](../AGENTS.md), [CONTRIBUTING.md](../CONTRIBUTING.md). Checkliste nach jeder Änderung in der [aktuellen Phasen-Datei](./phasen/01-auth-haushalt.md) setzen; neuer Scope: Punkt aufnehmen und `*(ergänzt)*` markieren. Persistierte Entities: vor dem Bau C/R/U/D einschätzen ([lessons-learned.md](./lessons-learned.md)).
+Arbeitsregeln: [AGENTS.md](../AGENTS.md), [CONTRIBUTING.md](../CONTRIBUTING.md). Checkliste nach jeder Änderung in der [aktuellen Phasen-Datei](./phasen/03-pro-trigger.md) setzen; neuer Scope: Punkt aufnehmen und `*(ergänzt)*` markieren. Persistierte Entities: vor dem Bau C/R/U/D einschätzen ([lessons-learned.md](./lessons-learned.md)).

@@ -78,3 +78,13 @@ Vor jedem Store: CRUD-Einschätzung — **[phase-2-crud-roles.md](../design/phas
 - [x] Morgen-Algo (Free) mit Tests
 - [x] Docs: Haken hier; [features.md](../features.md) bei Bedarf
 - [x] `firestore.rules` in Firebase Console veröffentlichen *(nach jedem Rules-Merge)*
+
+## UX-Nachzüge (2.1–2.5, nach PR #11)
+
+Kern-Alltag oben; danach eigene Phasen mit Milestones:
+
+- [x] [2.1 Heute UX](./02.1-heute-ux.md) · PR [#44](https://github.com/ktauchert/family-companion/pull/44)
+- [x] [2.2 Kalender & Todos UX](./02.2-kalender-todos-ux.md) · PR [#45](https://github.com/ktauchert/family-companion/pull/45)
+- [x] [2.3 Listen UX](./02.3-listen-ux.md) · PR [#46](https://github.com/ktauchert/family-companion/pull/46)
+- [x] [2.4 Haushalt, Nav & Shell](./02.4-haushalt-nav-shell.md) · PR [#47](https://github.com/ktauchert/family-companion/pull/47)
+- [x] [2.5 Landing (Scaffold)](./02.5-landing-scaffold.md) · PR [#48](https://github.com/ktauchert/family-companion/pull/48)

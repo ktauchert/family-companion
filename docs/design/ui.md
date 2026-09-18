@@ -227,9 +227,9 @@ Web: `apps/web/components/cards/` · Mobile: `apps/mobile/components/cards/`
 - **Settings:** Theme, Konto, Abmelden, Pro-Platzhalter.
 - **Legal:** Footer Web → Impressum/Datenschutz.
 
-## Landing (Phase 2.5)
+## Landing (umgesetzt 2.5)
 
-Öffentliches `/` mit Hero, drei Feature-Karten (Listen, Kalender & Todos, Heute) und auth-abhängigen CTAs. Route-Gruppen `(marketing)` vs `(app)`; App-Chrome nur in `(app)`. Tokens wie die App — kein separates Marketing-Theme. Details: [02.5-landing-scaffold.md](../phasen/02.5-landing-scaffold.md). Finales Visual und SEO **später**.
+Öffentliches `/` mit Hero, drei Feature-Karten (Listen, Kalender & Todos, Heute) und auth-abhängigen CTAs. Route-Gruppen `(marketing)` vs `(app)`; App-Chrome nur in `(app)`. Tokens wie die App — kein separates Marketing-Theme. Details: [02.5-landing-scaffold.md](../phasen/02.5-landing-scaffold.md) (PR [#48](https://github.com/ktauchert/family-companion/pull/48)). Finales Visual und SEO **später** (Pre-Launch).
 
 ---
 

@@ -15,7 +15,7 @@ Produktkatalog: [features.md](./features.md).
 
 ### 1. Registrierung & Haushalts-Erstellung (Julian – Next.js Web App)
 
-1. **Landing Page:** Julian öffnet `/login` (anmelden) oder `/register` (neues E-Mail-Konto). Google nur auf Login.
+1. **Landing Page:** Julian öffnet `/` — öffentliche Startseite mit **Anmelden**, **Registrieren** oder **Kostenlos starten**. Google nur auf Login.
 2. **Auth Flow:** Firebase erzeugt oder findet den Account. Google ist der Komfortweg; E-Mail reicht zum Mitmachen und zum Testen ohne zweites Google-Konto ([ADR 0009](./adr/0009-auth-google-und-email.md)).
 3. **Haushalt anlegen:** Ein Onboarding fragt nach dem Haushaltsnamen (*Unser Haushalt*). Firestore vergibt die Dokument-ID. Es entsteht ein 6-stelliger PIN.
 4. **Einladung:** Unter Haushalt sieht Julian die Mitglieder **mit Konto-E-Mail** (nicht nur „Mitglied“). *Einladungen verwalten* (`/haushalt/einladen`): E-Mail auf die Liste, ändern, entfernen. PIN daneben, Versand per WhatsApp oder SMS ([ADR 0010](./adr/0010-invite-pin-und-email-whitelist.md)).
