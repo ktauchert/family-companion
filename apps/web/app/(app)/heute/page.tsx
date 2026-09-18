@@ -6,10 +6,12 @@ import type {
   Household,
   MorningCheckIn,
   MorningCheckInBand,
+  OpenMandatoryHabit,
   PrioritizationSuggestion,
   ShoppingItem,
   ShoppingList,
   TodoItem,
+  UserPreferences,
 } from '@family-companion/shared';
 import {
   applySuggestionToEvent,
@@ -18,8 +20,11 @@ import {
   ENERGY_CHECK_IN_OPTIONS,
   energyBandToValue,
   ensureMemberEmail,
+  evaluateKaizenNudge,
   isCalendarEventDoneForUser,
+  isKaizenNudgesEnabled,
   isTodoDoneForUser,
+  listOpenMandatoryHabitsForUser,
   localDateString,
   messageFromStoreError,
   missingDefaultShoppingLists,
@@ -39,6 +44,8 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { Chrome } from '../../../components/Chrome';
 import { AreaSummaryCards } from '../../../components/heute/AreaSummaryCards';
+import { KaizenNudgeCard } from '../../../components/heute/KaizenNudgeCard';
+import { MandatoryHabitsSection } from '../../../components/heute/MandatoryHabitsSection';
 import { ProTeaserCards } from '../../../components/heute/ProTeaserCards';
 import { CheckInChip } from '../../../components/heute/CheckInChip';
 import { DayPlanItemCard } from '../../../components/heute/DayPlanItemCard';
@@ -50,6 +57,7 @@ import { morning } from '../../../lib/morning';
 import { shopping } from '../../../lib/shopping';
 import { shoppingLists } from '../../../lib/shoppingLists';
 import { todos } from '../../../lib/todos';
+import { userPreferences } from '../../../lib/userPreferences';
 
 function isDayPlanItemDone(
   item: DayPlanItem,
@@ -83,8 +91,15 @@ export default function HeutePage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [prefs, setPrefs] = useState<UserPreferences | null>(null);
 
   const today = localDateString();
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     return onAuthStateChanged(auth, async (user) => {
@@ -150,6 +165,40 @@ export default function HeutePage() {
       unsubLists();
     };
   }, [household, today, uid]);
+
+  useEffect(() => {
+    if (!uid) {
+      return;
+    }
+    return userPreferences.subscribeForUser(uid, setPrefs);
+  }, [uid]);
+
+  const openMandatoryHabits = useMemo(() => {
+    if (!uid || household?.plan !== 'pro') {
+      return [];
+    }
+    return listOpenMandatoryHabitsForUser({
+      actorId: uid,
+      date: today,
+      events,
+      todos: todoItems,
+    });
+  }, [household?.plan, uid, today, events, todoItems]);
+
+  const kaizenNudge = useMemo(() => {
+    if (!household || !uid) {
+      return null;
+    }
+    return evaluateKaizenNudge({
+      household,
+      actorId: uid,
+      date: today,
+      now,
+      events,
+      todos: todoItems,
+      kaizenNudgesEnabled: isKaizenNudgesEnabled(prefs ?? undefined),
+    });
+  }, [household, uid, today, now, events, todoItems, prefs]);
 
   const actorCheckIn = useMemo(
     () => checkIns.find((entry) => entry.userId === uid) ?? null,
@@ -388,6 +437,29 @@ export default function HeutePage() {
               </button>
             </section>
           ) : null}
+
+          {openMandatoryHabits.length > 0 ? (
+            <MandatoryHabitsSection
+              habits={openMandatoryHabits}
+              events={events}
+              todos={todoItems}
+              household={household}
+              togglingId={togglingId}
+              isDone={(habit) => {
+                if (habit.targetKind === 'event') {
+                  const event = events.find((entry) => entry.id === habit.id);
+                  return event ? isCalendarEventDoneForUser(event, uid) : false;
+                }
+                const todo = todoItems.find((entry) => entry.id === habit.id);
+                return todo ? isTodoDoneForUser(todo, uid) : false;
+              }}
+              onToggleDone={(habit) =>
+                void toggleDayPlanItem({ kind: habit.targetKind, id: habit.id, title: habit.title, energyHint: 'medium' })
+              }
+            />
+          ) : null}
+
+          {kaizenNudge ? <KaizenNudgeCard nudge={kaizenNudge} /> : null}
 
           {visibleSuggestions.length > 0 ? (
             <section className="stack">

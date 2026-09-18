@@ -8,6 +8,7 @@ import type {
   Recurrence,
 } from '@family-companion/shared';
 import {
+  MANDATORY_DAILY_LABEL,
   CALENDAR_KIND_LABELS,
   COMPLETION_MODE_LABELS,
   ENERGY_HINT_LABELS,
@@ -34,6 +35,7 @@ export type CalendarEventDraft = {
   recurrence: Recurrence;
   kind: CalendarEvent['kind'];
   energyHint: EnergyBand;
+  mandatoryDaily?: boolean;
 };
 
 export function calendarEventDraftFromEvent(event: CalendarEvent): CalendarEventDraft {
@@ -46,6 +48,7 @@ export function calendarEventDraftFromEvent(event: CalendarEvent): CalendarEvent
     recurrence: event.recurrence,
     kind: event.kind,
     energyHint: event.energyHint ?? 'medium',
+    mandatoryDaily: event.mandatoryDaily,
   };
 }
 
@@ -69,6 +72,7 @@ export function CalendarEventModal({
   modalError,
   done,
   canDelete,
+  isPro,
   onClose,
   onDraftChange,
   onSave,
@@ -82,6 +86,7 @@ export function CalendarEventModal({
   draft: CalendarEventDraft;
   household: Household;
   actorId: string;
+  isPro: boolean;
   members: Array<{ userId: string; email: string | null }>;
   busy: boolean;
   modalError?: string | null;
@@ -123,6 +128,7 @@ export function CalendarEventModal({
             {COMPLETION_MODE_LABELS[event.completionMode]}
             {' · '}
             {CALENDAR_KIND_LABELS[event.kind]}
+            {event.mandatoryDaily ? ` · ${MANDATORY_DAILY_LABEL}` : ''}
           </p>
           <ModalActionBar
             mode="view"
@@ -191,7 +197,14 @@ export function CalendarEventModal({
               value: value as Recurrence,
               label,
             }))}
-            onChange={(recurrence) => onDraftChange({ ...draft, recurrence })}
+            onChange={(recurrence) =>
+              onDraftChange({
+                ...draft,
+                recurrence,
+                mandatoryDaily:
+                  draft.kind === 'habit' && recurrence === 'daily' ? draft.mandatoryDaily : undefined,
+              })
+            }
           />
           <ChipSelector
             label="Erledigung"
@@ -209,8 +222,26 @@ export function CalendarEventModal({
               value: value as CalendarEvent['kind'],
               label,
             }))}
-            onChange={(kind) => onDraftChange({ ...draft, kind })}
+            onChange={(kind) =>
+              onDraftChange({
+                ...draft,
+                kind,
+                mandatoryDaily: kind === 'habit' && draft.recurrence === 'daily' ? draft.mandatoryDaily : undefined,
+              })
+            }
           />
+          {isPro && draft.kind === 'habit' && draft.recurrence === 'daily' ? (
+            <label className="check-row">
+              <input
+                type="checkbox"
+                checked={draft.mandatoryDaily === true}
+                onChange={(e) =>
+                  onDraftChange({ ...draft, mandatoryDaily: e.target.checked ? true : undefined })
+                }
+              />
+              {MANDATORY_DAILY_LABEL}
+            </label>
+          ) : null}
           <ChipSelector
             label="Energie-Hinweis"
             value={draft.energyHint}

@@ -1,4 +1,5 @@
 import { isCalendarEventDoneForUser } from '../calendar/completion';
+import { isMandatoryDailyHabitEntity } from '../habits/open-mandatory';
 import { isTodoDoneForUser } from '../todos/completion';
 import { shoppingListName } from '../shopping/defaults';
 import { isShoppingItemOpen } from '../shopping/item';
@@ -116,6 +117,9 @@ function buildDayItems(input: PrioritizeDayInput): DayPlanItem[] {
     if (!isEventToday(event, input.date)) {
       continue;
     }
+    if (isMandatoryDailyHabitEntity(event)) {
+      continue;
+    }
     if (isCalendarEventDoneForUser(event, input.actorId)) {
       continue;
     }
@@ -133,6 +137,9 @@ function buildDayItems(input: PrioritizeDayInput): DayPlanItem[] {
 
   for (const todo of input.todos) {
     if (!isTodoRelevantToday(todo, input.date)) {
+      continue;
+    }
+    if (isMandatoryDailyHabitEntity(todo)) {
       continue;
     }
     if (isTodoDoneForUser(todo, input.actorId)) {

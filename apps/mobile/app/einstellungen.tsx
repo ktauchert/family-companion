@@ -1,15 +1,20 @@
-import type { Household } from '@family-companion/shared';
+import type { Household, UserPreferences } from '@family-companion/shared';
 import {
+  defaultUserPreferences,
+  isKaizenNudgesEnabled,
   messageFromStoreError,
+  prepareSaveUserPreferences,
   upgradeHouseholdPlanMessage,
   upgradeHouseholdToPro,
+  userPreferencesErrorMessage,
 } from '@family-companion/shared';
 import { Stack, useRouter } from 'expo-router';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { auth } from '../lib/firebase';
 import { households } from '../lib/households';
+import { userPreferences } from '../lib/userPreferences';
 import {
   THEME_PREFERENCE_LABELS,
   useTheme,
@@ -28,6 +33,7 @@ export default function EinstellungenScreen() {
   const [household, setHousehold] = useState<Household | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [prefs, setPrefs] = useState<UserPreferences | null>(null);
 
   useEffect(() => {
     return onAuthStateChanged(auth, async (user) => {
@@ -45,6 +51,13 @@ export default function EinstellungenScreen() {
       setHousehold(found);
     });
   }, [router]);
+
+  useEffect(() => {
+    if (!uid) {
+      return;
+    }
+    return userPreferences.subscribeForUser(uid, setPrefs);
+  }, [uid]);
 
   async function activateFamilyPlus() {
     if (!household || !uid) {
@@ -73,6 +86,35 @@ export default function EinstellungenScreen() {
     try {
       await signOut(auth);
       router.replace('/login');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function setKaizenNudgesEnabled(enabled: boolean) {
+    if (!uid) {
+      return;
+    }
+    const result = prepareSaveUserPreferences({
+      actorId: uid,
+      preferences: {
+        ...defaultUserPreferences(uid),
+        ...prefs,
+        userId: uid,
+        kaizenNudgesEnabled: enabled,
+      },
+    });
+    if (!result.ok) {
+      setError(userPreferencesErrorMessage(result.reason));
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      await userPreferences.savePreferences(result.preferences);
+      setPrefs(result.preferences);
+    } catch (err) {
+      setError(messageFromStoreError(err, 'Einstellung konnte nicht gespeichert werden.'));
     } finally {
       setBusy(false);
     }
@@ -183,6 +225,15 @@ export default function EinstellungenScreen() {
                 );
               })}
             </View>
+          </View>
+
+          <View style={styles.row}>
+            <Text style={styles.label}>Kaizen-Nudges</Text>
+            <Switch
+              value={isKaizenNudgesEnabled(prefs ?? undefined)}
+              disabled={busy}
+              onValueChange={(value) => void setKaizenNudgesEnabled(value)}
+            />
           </View>
 
           <View style={styles.row}>

@@ -20,8 +20,9 @@ Kalender und Todos sind Kern ([ADR 0003](./adr/0003-kalender-und-todos-sind-kern
 | **Morgen-Check-in** | Stimmung + Energie nach dem Schlaf | Einmal pro Tag (drei Stufen je Feld); nach Speichern **Check-in-Chip** auf Heute (Phase 2.1), kein zweites Formular |
 | **Heute-Dashboard** | Priorisierter Tagesüberblick | Mini-Cards, Summary pro Bereich, Icons; [02.1-heute-ux.md](./phasen/02.1-heute-ux.md) |
 | **Einstellungen & Shell** | Konto, Theme, Abmelden, Legal | Web `/einstellungen`, Mobile Zahnrad auf Heute; Impressum/Datenschutz im Marketing-Layout; App-Chrome nur in `(app)/…` ([02.4](./phasen/02.4-haushalt-nav-shell.md), [02.5](./phasen/02.5-landing-scaffold.md)) |
-| **Priorisierung (Algo)** | Passt den Tag an Energie an | Sortierung + Vorschläge mit Bestätigung ([ADR 0011](./adr/0011-morgen-priorisierung-vorschlaege.md)); nutzt **Morgen-Snapshot**, kein laufendes Budget ([ADR 0012](./adr/0012-tages-energie-budget.md)) |
-| Muster-Vorschläge Einkauf | „Milch ist oft nach 5 Tagen leer“ | Einfacher Algo, sobald genug Daten da sind |
+| **Priorisierung (Algo)** | Passt den Tag an Energie an | Sortierung + Vorschläge mit Bestätigung ([ADR 0011](./adr/0011-morgen-priorisierung-vorschlaege.md)); Morgen-Snapshot; ab Phase 4 **IST + Forecast** auf Heute ([ADR 0012](./adr/0012-tages-energie-budget.md)) |
+| Muster-Vorschläge Einkauf | „Milch ist oft nach 5 Tagen leer“ | Einfacher Algo (Phase 4 WP4), sobald genug Daten da sind |
+| **Energie-Budget (Anzeige)** | Sieht vorher, ob der Tag passt | IST + Forecast auf Heute — auch **Free** ([ADR 0012](./adr/0012-tages-energie-budget.md)) |
 
 ---
 
@@ -30,13 +31,13 @@ Kalender und Todos sind Kern ([ADR 0003](./adr/0003-kalender-und-todos-sind-kern
 | Feature | Nutzen | Notes |
 | --- | --- | --- |
 | Unbegrenzte Mitglieder | Weitere Personen einladen | Family+ |
-| **Per-Member-Erledigung** | Jede Person hakte denselben Termin/Todo selbst ab | Z. B. Fitness für Julian *und* Sophie ([ADR 0004](./adr/0004-per-member-habits-und-kaizen.md)) |
-| **Tägliche Pflicht-Habits** | Immer sichtbar, bis erledigt | Wiederkehrend, z. B. mandatory pro Tag |
-| **Kaizen / Ikigai-Nudge** | 1 % heute, Disziplin halten | Hinweis + Motivationsspruch, wenn ein Tag fehlt. Abschaltbar. |
-| **Priorisierung (KI)** | Feinere Reihenfolge und Umverteilung | Statt/zusätzlich zum Algo: wer übernimmt, was wartet |
-| **KI-Tagesbriefing** | Morgenüberblick aus Kalender, Todos, Listen, Check-in | Erweitert den Free-Algo |
-| **Tages-Energie-Budget** | Rest-Energie im Tagesverlauf (Tasks/Termine verbrauchen/entlasten) | Phase 4 ([ADR 0012](./adr/0012-tages-energie-budget.md)); baut auf Morgen-Check-in + `energyHint` auf |
-| **Smart Shopping (KI)** | Freitext + Muster aus Abhaken/Einfügen | Z. B. *Wir kochen Lasagne.* |
+| **Per-Member-Erledigung** | Jede Person hakte denselben Termin/Todo selbst ab | **Free** — z. B. Fitness ([ADR 0004](./adr/0004-per-member-habits-und-kaizen.md)) |
+| **Tägliche Pflicht-Habits** | Immer sichtbar auf Heute, bis erledigt | Nur Pro; `mandatoryDaily` |
+| **Kaizen / Ikigai-Nudge** | 1 % heute, Disziplin halten | Abends bei offenem Pflicht-Habit; Spruch lokal (LLM optional später). **Jedes Mitglied** schaltet für sich ab. |
+| **Priorisierung (KI)** | Feinere Reihenfolge und Umverteilung | Ergänzt Free-Algo; Consent vor API ([ADR 0013](./adr/0013-ki-priorisierung-und-briefing.md)) |
+| **KI-Tagesbriefing** | Morgenüberblick aus Kalender, Todos, Listen, Check-in, Budget | `/api/ai/daily-summary`; Web + Mobile |
+| **Tages-Energie-Budget (Verfeinerung)** | KI und Pro-Sortierung nutzen IST/Forecast | Anzeige IST + Forecast auch **Free** ([ADR 0012](./adr/0012-tages-energie-budget.md)) |
+| **Smart Shopping (KI)** | Freitext auf Heute und Listen | KI schlägt **Liste + Items** vor; Free-Muster-Algo separat ([ADR 0006](./adr/0006-kategorisierte-einkaufslisten.md)) |
 
 ---
 

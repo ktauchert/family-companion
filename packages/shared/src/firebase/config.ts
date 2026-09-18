@@ -5,6 +5,7 @@ export const FIRESTORE_COLLECTIONS = {
   todos: 'todos',
   calendarEvents: 'calendar_events',
   morningCheckIns: 'morning_checkins',
+  userPreferences: 'user_preferences',
 } as const;
 
 export const FREE_TIER_MAX_MEMBERS = 2;

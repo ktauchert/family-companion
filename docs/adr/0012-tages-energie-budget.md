@@ -1,55 +1,67 @@
-# ADR 0012: Tages-Energie-Budget — Morgen-Snapshot heute, dynamischer Verbrauch später
+# ADR 0012: Tages-Energie-Budget — IST, Forecast, 10×-Skala
 
-- Status: Proposed
-- Datum: 2026-09-15
+- Status: Accepted
+- Datum: 2026-09-15 (Phase-2-Teil); ergänzt 2026-09-18 (Phase-4-Entscheidungen)
 - Ergänzt: [ADR 0005](./0005-morgen-check-in-und-priorisierung.md), [ADR 0011](./0011-morgen-priorisierung-vorschlaege.md)
-- Geplant: Phase 4 (siehe [04-pro-ki-habits.md](../phasen/04-pro-ki-habits.md))
+- Umsetzung: [04-pro-ki-habits.md](../phasen/04-pro-ki-habits.md) WP3
 
 ## Kontext
 
-Der Morgen-Check-in erfasst Stimmung und Energie **einmal pro Tag** ([ADR 0005](./0005-morgen-check-in-und-priorisierung.md)). Phase 2 speichert dafür Werte auf einer 1–5-Skala; die UI nutzt drei Stufen (z. B. Mies / Neutral / Spitze → 1 / 3 / 5).
+Der Morgen-Check-in erfasst Stimmung und Energie **einmal pro Tag** ([ADR 0005](./0005-morgen-check-in-und-priorisierung.md)). Phase 2 speichert Werte auf 1–5 (UI: drei Stufen → 1 / 3 / 5).
 
-Im Alltag ändert sich die verfügbare Energie jedoch: ein energieintensiver Termin oder ein abgehakter schwerer Task „kostet“ Kapazität; leichte Erledigungen oder Pausen können subjektiv eher entlasten. Das ist **nicht** dasselbe wie das statische Feld `energyHint` an einem Todo/Event — das beschreibt nur den **geschätzten Aufwand** des Items, nicht den **aktuellen Rest** der Person am Tag.
+Die Skala 1–5 ist für Addition und Subtraktion im Tagesverlauf **zu grob** (z. B. „mittlere Aktivität kostet 3“ würde bei Startwert 3 den Tag sofort leeren). Phase 4 führt deshalb eine **interne Budget-Skala 0–50** ein (10× der Check-in-Stufen).
 
-Phase 2 priorisiert anhand des **Morgen-Snapshots** plus `energyHint` der offenen Items ([ADR 0011](./0011-morgen-priorisierung-vorschlaege.md)). Ein laufendes Energie-Budget ist bewusst **nicht** Teil von Phase 2.
+`energyHint` am Item beschreibt den **geschätzten Aufwand**, nicht den Rest der Person. Das Budget verbindet Check-in, Items und (später) Erledigungen zu zwei Kennzahlen:
+
+- **IST** — verbleibende Energie nach dem bisherigen Tagesverbrauch
+- **Forecast** — Summe des erwarteten Verbrauchs **aller** heutigen Aufgaben/Termine
+
+So sehen Mensch und Programm **vorher**, ob der Tag passt, überbucht ist oder Entlastung nötig ist.
+
+Phase 2 priorisiert nur mit dem **Morgen-Snapshot** ([ADR 0011](./0011-morgen-priorisierung-vorschlaege.md)).
 
 ## Entscheidung
 
-### Phase 2 (umgesetzt, Stand 2026-09-15)
+### Phase 2 (umgesetzt)
 
 | Thema | Verhalten |
 | --- | --- |
 | **Check-in UI** | Drei Buttons je Stimmung und Energie; Speichern legt den Tageswert an |
-| **Nach erstem Speichern** | Check-in auf **Heute ausgeblendet** — kein Bearbeiten in der Tagesansicht |
-| **Persistenz** | `morning_checkins`: `mood` und `energy` als Zahl (1 / 3 / 5 aus UI) |
-| **Priorisierung** | Nutzt den **gespeicherten Morgenwert** den ganzen Tag; keine automatische Anpassung beim Abhaken |
-| **`energyHint`** | Statisches Metadatum am Event/Todo (`low` \| `medium` \| `high`), Default `medium` |
+| **Nach erstem Speichern** | Check-in auf Heute ausgeblendet — kein Bearbeiten in der Tagesansicht |
+| **Persistenz** | `morning_checkins`: `mood` und `energy` als Zahl (1 / 3 / 5) |
+| **Priorisierung** | Gespeicherter Morgenwert den ganzen Tag; keine Anpassung beim Abhaken |
+| **`energyHint`** | Statisch am Event/Todo (`low` \| `medium` \| `high`), Default `medium` |
 
-Technisch erlauben Shared und Firestore noch **Update am selben Kalendertag** (Korrekturpfad aus [phase-2-crud-roles.md](../design/phase-2-crud-roles.md)); die Heute-UI nutzt ihn nicht. Ein späteres ADR-Update kann Updates ganz abschalten, wenn gewünscht.
+### Phase 4 — Tages-Energie-Budget
 
-### Später — Tages-Energie-Budget (Phase 4, Proposed)
+| Thema | Entscheidung |
+| --- | --- |
+| **Persistenz** | **Nur berechnet** — kein `remainingEnergy` in Firestore |
+| **Budget-Skala** | **0–50** intern; Start = Check-in-Energie × 10 (1→10, 3→30, 5→50). Check-in bleibt 1/3/5 in `morning_checkins` |
+| **`energyHint` → Punkte** | Mapping in Shared (Tests); Prinzip: medium ≈ 30 Punkte Verbrauch auf der 10×-Skala — exakte Werte für low/high bei Implementierung kalibrieren |
+| **Wann neu rechnen** | Beim **Heute-Load/Sync** (Tages-Replay), **nicht** optimistisch bei jedem Abhaken |
+| **IST** | Start minus Verbrauch aus **erledigten** Items des Tages (für den betrachteten User) |
+| **Forecast** | Summe Verbrauch **aller** heutigen Items (Termine + Todos), unabhängig vom Erledigungsstand |
+| **UI Free** | Heute zeigt IST + Forecast (Überbuchung wenn Forecast > Start) |
+| **UI Pro** | KI und feinere Priorisierung nutzen zusätzlich IST/Forecast ([ADR 0013](./0013-ki-priorisierung-und-briefing.md)) |
+| **Free-Algo** | Kann IST/Forecast einbeziehen; Morgen-Snapshot allein bleibt Fallback ohne Check-in |
 
-Ein **berechneter Tagesverlauf** auf Basis des Morgen-Check-ins:
+**Noch bei Implementierung zu kalibrieren** *(nicht blockierend für ADR)*:
 
-1. **Startwert** = gespeicherte Energie aus `morning_checkins` (und optional Stimmung als Gewicht).
-2. **Verbrauch / Entlastung** = Funktion aus erledigten und offenen Items mit `energyHint`, optional Dauer/Zeitfenster (Termine).
-3. **Rest-Energie** (virtuell oder persistiert) steuert **Neusortierung** auf Heute und ggf. neue Vorschläge — ergänzt den Free-Algo und die KI-Priorisierung ([Phase 4](../phasen/04-pro-ki-habits.md)).
-
-**Noch nicht festgelegt** (vor Implementierung klären):
-
-- Nur **berechnet** aus Check-in + Completions, oder zusätzliches Feld (z. B. `remainingEnergy`) pro User/Tag?
-- Ob Abhaken **sofort** den Rest senkt oder nur beim Tages-Replay;
-- Grenzen (nie unter 0, Deckel bei 5, Haushalts-Aggregation für Partner-Vorschläge).
+- Ob Termine mit Dauer stärker gewichtet werden als Todos
+- Ob `energyHint: low` entlastet oder nur wenig kostet
+- Haushalts-Aggregation für Partner-Vorschläge (Minimum pro Person vs. niedrigster im Haushalt)
 
 ## Konsequenzen
 
-- Phase 2 bleibt erklärbar: ein Check-in, ein Algo-Snapshot, keine versteckte Energie-Arithmetik.
-- Phase 4 braucht eigene Tests für Budget-Logik (Start, Verbrauch, Sortierung, Negativfälle).
-- UI Phase 4: optional Anzeige „noch Energie für …“ auf Heute — nicht in Phase 2.
-- KI-Briefing ([Phase 4](../phasen/04-pro-ki-habits.md)) kann Rest-Energie als Input nutzen, ersetzt aber nicht den deterministischen Free-Pfad.
+- Phase 2 bleibt erklärbar: kein Budget in Phase 2.
+- Shared-Modul `morning/energy-budget.ts` (o. ä.) mit Vitest inkl. Überbuchung und leerem Tag.
+- UI-Copy: Nutzer sehen Budget in verständlicher Form (nicht rohe 0–50-Zahl ohne Kontext — z. B. Balken oder „passt / knapp / zu viel“).
+- KI-Briefing erhält IST, Forecast und Check-ins als Input.
 
 ## Alternativen
 
-- **Nur Morgen-Snapshot (Status quo Phase 2):** einfach, aber Tagesverlauf unrealistisch nachmittags.
-- **Nutzer passt Check-in mehrmals an:** widerspricht „morgens festgelegt“; verworfen für Heute-UX.
-- **Sofort in Phase 2:** zu viel Scope neben CRUD und erstem Algo; verschoben auf Phase 4.
+- **Skala 1–5 beibehalten:** zu grob für sinnvolle Subtraktion — verworfen.
+- **Persistiertes `remainingEnergy`:** unnötige Sync-Komplexität — verworfen (nur berechnet).
+- **Sofortiges Update beim Abhaken:** widerspricht Tages-Replay — verworfen.
+- **Budget nur Pro:** Rest-Anzeige soll auch Free helfen — IST/Forecast Free, Verfeinerung Pro.

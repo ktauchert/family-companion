@@ -80,13 +80,17 @@ export function defaultStartsAtLocal(): string {
   return toDatetimeLocalValue(now.toISOString());
 }
 
+import { mandatoryDailyErrorMessage } from '../habits/mandatory-daily';
+
 export function createCalendarEventErrorMessage(
   reason:
     | 'not_member'
     | 'title_required'
     | 'invalid_dates'
     | 'invalid_assignee'
-    | 'not_allowed',
+    | 'not_allowed'
+    | 'pro_required'
+    | 'invalid_mandatory',
 ): string {
   switch (reason) {
     case 'not_member':
@@ -99,5 +103,9 @@ export function createCalendarEventErrorMessage(
       return 'Zuweisung muss ein Haushaltsmitglied sein.';
     case 'not_allowed':
       return 'Diese Änderung ist nicht erlaubt.';
+    case 'pro_required':
+      return mandatoryDailyErrorMessage('pro_required');
+    case 'invalid_mandatory':
+      return mandatoryDailyErrorMessage('invalid_mandatory');
   }
 }

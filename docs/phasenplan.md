@@ -22,7 +22,7 @@ Quellen: [features.md](./features.md), [user-journey.md](./user-journey.md), [de
 | **2.4 Haushalt, Nav & Shell** | erledigt | [02.4-haushalt-nav-shell.md](./phasen/02.4-haushalt-nav-shell.md) · Milestone [Phase 2.4](https://github.com/ktauchert/family-companion/milestone/4) · PR [#47](https://github.com/ktauchert/family-companion/pull/47) |
 | **2.5 Landing (Scaffold)** | erledigt | [02.5-landing-scaffold.md](./phasen/02.5-landing-scaffold.md) · Milestone [Phase 2.5](https://github.com/ktauchert/family-companion/milestone/5) · PR [#48](https://github.com/ktauchert/family-companion/pull/48) |
 | **3 Pro-Trigger** | erledigt | [03-pro-trigger.md](./phasen/03-pro-trigger.md) · PR [#49](https://github.com/ktauchert/family-companion/pull/49) |
-| 4 Pro: KI & Habits | offen | [04-pro-ki-habits.md](./phasen/04-pro-ki-habits.md) |
+| 4 Pro: KI & Habits | offen | [04-pro-ki-habits.md](./phasen/04-pro-ki-habits.md) · Milestone [Phase 4](https://github.com/ktauchert/family-companion/milestone/6) · Issues [#50](https://github.com/ktauchert/family-companion/issues/50)–[#53](https://github.com/ktauchert/family-companion/issues/53) |
 
 ## Qualitätssicherung
 
@@ -42,5 +42,6 @@ Quellen: [features.md](./features.md), [user-journey.md](./user-journey.md), [de
 - Kalender-Import (Google/Outlook) — eigenes ADR
 - Payment-Provider für Pro
 - Domain / Branding (Platzhalter: family-app.com)
-- Tages-Energie-Budget (Rest-Energie im Verlauf) — [ADR 0012](./adr/0012-tages-energie-budget.md), Arbeit Phase 4 WP3
+- Energie-Budget: Mapping `energyHint` → Punkte und Termin-Gewichtung kalibrieren — [ADR 0012](./adr/0012-tages-energie-budget.md), WP3
+- Kaizen-Sprüche per LLM (optional nach lokaler Liste) — WP1
 - E2E Web (Playwright) — nach Phase 2, siehe Qualitätssicherung
