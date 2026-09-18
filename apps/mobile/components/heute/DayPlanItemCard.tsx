@@ -5,6 +5,7 @@ import {
   dayPlanItemTitle,
   dayPlanItemToggleSupported,
   dayPlanKindStamp,
+  parseDefaultShoppingListCategory,
 } from '@family-companion/shared';
 import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 import { DayPlanKindIconGlyph, ShoppingCategoryIconGlyph } from '../nav-icons';
@@ -35,6 +36,10 @@ export function DayPlanItemCard({
         : undefined,
   });
   const canToggle = dayPlanItemToggleSupported(item) && onToggleDone;
+  const shoppingCategory =
+    item.kind === 'shopping' && item.shoppingListId
+      ? parseDefaultShoppingListCategory(item.shoppingListId, household.id)
+      : undefined;
 
   const styles = StyleSheet.create({
     card: {
@@ -63,8 +68,8 @@ export function DayPlanItemCard({
     <View style={styles.card}>
       <Pressable style={styles.link} onPress={onPress} accessibilityRole="button">
         <View style={styles.icon}>
-          {item.kind === 'shopping' && item.shoppingCategory ? (
-            <ShoppingCategoryIconGlyph icon={item.shoppingCategory} size={22} color={theme.inkSoft} />
+          {item.kind === 'shopping' && shoppingCategory ? (
+            <ShoppingCategoryIconGlyph icon={shoppingCategory} size={22} color={theme.inkSoft} />
           ) : (
             <DayPlanKindIconGlyph icon={item.kind} size={22} color={theme.inkSoft} />
           )}

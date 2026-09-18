@@ -513,6 +513,155 @@ button.item-card-main:hover .item-card-title {
   flex-shrink: 0;
 }
 
+.listen-inline-add {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.listen-inline-add-field {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.listen-inline-add-input {
+  width: 100%;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+
+.listen-suggestions {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 2;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: var(--sheet);
+  box-shadow: 0 12px 32px -16px rgb(43 38 31 / 18%);
+}
+
+.listen-suggestion {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  background: none;
+  color: var(--ink);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.listen-suggestion:hover,
+.listen-suggestion--active {
+  background: var(--well);
+}
+
+.listen-inline-add-btn {
+  flex-shrink: 0;
+  padding: 10px;
+}
+
+.listen-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.listen-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  padding: 4px 0;
+  border-top: 1px solid var(--rule);
+}
+
+.listen-row-check {
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.listen-row-name {
+  flex: 1;
+  min-width: 0;
+  font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+  font-size: 1.0625rem;
+  line-height: 1.375rem;
+}
+
+.listen-row-name.done {
+  text-decoration: line-through;
+  color: var(--ink-faint);
+}
+
+.listen-row-delete {
+  flex-shrink: 0;
+  padding: 8px;
+  opacity: 0;
+  pointer-events: none;
+  color: var(--rust);
+}
+
+.listen-row:focus-within .listen-row-delete,
+.listen-row:hover .listen-row-delete {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.listen-tabs {
+  flex-wrap: wrap;
+}
+
+.listen-tab-action {
+  font-size: 14px;
+  padding: 8px 12px;
+}
+
+.listen-list-menu {
+  position: fixed;
+  z-index: 30;
+  min-width: 160px;
+  padding: 4px 0;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: var(--sheet);
+  box-shadow: 0 12px 32px -16px rgb(43 38 31 / 18%);
+}
+
+.listen-list-menu button {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  background: none;
+  color: var(--ink);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.listen-list-menu button:hover {
+  background: var(--well);
+}
+
+.listen-list-menu button.danger {
+  color: var(--rust);
+}
+
 .item-card--past {
   opacity: 0.72;
 }

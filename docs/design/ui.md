@@ -214,7 +214,7 @@ Web: `apps/web/components/cards/` · Mobile: `apps/mobile/components/cards/`
 - **Neue Liste:** Plus oben rechts in der Card → Modal.
 - **Artikel:** Hinzufügen unter den Chips — ein Textfeld, ✓/✗ rechts; Kategorie = aktiver Tab.
 - **Zeile:** Checkbox + Name; Löschen-Icon rechts nur bei Fokus; keine Meta-Zeile.
-- **Kategorie:** Bearbeiten/Löschen am Ende der Chips (aktiver Tab); Löschen nur **Inhaber**, bei Items **verschieben nach** anderer Liste.
+- **Kategorie:** Long-Press (App) / Rechtsklick (Web) auf Listen-Chip → Bearbeiten / Löschen
 - **Autocomplete:** ab 3 Zeichen, Teilmatch auf frühere Artikelnamen.
 
 ## Haushalt & Shell (Phase 2.4)

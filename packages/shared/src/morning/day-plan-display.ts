@@ -1,28 +1,25 @@
 import { formatCalendarEventRange } from '../calendar/display';
-import { SHOPPING_CATEGORY_LABELS } from '../shopping/display';
 import { formatDueDate } from '../todos/display';
 import type { NavIcon } from '../display/icons';
 import { DAY_PLAN_KIND_ICON_LABELS } from '../display/icons';
-import type { ShoppingCategory } from '../types';
 import type { DayPlanItem } from './prioritize';
 
 export type DayPlanItemTarget = {
   area: NavIcon;
   webPath: string;
   mobilePath: string;
-  shoppingCategory?: ShoppingCategory;
+  shoppingListId?: string;
 };
 
 export type DayPlanItemMetaOptions = {
   assigneeLabel?: string;
 };
 
-/** Primary line on Heute cards — shopping uses category summary, not product names. */
+/** Primary line on Heute cards — shopping uses list summary, not product names. */
 export function dayPlanItemTitle(item: DayPlanItem): string {
-  if (item.kind === 'shopping' && item.shoppingCategory) {
-    const label = SHOPPING_CATEGORY_LABELS[item.shoppingCategory];
+  if (item.kind === 'shopping' && item.shoppingListId) {
     const count = item.openCount ?? 1;
-    return `${label} · ${count} offen`;
+    return `${item.title} · ${count} offen`;
   }
   return item.title;
 }
@@ -52,13 +49,13 @@ export function dayPlanItemTarget(item: DayPlanItem): DayPlanItemTarget {
   if (item.kind === 'todo') {
     return { area: 'todos', webPath: '/todos', mobilePath: '/todos' };
   }
-  const category = item.shoppingCategory ?? 'other';
-  const query = `?category=${category}`;
+  const listId = item.shoppingListId ?? '';
+  const query = listId ? `?list=${encodeURIComponent(listId)}` : '';
   return {
     area: 'listen',
     webPath: `/listen${query}`,
     mobilePath: `/listen${query}`,
-    shoppingCategory: category,
+    shoppingListId: listId || undefined,
   };
 }
 

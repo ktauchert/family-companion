@@ -42,7 +42,7 @@ Der Inhaber ist immer auch in `members[]`. „Mitglied“ meint hier **nicht-Inh
 | **`firestore.rules`** | Muss dieselben Grenzen erzwingen (Client ist nicht vertrauenswürdig) |
 | **UI** | Buttons ausblenden, wenn Shared-Regel nein sagt — kein Ersatz für Rules |
 
-Neue Collections (Top-Level, `householdId`-Feld): `calendar_events`, `todos`, `shopping_items`, `morning_checkins` — siehe [`FIRESTORE_COLLECTIONS`](../../packages/shared/src/firebase/config.ts).
+Neue Collections (Top-Level, `householdId`-Feld): `calendar_events`, `todos`, `shopping_items`, `shopping_lists` *(Phase 2.3)*, `morning_checkins` — siehe [`FIRESTORE_COLLECTIONS`](../../packages/shared/src/firebase/config.ts).
 
 Rules-Muster (Konzept):
 
@@ -101,18 +101,31 @@ Analog Kalender: `title`, `status`, `dueDate`, `assignedTo` (`string[]`), `compl
 
 ## Listenpunkt (`shopping_items`)
 
-Felder: `name`, `category` (Enum ADR 0006), `checked`, `addedBy`, `createdAt`, `checkedAt`. ADR 0006: Historie für Algo — **Delete** soft oder Event-Log später; Phase 2 mindestens **`checked` + Timestamps** behalten.
+Felder: `name`, `listId` → `shopping_lists`, `checked`, `addedBy`, `createdAt`, `checkedAt`. ADR 0006: Historie für Algo — **Delete** soft oder Event-Log später; Phase 2 mindestens **`checked` + Timestamps** behalten. Legacy `category` wird beim Lesen nach `listId` normalisiert.
 
 | | Inhaber | Mitglied (nicht Inhaber) |
 | --- | --- | --- |
-| **C** | ja (Thema/Liste wählen) | ja |
-| **R** | Text, Thema, abgehakt ja/nein, wer hinzugefügt hat (E-Mail/Name) | gleich |
-| **U** | Text/Thema ändern, abhaken (Echtzeit für alle) | gleich |
+| **C** | ja (aktive Liste / Tab) | ja |
+| **R** | Text, Liste, abgehakt ja/nein, wer hinzugefügt hat (E-Mail/Name) | gleich |
+| **U** | Text/Liste ändern, abhaken (Echtzeit für alle) | gleich |
 | **D** | jeder Punkt | nur `addedBy == actorId` |
 
-**Delete begründet:** Tippfehler entfernen; Inhaber kann „Zombie“-Einträge löschen. Optional Phase 2.1: statt Hard-Delete nur `archived` — erst Hard-Delete laut WP.
+**Negativfälle:** ungültige `listId`; Abhaken durch Nicht-Mitglied; Delete fremder Zeile als Mitglied.
 
-**Negativfälle:** ungültige `category`; Abhaken durch Nicht-Mitglied; Delete fremder Zeile als Mitglied.
+---
+
+## Einkaufsliste (`shopping_lists`) *(Phase 2.3)*
+
+Felder: `name`, `sortOrder`, `householdId`, `createdBy`, `createdAt`. Default-Listen pro Haushalt (Supermarkt, …) plus Custom (DM, Handwerk, …).
+
+| | Inhaber | Mitglied (nicht Inhaber) |
+| --- | --- | --- |
+| **C** | ja (Plus-Modal) | ja |
+| **R** | alle Listen des Haushalts | gleich |
+| **U** | Name jeder Liste | gleich |
+| **D** | ja; bei Items **Verschieben** nach andere Liste, dann löschen | **nein** |
+
+Details UX: [02.3-listen-ux.md](../phasen/02.3-listen-ux.md).
 
 ---
 

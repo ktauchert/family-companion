@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { startHousehold } from '../household/membership';
-import type { Household } from '../types';
-import { prepareCreateShoppingItem, prepareToggleShoppingItemChecked } from './item';
+import type { Household, ShoppingList } from '../types';
+import { defaultShoppingListId } from './defaults';
+import {
+  isShoppingItemOpen,
+  normalizeShoppingItemChecked,
+  prepareCreateShoppingItem,
+  prepareToggleShoppingItemChecked,
+} from './item';
 
 function householdOf(): Household {
   return {
@@ -17,14 +23,28 @@ function householdOf(): Household {
   };
 }
 
+function listsOf(): ShoppingList[] {
+  return [
+    {
+      id: defaultShoppingListId('hh_1', 'supermarket'),
+      householdId: 'hh_1',
+      name: 'Supermarkt',
+      sortOrder: 0,
+      createdBy: 'user_julian',
+      createdAt: '2026-09-15T08:00:00.000Z',
+    },
+  ];
+}
+
 describe('prepareCreateShoppingItem', () => {
-  it('creates an item with addedBy', () => {
+  it('creates an item with listId', () => {
     const result = prepareCreateShoppingItem({
       actorId: 'user_sophie',
       household: householdOf(),
       itemId: 'shop_new',
       name: ' Milch ',
-      category: 'supermarket',
+      listId: defaultShoppingListId('hh_1', 'supermarket'),
+      lists: listsOf(),
       createdAt: '2026-09-20T10:00:00.000Z',
     });
 
@@ -34,7 +54,7 @@ describe('prepareCreateShoppingItem', () => {
         id: 'shop_new',
         householdId: 'hh_1',
         name: 'Milch',
-        category: 'supermarket',
+        listId: defaultShoppingListId('hh_1', 'supermarket'),
         checked: false,
         addedBy: 'user_sophie',
         createdAt: '2026-09-20T10:00:00.000Z',
@@ -42,17 +62,18 @@ describe('prepareCreateShoppingItem', () => {
     });
   });
 
-  it('rejects invalid categories', () => {
+  it('rejects invalid list ids', () => {
     expect(
       prepareCreateShoppingItem({
         actorId: 'user_sophie',
         household: householdOf(),
         itemId: 'shop_new',
         name: 'Milch',
-        category: 'bakery' as 'supermarket',
+        listId: 'foreign_list',
+        lists: listsOf(),
         createdAt: '2026-09-20T10:00:00.000Z',
       }),
-    ).toEqual({ ok: false, reason: 'invalid_category' });
+    ).toEqual({ ok: false, reason: 'invalid_list' });
   });
 });
 
@@ -63,7 +84,7 @@ describe('prepareToggleShoppingItemChecked', () => {
       id: 'shop_1',
       householdId: 'hh_1',
       name: 'Milch',
-      category: 'supermarket' as const,
+      listId: defaultShoppingListId('hh_1', 'supermarket'),
       checked: false,
       addedBy: 'user_sophie',
       createdAt: '2026-09-20T10:00:00.000Z',
@@ -73,6 +94,7 @@ describe('prepareToggleShoppingItemChecked', () => {
       actorId: 'user_julian',
       household,
       item,
+      lists: listsOf(),
       checked: true,
       checkedAt: '2026-09-20T11:00:00.000Z',
     });
@@ -81,5 +103,19 @@ describe('prepareToggleShoppingItemChecked', () => {
       ok: true,
       item: { ...item, checked: true, checkedAt: '2026-09-20T11:00:00.000Z' },
     });
+  });
+});
+
+describe('isShoppingItemOpen', () => {
+  it('treats only strict true as checked off', () => {
+    expect(isShoppingItemOpen({ checked: false })).toBe(true);
+    expect(isShoppingItemOpen({ checked: true })).toBe(false);
+    expect(isShoppingItemOpen({ checked: 'true' as unknown as boolean })).toBe(true);
+  });
+
+  it('normalizes legacy checked values from firestore reads', () => {
+    expect(normalizeShoppingItemChecked(true)).toBe(true);
+    expect(normalizeShoppingItemChecked(false)).toBe(false);
+    expect(normalizeShoppingItemChecked('true')).toBe(false);
   });
 });

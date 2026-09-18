@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { startHousehold } from '../household/membership';
 import type { CalendarEvent, Household, ShoppingItem, TodoItem } from '../types';
+import { defaultShoppingListId } from '../shopping/defaults';
 import { buildHeuteAreaSummaries } from './heute-summary';
 
 function householdOf(): Household {
@@ -54,7 +55,7 @@ describe('buildHeuteAreaSummaries', () => {
         id: 'shop_1',
         householdId: 'hh_1',
         name: 'Milch',
-        category: 'supermarket',
+        listId: defaultShoppingListId('hh_1', 'supermarket'),
         checked: false,
         addedBy: 'user_julian',
         createdAt: '2026-09-15T08:00:00.000Z',
@@ -73,6 +74,67 @@ describe('buildHeuteAreaSummaries', () => {
     expect(summaries.kalender.line).toContain('Elternabend');
     expect(summaries.todos.line).toContain('überfällig');
     expect(summaries.listen.line).toBe('1 Artikel offen');
+  });
+
+  it('counts only unchecked shopping items on the listen summary', () => {
+    const shoppingItems: ShoppingItem[] = [
+      {
+        id: 'shop_1',
+        householdId: 'hh_1',
+        name: 'Milch',
+        listId: defaultShoppingListId('hh_1', 'supermarket'),
+        checked: true,
+        addedBy: 'user_julian',
+        createdAt: '2026-09-15T08:00:00.000Z',
+      },
+      {
+        id: 'shop_2',
+        householdId: 'hh_1',
+        name: 'Brot',
+        listId: defaultShoppingListId('hh_1', 'supermarket'),
+        checked: true,
+        addedBy: 'user_julian',
+        createdAt: '2026-09-15T08:05:00.000Z',
+      },
+      {
+        id: 'shop_3',
+        householdId: 'hh_1',
+        name: 'Butter',
+        listId: defaultShoppingListId('hh_1', 'supermarket'),
+        checked: true,
+        addedBy: 'user_julian',
+        createdAt: '2026-09-15T08:10:00.000Z',
+      },
+      {
+        id: 'shop_4',
+        householdId: 'hh_1',
+        name: 'Eier',
+        listId: defaultShoppingListId('hh_1', 'supermarket'),
+        checked: false,
+        addedBy: 'user_julian',
+        createdAt: '2026-09-15T08:15:00.000Z',
+      },
+      {
+        id: 'shop_5',
+        householdId: 'hh_1',
+        name: 'Käse',
+        listId: defaultShoppingListId('hh_1', 'supermarket'),
+        checked: false,
+        addedBy: 'user_julian',
+        createdAt: '2026-09-15T08:20:00.000Z',
+      },
+    ];
+
+    const summaries = buildHeuteAreaSummaries({
+      household,
+      actorId: 'user_julian',
+      date,
+      events: [],
+      todos: [],
+      shoppingItems,
+    });
+
+    expect(summaries.listen.line).toBe('2 Artikel offen');
   });
 
   it('uses empty-state copy when nothing is open', () => {

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { startHousehold } from '../household/membership';
-import type { CalendarEvent, Household, MorningCheckIn, ShoppingItem, TodoItem } from '../types';
+import type { CalendarEvent, Household, MorningCheckIn, ShoppingItem, ShoppingList, TodoItem } from '../types';
+import { defaultShoppingListId } from '../shopping/defaults';
 import { prioritizeDay } from './prioritize';
 
 function householdOf(): Household {
@@ -33,6 +34,27 @@ function eventOf(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
     completions: [],
     ...overrides,
   };
+}
+
+function shoppingListsOf(): ShoppingList[] {
+  return [
+    {
+      id: defaultShoppingListId('hh_1', 'supermarket'),
+      householdId: 'hh_1',
+      name: 'Supermarkt',
+      sortOrder: 0,
+      createdBy: 'user_julian',
+      createdAt: '2026-09-15T08:00:00.000Z',
+    },
+    {
+      id: defaultShoppingListId('hh_1', 'drugstore'),
+      householdId: 'hh_1',
+      name: 'Drogerie',
+      sortOrder: 1,
+      createdBy: 'user_julian',
+      createdAt: '2026-09-15T08:00:00.000Z',
+    },
+  ];
 }
 
 function todoOf(overrides: Partial<TodoItem> = {}): TodoItem {
@@ -130,7 +152,7 @@ describe('prioritizeDay', () => {
         id: 'shop_1',
         householdId: 'hh_1',
         name: 'Milch',
-        category: 'supermarket',
+        listId: defaultShoppingListId('hh_1', 'supermarket'),
         checked: false,
         addedBy: 'user_julian',
         createdAt: '2026-09-15T08:00:00.000Z',
@@ -145,18 +167,22 @@ describe('prioritizeDay', () => {
       events: [],
       todos: [todoOf({ id: 'todo_low', title: 'Kurz anrufen', energyHint: 'low' })],
       shoppingItems,
+      shoppingLists: shoppingListsOf(),
     });
 
-    expect(result.items.map((item) => item.id)).toEqual(['todo_low', 'shopping_supermarket']);
+    expect(result.items.map((item) => item.id)).toEqual([
+      'todo_low',
+      `shopping_${defaultShoppingListId('hh_1', 'supermarket')}`,
+    ]);
   });
 
-  it('aggregates open shopping items by category', () => {
+  it('aggregates open shopping items by list', () => {
     const shoppingItems: ShoppingItem[] = [
       {
         id: 'shop_1',
         householdId: 'hh_1',
         name: 'Milch',
-        category: 'supermarket',
+        listId: defaultShoppingListId('hh_1', 'supermarket'),
         checked: false,
         addedBy: 'user_julian',
         createdAt: '2026-09-15T08:00:00.000Z',
@@ -165,7 +191,7 @@ describe('prioritizeDay', () => {
         id: 'shop_2',
         householdId: 'hh_1',
         name: 'Brot',
-        category: 'supermarket',
+        listId: defaultShoppingListId('hh_1', 'supermarket'),
         checked: false,
         addedBy: 'user_julian',
         createdAt: '2026-09-15T08:05:00.000Z',
@@ -174,7 +200,7 @@ describe('prioritizeDay', () => {
         id: 'shop_3',
         householdId: 'hh_1',
         name: 'Shampoo',
-        category: 'drugstore',
+        listId: defaultShoppingListId('hh_1', 'drugstore'),
         checked: false,
         addedBy: 'user_julian',
         createdAt: '2026-09-15T08:10:00.000Z',
@@ -189,10 +215,13 @@ describe('prioritizeDay', () => {
       events: [],
       todos: [],
       shoppingItems,
+      shoppingLists: shoppingListsOf(),
     });
 
     expect(result.items).toHaveLength(2);
-    const supermarket = result.items.find((item) => item.shoppingCategory === 'supermarket');
+    const supermarket = result.items.find(
+      (item) => item.shoppingListId === defaultShoppingListId('hh_1', 'supermarket'),
+    );
     expect(supermarket?.openCount).toBe(2);
     expect(supermarket?.title).toBe('Supermarkt');
   });

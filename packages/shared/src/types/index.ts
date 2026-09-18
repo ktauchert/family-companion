@@ -50,11 +50,20 @@ export interface CalendarEvent {
   completions: MemberCompletion[];
 }
 
+export interface ShoppingList {
+  id: string;
+  householdId: string;
+  name: string;
+  sortOrder: number;
+  createdBy: string;
+  createdAt: string;
+}
+
 export interface ShoppingItem {
   id: string;
   householdId: string;
   name: string;
-  category: ShoppingCategory;
+  listId: string;
   checked: boolean;
   addedBy: string;
   createdAt: string;
