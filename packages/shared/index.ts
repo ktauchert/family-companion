@@ -12,6 +12,8 @@ export * from './src/firebase/store-error';
 export * from './src/household/access';
 export * from './src/household/can-add-member';
 export * from './src/household/membership';
+export * from './src/household/pro-teasers';
+export * from './src/household/upgrade-plan';
 export * from './src/calendar/completion';
 export * from './src/calendar/display';
 export * from './src/calendar/week-range';

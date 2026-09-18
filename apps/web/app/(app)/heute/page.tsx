@@ -39,6 +39,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { Chrome } from '../../../components/Chrome';
 import { AreaSummaryCards } from '../../../components/heute/AreaSummaryCards';
+import { ProTeaserCards } from '../../../components/heute/ProTeaserCards';
 import { CheckInChip } from '../../../components/heute/CheckInChip';
 import { DayPlanItemCard } from '../../../components/heute/DayPlanItemCard';
 import { SuggestionCard } from '../../../components/heute/SuggestionCard';
@@ -426,6 +427,7 @@ export default function HeutePage() {
         </article>
 
         <AreaSummaryCards summaries={areaSummaries} />
+        {household.plan === 'free' ? <ProTeaserCards settingsPath="/einstellungen" /> : null}
       </div>
     </Chrome>
   );

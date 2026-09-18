@@ -28,6 +28,21 @@ service cloud.firestore {
         && request.resource.data.createdAt == resource.data.createdAt;
     }
 
+    function isOwnerPlanUpgradeWrite() {
+      return signedIn()
+        && request.auth.uid == resource.data.ownerId
+        && resource.data.plan == 'free'
+        && request.resource.data.plan == 'pro'
+        && request.resource.data.id == resource.data.id
+        && request.resource.data.ownerId == resource.data.ownerId
+        && request.resource.data.invitePin == resource.data.invitePin
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.members == resource.data.members
+        && request.resource.data.invitedEmails == resource.data.invitedEmails
+        && request.resource.data.memberEmails == resource.data.memberEmails
+        && request.resource.data.name == resource.data.name;
+    }
+
     function identityFrozen() {
       return request.resource.data.id == resource.data.id
         && request.resource.data.ownerId == resource.data.ownerId
@@ -313,7 +328,7 @@ service cloud.firestore {
         && request.resource.data.invitePin is string
         && request.resource.data.invitePin.matches('^[0-9]{6}$');
 
-      allow update: if isOwnerWrite() || isJoinWrite() || isOwnerKickWrite() || isLeaveWrite() || isMemberEmailWrite();
+      allow update: if isOwnerWrite() || isOwnerPlanUpgradeWrite() || isJoinWrite() || isOwnerKickWrite() || isLeaveWrite() || isMemberEmailWrite();
     }
 
     match /calendar_events/{id} {

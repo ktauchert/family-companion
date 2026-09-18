@@ -899,6 +899,52 @@ button.item-card-main:hover .item-card-title {
   flex-shrink: 0;
 }
 
+.pro-teaser-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pro-teaser-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.pro-teaser-card {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+}
+
+.pro-teaser-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+}
+
+.pro-teaser-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pro-teaser-stamp {
+  color: var(--clay);
+  flex-shrink: 0;
+}
+
+.pro-teaser-glass {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--paper) 42%, transparent);
+  backdrop-filter: blur(1px);
+  pointer-events: none;
+}
+
 .heute-summary-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -928,7 +974,8 @@ button.item-card-main:hover .item-card-title {
 }
 
 @media (max-width: 640px) {
-  .heute-summary-grid {
+  .heute-summary-grid,
+  .pro-teaser-grid {
     grid-template-columns: 1fr;
   }
 }
