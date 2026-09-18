@@ -1,0 +1,63 @@
+Phase 3 — Pro-Upgrade-Trigger (family-companion)
+
+Kontext:
+- main: Phase 2 komplett (Alltag PR #11, UX 2.1–2.5 PRs #44–#48, Landing-Scaffold)
+- Spec: docs/phasen/03-pro-trigger.md, docs/user-journey.md (Abschnitt Phase 3), docs/features.md (Pro-Tabelle)
+- Nächster Block nach 2.5 — kein Milestone/Issues auf GitHub angelegt; bei Bedarf Issues + Milestone „Phase 3 — Pro-Trigger“ nachziehen
+
+Ziel Phase 3:
+Pro ist sichtbar und upgradebar — ohne Payment-Provider und ohne echte Pro-Features (die kommen Phase 4). Konkret:
+- WP1: Ausgegraute Pro-Teaser in der App (KI-Tagesplan, Per-Member-Habits, Smart Shopping) — Milchglas + Clay-Siegel laut ui.md, kein Schloss-Emoji-Klischee
+- WP2: Haushalt `plan: "pro"` setzbar (Inhaber); Free-Mitgliederlimit (2) fällt weg; Member-CRUD aus Phase 1 bleibt
+
+Pflicht-Lektüre vor Code:
+- docs/phasen/03-pro-trigger.md
+- docs/design/ui.md (Pro-Karten, Stempel, Settings-Pro-Platzhalter)
+- docs/user-journey.md — „Phase 3: Der Trigger für das Pro-Upgrade“
+- AGENTS.md (Branch pro Phase, CRUD vor Store/UI, TDD in shared, Docs nachziehen)
+- packages/shared/src/types/index.ts — `SubscriptionPlan`, `Household.plan`, `kaizenNudgesEnabled?`
+- packages/shared/src/household/can-add-member.ts + Tests (Pro-Limit schon da)
+- packages/shared/src/household/membership.ts — Join/Invite nutzt `canAddHouseholdMember`
+- firestore.rules — aktuell friert `isOwnerWrite`/`identityFrozen` das Feld `plan` ein; Phase 3 braucht Owner-Pfad free→pro (Rules + Console veröffentlichen)
+
+Ist-Stand Code (wichtig):
+- Web Einstellungen + Mobile Einstellungen: „Family+ · Kommt bald“ — ersetzen durch Upgrade-CTA
+- Haushalt/Mehr zeigt bereits `Plan {household.plan}` — nach Upgrade sichtbar
+- Heute-Dashboard: Wireframe in ui.md kennt Pro-Briefing-Karte; AreaSummaryCards noch ohne Pro-Teaser
+- Kein Shared-Store-Pfad zum Plan-Upgrade; `saveHousehold` allein reicht nicht ohne Rules-Anpassung
+
+Architektur (fest):
+- KEIN Payment (Stripe o. ä.) in Phase 3 — offen lassen, ggf. kurzes ADR-Vorstadium nur wenn nötig
+- KEINE KI-API, keine Per-Member-Logik, kein Smart Shopping — nur Teaser + `plan`-Feld
+- Domain/Validierung in @family-companion/shared; Web + Mobile binden nur `db`
+- Upgrade nur Inhaber; kein Downgrade-Pfad nötig (außer explizit spezifiziert)
+
+CRUD vor Implementierung (an Maintainer + ins Phasen-WP):
+- C: Plan startet `free` bei Haushalts-Anlage (bleibt)
+- R: Plan in Haushalt + Settings sichtbar (größtenteils da)
+- U: Inhaber setzt `plan` auf `pro` (neu — Shared + Rules)
+- D: kein Plan-Löschen; Downgrade später
+
+Git:
+- Branch: phase-3-pro-trigger von aktuellem main (git pull)
+- PR nach main am Ende — nicht selbst mergen
+
+Vorgeschlagene Reihenfolge:
+- Branch anlegen
+- CRUD-Kurztext in 03-pro-trigger.md ergänzen (falls noch nicht)
+- Shared: `prepareUpgradeHouseholdPlan` / `upgradeHouseholdToPro` o. ä. + Tests (Owner, schon pro, Nicht-Owner)
+- firestore.rules: Owner darf nur `plan` von free auf pro ändern (Rest identityFrozen); Join-Rule für >2 Members bei pro prüfen
+- WP1 Web + Mobile: Pro-Teaser-Karten (Heute oder dedizierte Sektion) — nur wenn `plan === 'free'`, Milchglas-Stil
+- WP2 Settings: Inhaber kann upgraden (Button → Shared → Firestore); danach Teaser ausblenden / Limit-Hinweis bei Invite entfällt
+- Negativfall testen: drittes Mitglied auf free scheitert, auf pro klappt
+- Docs: Haken in 03-pro-trigger.md, phasenplan.md bei Merge; features.md nur bei Abweichung
+- npm run check grün
+
+Bewusst nicht in Phase 3:
+- Payment, Pricing auf Landing, Receipts
+- Phase-4-Features (KI, Kaizen-Nudge aktiv, Pflicht-Habits, Energie-Budget)
+- Pro-Inhalte freischalten — nur das Feld und die Teaser
+
+Start:
+- Lies 03-pro-trigger.md und firestore.rules (plan-Zeilen)
+- Leg Branch an, zeig kurz Plan + CRUD-Einschätzung, warte auf GO, dann WP2 Shared/Rules vor UI
