@@ -2,6 +2,7 @@ import { isCalendarEventDoneForUser } from '../calendar/completion';
 import { formatCalendarEventRange } from '../calendar/display';
 import { NAV_ICON_TO_MOBILE_TAB, NAV_ICON_TO_WEB_PATH, type NavIcon } from '../display/icons';
 import { isTodoDoneForUser } from '../todos/completion';
+import { isShoppingItemOpen } from '../shopping/item';
 import type { CalendarEvent, Household, ShoppingItem, TodoItem } from '../types';
 import { localDateFromIso } from './dates';
 
@@ -66,7 +67,7 @@ function summarizeTodos(input: {
 }
 
 function summarizeListen(shoppingItems: ShoppingItem[]): Pick<HeuteAreaSummary, 'line'> {
-  const openCount = shoppingItems.filter((item) => !item.checked).length;
+  const openCount = shoppingItems.filter((item) => isShoppingItemOpen(item)).length;
   if (openCount === 0) {
     return { line: 'Nichts auf den Listen' };
   }

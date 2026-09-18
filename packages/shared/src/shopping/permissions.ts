@@ -1,5 +1,6 @@
 import { isHouseholdMember, isHouseholdOwner } from '../household/access';
-import type { Household, ShoppingItem } from '../types';
+import type { Household, ShoppingItem, ShoppingList } from '../types';
+import { isShoppingListInHousehold } from './defaults';
 
 export type ShoppingItemAccessContext = {
   actorId: string;
@@ -29,6 +30,7 @@ export function canUpdateShoppingItem(ctx: {
   household: Household;
   item: ShoppingItem;
   patch: Partial<ShoppingItem>;
+  lists: ShoppingList[];
 }): boolean {
   if (!canReadShoppingItem({ actorId: ctx.actorId, household: ctx.household, item: ctx.item })) {
     return false;
@@ -44,6 +46,11 @@ export function canUpdateShoppingItem(ctx: {
     return false;
   }
   if (ctx.patch.createdAt !== undefined && ctx.patch.createdAt !== ctx.item.createdAt) {
+    return false;
+  }
+
+  const nextListId = ctx.patch.listId ?? ctx.item.listId;
+  if (!isShoppingListInHousehold(nextListId, ctx.household.id, ctx.lists)) {
     return false;
   }
 

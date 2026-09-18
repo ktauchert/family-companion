@@ -1,41 +1,42 @@
 'use client';
 
-import type { Household, ShoppingCategory, ShoppingItem } from '@family-companion/shared';
+import type { Household, ShoppingItem, ShoppingList } from '@family-companion/shared';
 import {
-  SHOPPING_CATEGORIES,
-  SHOPPING_CATEGORY_LABELS,
-  itemOpenClosedLabel,
   canDeleteShoppingItem,
   createShoppingItemErrorMessage,
+  createShoppingListErrorMessage,
   ensureMemberEmail,
+  isHouseholdOwner,
   messageFromStoreError,
+  missingDefaultShoppingLists,
+  newEntityId,
+  nextShoppingListSortOrder,
   prepareCreateShoppingItem,
+  prepareCreateShoppingList,
+  prepareDeleteShoppingListPlan,
   prepareToggleShoppingItemChecked,
-  shoppingAddedByLabel,
+  prepareUpdateShoppingList,
+  shoppingListDeleteTargets,
+  shoppingListName,
 } from '@family-companion/shared';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { Chrome } from '../../components/Chrome';
+import { PlusIconButton } from '../../components/PlusIconButton';
+import { ShoppingListInlineAdd } from '../../components/listen/ShoppingListInlineAdd';
+import { ShoppingListItemRow } from '../../components/listen/ShoppingListItemRow';
+import {
+  ShoppingListModal,
+  type ShoppingListModalMode,
+} from '../../components/listen/ShoppingListModal';
 import { auth } from '../../lib/firebase';
 import { households } from '../../lib/households';
 import { shopping } from '../../lib/shopping';
-
-type ItemDraft = {
-  name: string;
-  category: ShoppingCategory;
-};
-
-function emptyDraft(): ItemDraft {
-  return { name: '', category: 'supermarket' };
-}
+import { shoppingLists } from '../../lib/shoppingLists';
 
 function sortItems(items: ShoppingItem[]): ShoppingItem[] {
   return [...items].sort((a, b) => {
-    const cat = a.category.localeCompare(b.category);
-    if (cat !== 0) {
-      return cat;
-    }
     if (a.checked !== b.checked) {
       return a.checked ? 1 : -1;
     }
@@ -48,12 +49,21 @@ export default function ListenPage() {
   const searchParams = useSearchParams();
   const [household, setHousehold] = useState<Household | null>(null);
   const [uid, setUid] = useState<string | null>(null);
+  const [lists, setLists] = useState<ShoppingList[]>([]);
   const [items, setItems] = useState<ShoppingItem[]>([]);
-  const [filter, setFilter] = useState<ShoppingCategory | 'all'>('all');
+  const [activeListId, setActiveListId] = useState<string | null>(null);
+  const [draftName, setDraftName] = useState('');
+  const [listModal, setListModal] = useState<ShoppingListModalMode | null>(null);
+  const [listDraftName, setListDraftName] = useState('');
+  const [moveToListId, setMoveToListId] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [listModalError, setListModalError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [showForm, setShowForm] = useState(false);
-  const [draft, setDraft] = useState<ItemDraft>(emptyDraft);
+  const [listMenu, setListMenu] = useState<{ list: ShoppingList; x: number; y: number } | null>(
+    null,
+  );
+
+  const isOwner = household && uid ? isHouseholdOwner(uid, household) : false;
 
   useEffect(() => {
     return onAuthStateChanged(auth, async (user) => {
@@ -84,27 +94,61 @@ export default function ListenPage() {
     });
   }, [router]);
 
-  const categoryFromUrl = searchParams.get('category');
+  const listFromUrl = searchParams.get('list');
 
   useEffect(() => {
-    if (
-      categoryFromUrl &&
-      (SHOPPING_CATEGORIES as readonly string[]).includes(categoryFromUrl)
-    ) {
-      setFilter(categoryFromUrl as ShoppingCategory);
-      setDraft((current) => ({ ...current, category: categoryFromUrl as ShoppingCategory }));
-    }
-  }, [categoryFromUrl]);
-
-  function selectFilter(next: ShoppingCategory | 'all') {
-    setFilter(next);
-    if (next === 'all') {
-      router.replace('/listen');
+    if (!household || !uid) {
       return;
     }
-    router.replace(`/listen?category=${next}`);
-    setDraft((current) => ({ ...current, category: next }));
-  }
+    return shoppingLists.subscribeForHousehold(
+      household.id,
+      (next) => {
+        setLists(next);
+        void (async () => {
+          const missing = missingDefaultShoppingLists(next, {
+            householdId: household.id,
+            createdBy: uid,
+            createdAt: new Date().toISOString(),
+          });
+          if (missing.length === 0) {
+            return;
+          }
+          try {
+            await Promise.all(missing.map((list) => shoppingLists.createList(list)));
+          } catch {
+            setError('Standard-Listen konnten nicht angelegt werden.');
+          }
+        })();
+      },
+      () => setError('Listen konnten nicht geladen werden.'),
+    );
+  }, [household, uid]);
+
+  useEffect(() => {
+    if (lists.length === 0) {
+      return;
+    }
+    if (listFromUrl && lists.some((list) => list.id === listFromUrl)) {
+      setActiveListId(listFromUrl);
+      return;
+    }
+    const first = lists[0]!.id;
+    setActiveListId(first);
+    router.replace(`/listen?list=${encodeURIComponent(first)}`);
+  }, [lists, listFromUrl, router]);
+
+  useEffect(() => {
+    setDraftName('');
+  }, [activeListId]);
+
+  useEffect(() => {
+    if (!listMenu) {
+      return;
+    }
+    const close = () => setListMenu(null);
+    window.addEventListener('click', close);
+    return () => window.removeEventListener('click', close);
+  }, [listMenu]);
 
   useEffect(() => {
     if (!household) {
@@ -113,17 +157,138 @@ export default function ListenPage() {
     return shopping.subscribeForHousehold(
       household.id,
       (next) => setItems(sortItems(next)),
-      () => setError('Listen konnten nicht geladen werden.'),
+      () => setError('Artikel konnten nicht geladen werden.'),
     );
   }, [household]);
 
   const visible = useMemo(
-    () => items.filter((item) => filter === 'all' || item.category === filter),
-    [items, filter],
+    () => (activeListId ? items.filter((item) => item.listId === activeListId) : []),
+    [items, activeListId],
   );
 
+  const activeListName = activeListId ? shoppingListName(activeListId, lists) : undefined;
+
+  function selectList(listId: string) {
+    setActiveListId(listId);
+    router.replace(`/listen?list=${encodeURIComponent(listId)}`);
+  }
+
+  function closeListModal() {
+    setListModal(null);
+    setListModalError(null);
+    setListDraftName('');
+    setMoveToListId('');
+  }
+
+  function openCreateList() {
+    setListModal({ kind: 'create' });
+    setListModalError(null);
+    setListDraftName('');
+  }
+
+  function openEditList(list: ShoppingList) {
+    setListModal({ kind: 'edit', list });
+    setListModalError(null);
+    setListDraftName(list.name);
+    setListMenu(null);
+  }
+
+  function openDeleteList(list: ShoppingList) {
+    const targets = shoppingListDeleteTargets(list.id, lists);
+    setListModal({ kind: 'delete', list });
+    setListModalError(null);
+    setMoveToListId(targets[0]?.id ?? '');
+    setListMenu(null);
+  }
+
+  function openListMenu(list: ShoppingList, x: number, y: number) {
+    selectList(list.id);
+    setListMenu({ list, x, y });
+  }
+
+  async function saveListModal() {
+    if (!household || !uid || !listModal || listModal.kind === 'delete') {
+      return;
+    }
+    setBusy(true);
+    setListModalError(null);
+    try {
+      if (listModal.kind === 'create') {
+        const result = prepareCreateShoppingList({
+          actorId: uid,
+          household,
+          listId: newEntityId('list'),
+          name: listDraftName,
+          sortOrder: nextShoppingListSortOrder(lists),
+          createdAt: new Date().toISOString(),
+        });
+        if (!result.ok) {
+          setListModalError(createShoppingListErrorMessage(result.reason));
+          return;
+        }
+        await shoppingLists.createList(result.list);
+        selectList(result.list.id);
+      } else {
+        const result = prepareUpdateShoppingList({
+          actorId: uid,
+          household,
+          list: listModal.list,
+          patch: { name: listDraftName },
+        });
+        if (!result.ok) {
+          setListModalError(createShoppingListErrorMessage(result.reason));
+          return;
+        }
+        await shoppingLists.saveList(result.list);
+      }
+      closeListModal();
+    } catch (err) {
+      setListModalError(messageFromStoreError(err, 'Liste konnte nicht gespeichert werden.'));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function confirmDeleteList() {
+    if (!household || !uid || !listModal || listModal.kind !== 'delete') {
+      return;
+    }
+    setBusy(true);
+    setListModalError(null);
+    try {
+      const plan = prepareDeleteShoppingListPlan({
+        actorId: uid,
+        household,
+        list: listModal.list,
+        lists,
+        items,
+        moveToListId: moveToListId || undefined,
+      });
+      if (!plan.ok) {
+        setListModalError(createShoppingListErrorMessage(plan.reason));
+        return;
+      }
+      if (plan.kind === 'relocate_and_delete') {
+        await shopping.saveItems(plan.items);
+      }
+      await shoppingLists.deleteList(listModal.list.id);
+      const fallback =
+        plan.kind === 'relocate_and_delete'
+          ? moveToListId
+          : lists.find((list) => list.id !== listModal.list.id)?.id;
+      closeListModal();
+      if (fallback) {
+        selectList(fallback);
+      }
+    } catch (err) {
+      setListModalError(messageFromStoreError(err, 'Liste konnte nicht gelöscht werden.'));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function addItem() {
-    if (!household || !uid) {
+    if (!household || !uid || !activeListId) {
       return;
     }
     setBusy(true);
@@ -132,9 +297,10 @@ export default function ListenPage() {
       const result = prepareCreateShoppingItem({
         actorId: uid,
         household,
-        itemId: crypto.randomUUID(),
-        name: draft.name,
-        category: filter === 'all' ? draft.category : filter,
+        itemId: newEntityId('shop'),
+        name: draftName,
+        listId: activeListId,
+        lists,
         createdAt: new Date().toISOString(),
       });
       if (!result.ok) {
@@ -142,8 +308,7 @@ export default function ListenPage() {
         return;
       }
       await shopping.createItem(result.item);
-      setDraft(emptyDraft());
-      setShowForm(false);
+      setDraftName('');
     } catch (err) {
       setError(messageFromStoreError(err, 'Eintrag konnte nicht angelegt werden.'));
     } finally {
@@ -159,6 +324,7 @@ export default function ListenPage() {
       actorId: uid,
       household,
       item,
+      lists,
       checked: !item.checked,
       checkedAt: new Date().toISOString(),
     });
@@ -180,10 +346,8 @@ export default function ListenPage() {
     if (!household || !uid || !canDeleteShoppingItem({ actorId: uid, household, item })) {
       return;
     }
-    if (!window.confirm(`„${item.name}" löschen?`)) {
-      return;
-    }
     setBusy(true);
+    setError(null);
     try {
       await shopping.deleteItem(item.id);
     } catch (err) {
@@ -193,8 +357,7 @@ export default function ListenPage() {
     }
   }
 
-  const crumb =
-    filter === 'all' ? 'Listen' : `Listen / ${SHOPPING_CATEGORY_LABELS[filter]}`;
+  const crumb = activeListName ? `Listen / ${activeListName}` : 'Listen';
 
   if (!household || !uid) {
     return (
@@ -210,123 +373,103 @@ export default function ListenPage() {
         <article className="card stack wide">
           <header className="row-between">
             <h1>Einkaufslisten</h1>
-            {!showForm ? (
-              <button className="btn" type="button" onClick={() => setShowForm(true)}>
-                Hinzufügen
-              </button>
-            ) : null}
+            <PlusIconButton label="Neue Liste" onClick={openCreateList} />
           </header>
           <hr className="rule" />
           {error ? <p className="err" role="alert">{error}</p> : null}
 
-          <div className="row-actions">
-            <button
-              className={`btn ${filter === 'all' ? '' : 'ghost'}`}
-              type="button"
-              onClick={() => selectFilter('all')}
-            >
-              Alle
-            </button>
-            {SHOPPING_CATEGORIES.map((category) => (
+          <div className="row-actions listen-tabs">
+            {lists.map((list) => (
               <button
-                key={category}
-                className={`btn ${filter === category ? '' : 'ghost'}`}
+                key={list.id}
+                className={`btn ${activeListId === list.id ? '' : 'ghost'}`}
                 type="button"
-                onClick={() => selectFilter(category)}
+                onClick={() => selectList(list.id)}
+                onContextMenu={(event) => {
+                  event.preventDefault();
+                  openListMenu(list, event.clientX, event.clientY);
+                }}
               >
-                {SHOPPING_CATEGORY_LABELS[category]}
+                {list.name}
               </button>
             ))}
           </div>
 
-          {showForm ? (
-            <form
-              className="stack wide"
-              onSubmit={(e) => {
-                e.preventDefault();
-                void addItem();
-              }}
-            >
-              <label className="field">
-                Artikel
-                <input
-                  value={draft.name}
-                  onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-                  required
-                />
-              </label>
-              <label className="field">
-                Thema
-                <select
-                  value={draft.category}
-                  onChange={(e) =>
-                    setDraft({ ...draft, category: e.target.value as ShoppingCategory })
-                  }
-                >
-                  {SHOPPING_CATEGORIES.map((category) => (
-                    <option key={category} value={category}>
-                      {SHOPPING_CATEGORY_LABELS[category]}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <div className="row-actions">
-                <button className="btn" type="submit" disabled={busy}>Anlegen</button>
-                <button
-                  className="btn ghost"
-                  type="button"
-                  disabled={busy}
-                  onClick={() => {
-                    setShowForm(false);
-                    setDraft(emptyDraft());
-                  }}
-                >
-                  Abbrechen
-                </button>
-              </div>
-            </form>
+          {activeListId ? (
+            <ShoppingListInlineAdd
+              value={draftName}
+              busy={busy}
+              listKey={activeListId}
+              historyItems={items}
+              onChange={setDraftName}
+              onConfirm={() => void addItem()}
+              onCancel={() => setDraftName('')}
+            />
           ) : null}
 
           {visible.length === 0 ? (
             <p className="muted">Keine Einträge in dieser Liste.</p>
           ) : (
-            <ul className="plain-list event-list">
-              {visible.map((item) => {
-                const canDelete = canDeleteShoppingItem({ actorId: uid, household, item });
-                return (
-                  <li className="event-row" key={item.id}>
-                    <label className="check-row">
-                      <input
-                        type="checkbox"
-                        checked={item.checked}
-                        disabled={busy}
-                        onChange={() => void toggleChecked(item)}
-                      />
-                      <span className={item.checked ? 'done' : undefined}>{item.name}</span>
-                    </label>
-                    <p className="muted small">
-                      {itemOpenClosedLabel(item.checked)} · {SHOPPING_CATEGORY_LABELS[item.category]} · von{' '}
-                      {shoppingAddedByLabel(household, item.addedBy)}
-                    </p>
-                    {canDelete ? (
-                      <div className="row-actions">
-                        <button
-                          className="btn ghost"
-                          type="button"
-                          disabled={busy}
-                          onClick={() => void removeItem(item)}
-                        >
-                          Löschen
-                        </button>
-                      </div>
-                    ) : null}
-                  </li>
-                );
-              })}
+            <ul className="listen-list">
+              {visible.map((item) => (
+                <ShoppingListItemRow
+                  key={item.id}
+                  item={item}
+                  busy={busy}
+                  canDelete={canDeleteShoppingItem({ actorId: uid, household, item })}
+                  onToggle={() => void toggleChecked(item)}
+                  onDelete={() => void removeItem(item)}
+                />
+              ))}
             </ul>
           )}
         </article>
       </div>
+
+      <ShoppingListModal
+        open={listModal !== null}
+        mode={listModal}
+        household={household}
+        actorId={uid}
+        lists={lists}
+        items={items}
+        name={listDraftName}
+        moveToListId={moveToListId}
+        busy={busy}
+        error={listModalError}
+        onNameChange={setListDraftName}
+        onMoveTargetChange={setMoveToListId}
+        onClose={closeListModal}
+        onSave={() => void saveListModal()}
+        onDelete={() => void confirmDeleteList()}
+      />
+
+      {listMenu ? (
+        <div
+          className="listen-list-menu"
+          role="menu"
+          style={{ top: listMenu.y, left: listMenu.x }}
+          onClick={(event) => event.stopPropagation()}
+        >
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => openEditList(listMenu.list)}
+          >
+            Bearbeiten
+          </button>
+          {isOwner ? (
+            <button
+              type="button"
+              role="menuitem"
+              className="danger"
+              onClick={() => openDeleteList(listMenu.list)}
+            >
+              Löschen
+            </button>
+          ) : null}
+        </div>
+      ) : null}
     </Chrome>
   );
 }

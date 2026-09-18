@@ -1,14 +1,15 @@
 import { isCalendarEventDoneForUser } from '../calendar/completion';
 import { isTodoDoneForUser } from '../todos/completion';
-import { SHOPPING_CATEGORY_LABELS } from '../shopping/display';
+import { shoppingListName } from '../shopping/defaults';
+import { isShoppingItemOpen } from '../shopping/item';
 import type {
   CalendarEvent,
   CompletionMode,
   EnergyBand,
   Household,
   MorningCheckIn,
-  ShoppingCategory,
   ShoppingItem,
+  ShoppingList,
   TodoItem,
 } from '../types';
 import { addDaysToDateString, localDateFromIso } from './dates';
@@ -23,8 +24,8 @@ export type DayPlanItem = {
   assignedTo?: string[];
   entityKind?: CalendarEvent['kind'] | TodoItem['kind'];
   completionMode?: CompletionMode;
-  shoppingCategory?: ShoppingItem['category'];
-  /** Aggregated open shopping items in this category. */
+  shoppingListId?: string;
+  /** Aggregated open shopping items in this list. */
   openCount?: number;
 };
 
@@ -47,6 +48,7 @@ export type PrioritizeDayInput = {
   events: CalendarEvent[];
   todos: TodoItem[];
   shoppingItems?: ShoppingItem[];
+  shoppingLists?: ShoppingList[];
 };
 
 export type PrioritizeDayResult = {
@@ -148,31 +150,38 @@ function buildDayItems(input: PrioritizeDayInput): DayPlanItem[] {
     });
   }
 
-  for (const item of aggregateShoppingItems(input.shoppingItems ?? [])) {
+  for (const item of aggregateShoppingItems(input.shoppingItems ?? [], input.shoppingLists ?? [])) {
     items.push(item);
   }
 
   return items;
 }
 
-function aggregateShoppingItems(shoppingItems: ShoppingItem[]): DayPlanItem[] {
-  const counts = new Map<ShoppingCategory, number>();
+function aggregateShoppingItems(
+  shoppingItems: ShoppingItem[],
+  shoppingLists: ShoppingList[],
+): DayPlanItem[] {
+  const counts = new Map<string, number>();
 
   for (const item of shoppingItems) {
-    if (item.checked) {
+    if (!isShoppingItemOpen(item)) {
       continue;
     }
-    counts.set(item.category, (counts.get(item.category) ?? 0) + 1);
+    counts.set(item.listId, (counts.get(item.listId) ?? 0) + 1);
   }
 
   return [...counts.entries()]
-    .sort(([left], [right]) => left.localeCompare(right))
-    .map(([category, openCount]) => ({
+    .sort(([left], [right]) => {
+      const leftName = shoppingListName(left, shoppingLists) ?? left;
+      const rightName = shoppingListName(right, shoppingLists) ?? right;
+      return leftName.localeCompare(rightName);
+    })
+    .map(([listId, openCount]) => ({
       kind: 'shopping' as const,
-      id: `shopping_${category}`,
-      title: SHOPPING_CATEGORY_LABELS[category],
+      id: `shopping_${listId}`,
+      title: shoppingListName(listId, shoppingLists) ?? 'Liste',
       energyHint: 'medium' as const,
-      shoppingCategory: category,
+      shoppingListId: listId,
       openCount,
     }));
 }

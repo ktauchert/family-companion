@@ -14,9 +14,10 @@ import {
 import { FIRESTORE_COLLECTIONS } from '../firebase/config';
 import { firestoreDocumentPayload } from '../firebase/document';
 import type { ShoppingItem } from '../types';
+import { normalizeShoppingItem, shoppingItemNeedsListMigration, type LegacyShoppingItem } from './migrate';
 
-function asShoppingItem(id: string, data: ShoppingItem): ShoppingItem {
-  return { ...data, id };
+function asShoppingItem(id: string, data: LegacyShoppingItem): ShoppingItem {
+  return normalizeShoppingItem({ ...data, id });
 }
 
 export function shoppingStore(db: Firestore) {
@@ -25,7 +26,7 @@ export function shoppingStore(db: Firestore) {
   return {
     async listForHousehold(householdId: string): Promise<ShoppingItem[]> {
       const snap = await getDocs(query(items(), where('householdId', '==', householdId)));
-      return snap.docs.map((item) => asShoppingItem(item.id, item.data() as ShoppingItem));
+      return snap.docs.map((item) => asShoppingItem(item.id, item.data() as LegacyShoppingItem));
     },
 
     async itemById(itemId: string): Promise<ShoppingItem | null> {
@@ -33,7 +34,7 @@ export function shoppingStore(db: Firestore) {
       if (!snap.exists()) {
         return null;
       }
-      return asShoppingItem(snap.id, snap.data() as ShoppingItem);
+      return asShoppingItem(snap.id, snap.data() as LegacyShoppingItem);
     },
 
     async createItem(item: ShoppingItem): Promise<ShoppingItem> {
@@ -51,6 +52,17 @@ export function shoppingStore(db: Firestore) {
       );
     },
 
+    async saveItems(items: ShoppingItem[]): Promise<void> {
+      await Promise.all(
+        items.map((item) =>
+          setDoc(
+            doc(db, FIRESTORE_COLLECTIONS.shoppingItems, item.id),
+            firestoreDocumentPayload(item),
+          ),
+        ),
+      );
+    },
+
     async deleteItem(itemId: string): Promise<void> {
       await deleteDoc(doc(db, FIRESTORE_COLLECTIONS.shoppingItems, itemId));
     },
@@ -63,7 +75,19 @@ export function shoppingStore(db: Firestore) {
       return onSnapshot(
         query(items(), where('householdId', '==', householdId)),
         (snap) => {
-          onChange(snap.docs.map((item) => asShoppingItem(item.id, item.data() as ShoppingItem)));
+          onChange(
+            snap.docs.map((item) => {
+              const data = item.data() as LegacyShoppingItem;
+              const normalized = asShoppingItem(item.id, data);
+              if (shoppingItemNeedsListMigration({ ...data, id: item.id })) {
+                void setDoc(
+                  doc(db, FIRESTORE_COLLECTIONS.shoppingItems, item.id),
+                  firestoreDocumentPayload(normalized),
+                );
+              }
+              return normalized;
+            }),
+          );
         },
         (err) => onError?.(err),
       );

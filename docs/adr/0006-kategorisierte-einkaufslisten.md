@@ -28,7 +28,9 @@ Analyse betrachtet Einfügen und Abhaken, getrennt nach Liste/Thema.
 
 ## Konsequenzen
 
-- Phase 2: `ShoppingItem.category` als festes Enum. **Phase 2.3:** `listId` verweist auf `shopping_lists` pro Haushalt.
+- Phase 2: `ShoppingItem.category` als festes Enum.
+- **Phase 2.3 (umgesetzt):** `ShoppingItem.listId` verweist auf `shopping_lists` pro Haushalt; Default-Themen (`Supermarkt`, …) werden beim ersten Öffnen als Listen angelegt und legacy `category`-Felder migriert.
+- **Heute (#14):** Einkauf im Tagesplan aggregiert nach **Listenname** (`shoppingListId`), Tap-through zu `/listen?list=…`.
 - Events (add/check) müssen für den Algo historisch auswertbar sein — nicht nur der aktuelle `checked`-Stand.
 - Die alte Idee „nur KI-Zutaten aus Freitext“ bleibt Pro, ist aber nicht mehr der einzige Smart-Shopping-Weg.
 
@@ -39,5 +41,6 @@ Analyse betrachtet Einfügen und Abhaken, getrennt nach Liste/Thema.
 
 ## UI & Custom Listen (Phase 2.3, 2026-09-15)
 
-- Listen-Chips ohne „Alle“-Tab; Inline-Add mit Autocomplete (Teilmatch ab 3 Zeichen).
-- Inhaber darf Listen löschen; bei vorhandenen Items **Verschieben** in andere Liste. Details: [02.3-listen-ux.md](../phasen/02.3-listen-ux.md).
+- Listen-Chips ohne „Alle“-Tab; Inline-Add mit Autocomplete (Teilmatch ab 3 Zeichen, Shared: `suggestShoppingItemNames`).
+- Custom Listen (`shopping_lists`): Plus-Modal, Bearbeiten/Löschen am aktiven Tab; Inhaber darf Listen löschen; bei vorhandenen Items **Verschieben** in andere Liste.
+- Details: [02.3-listen-ux.md](../phasen/02.3-listen-ux.md).

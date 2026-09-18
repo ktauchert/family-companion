@@ -1,17 +1,22 @@
-import type { Household, ShoppingCategory, ShoppingItem } from '@family-companion/shared';
+import type { Household, ShoppingItem, ShoppingList } from '@family-companion/shared';
 import {
-  SHOPPING_CATEGORIES,
-  SHOPPING_CATEGORY_LABELS,
-  itemOpenClosedLabel,
   canDeleteShoppingItem,
   createShoppingItemErrorMessage,
+  createShoppingListErrorMessage,
   ensureMemberEmail,
+  isHouseholdOwner,
   messageFromStoreError,
+  missingDefaultShoppingLists,
   newEntityId,
+  nextShoppingListSortOrder,
   prepareCreateShoppingItem,
+  prepareCreateShoppingList,
+  prepareDeleteShoppingListPlan,
   prepareToggleShoppingItemChecked,
-  shoppingAddedByLabel,
+  prepareUpdateShoppingList,
+  shoppingListDeleteTargets,
 } from '@family-companion/shared';
+import { Ionicons } from '@expo/vector-icons';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
@@ -20,29 +25,49 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Switch,
   Text,
-  TextInput,
   View,
 } from 'react-native';
+import { ShoppingListInlineAdd } from '../../components/listen/ShoppingListInlineAdd';
+import { ShoppingListItemRow } from '../../components/listen/ShoppingListItemRow';
+import {
+  ShoppingListModal,
+  type ShoppingListModalMode,
+} from '../../components/listen/ShoppingListModal';
 import { auth } from '../../lib/firebase';
 import { households } from '../../lib/households';
 import { shopping } from '../../lib/shopping';
+import { shoppingLists } from '../../lib/shoppingLists';
 import { useTheme } from '../../lib/theme';
+
+function sortItems(items: ShoppingItem[]): ShoppingItem[] {
+  return [...items].sort((a, b) => {
+    if (a.checked !== b.checked) {
+      return a.checked ? 1 : -1;
+    }
+    return a.name.localeCompare(b.name);
+  });
+}
 
 export default function ListenScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ category?: string }>();
+  const params = useLocalSearchParams<{ list?: string }>();
   const theme = useTheme();
   const [household, setHousehold] = useState<Household | null>(null);
   const [uid, setUid] = useState<string | null>(null);
+  const [lists, setLists] = useState<ShoppingList[]>([]);
   const [items, setItems] = useState<ShoppingItem[]>([]);
-  const [filter, setFilter] = useState<ShoppingCategory | 'all'>('all');
+  const [activeListId, setActiveListId] = useState<string | null>(null);
+  const [activeItemId, setActiveItemId] = useState<string | null>(null);
+  const [draftName, setDraftName] = useState('');
+  const [listModal, setListModal] = useState<ShoppingListModalMode | null>(null);
+  const [listDraftName, setListDraftName] = useState('');
+  const [moveToListId, setMoveToListId] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [listModalError, setListModalError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [showForm, setShowForm] = useState(false);
-  const [name, setName] = useState('');
-  const [category, setCategory] = useState<ShoppingCategory>('supermarket');
+
+  const isOwner = household && uid ? isHouseholdOwner(uid, household) : false;
 
   useEffect(() => {
     return onAuthStateChanged(auth, (user) => {
@@ -62,73 +87,226 @@ export default function ListenScreen() {
     });
   }, [router]);
 
-  const categoryFromUrl =
-    typeof params.category === 'string'
-      ? params.category
-      : Array.isArray(params.category)
-        ? params.category[0]
+  const listFromUrl =
+    typeof params.list === 'string'
+      ? params.list
+      : Array.isArray(params.list)
+        ? params.list[0]
         : undefined;
 
   useEffect(() => {
-    if (
-      categoryFromUrl &&
-      (SHOPPING_CATEGORIES as readonly string[]).includes(categoryFromUrl)
-    ) {
-      setFilter(categoryFromUrl as ShoppingCategory);
-      setCategory(categoryFromUrl as ShoppingCategory);
-    }
-  }, [categoryFromUrl]);
+    if (!household || !uid) return;
+    return shoppingLists.subscribeForHousehold(
+      household.id,
+      (next) => {
+        setLists(next);
+        void (async () => {
+          const missing = missingDefaultShoppingLists(next, {
+            householdId: household.id,
+            createdBy: uid,
+            createdAt: new Date().toISOString(),
+          });
+          if (missing.length === 0) return;
+          try {
+            await Promise.all(missing.map((list) => shoppingLists.createList(list)));
+          } catch {
+            setError('Standard-Listen konnten nicht angelegt werden.');
+          }
+        })();
+      },
+      () => setError('Listen konnten nicht geladen werden.'),
+    );
+  }, [household, uid]);
 
-  function selectFilter(next: ShoppingCategory | 'all') {
-    setFilter(next);
-    if (next === 'all') {
-      router.setParams({ category: undefined });
+  useEffect(() => {
+    if (lists.length === 0) return;
+    if (listFromUrl && lists.some((list) => list.id === listFromUrl)) {
+      setActiveListId(listFromUrl);
       return;
     }
-    router.setParams({ category: next });
-    setCategory(next);
-  }
+    const first = lists[0]!.id;
+    setActiveListId(first);
+    router.setParams({ list: first });
+  }, [lists, listFromUrl, router]);
+
+  useEffect(() => {
+    setDraftName('');
+    setActiveItemId(null);
+  }, [activeListId]);
 
   useEffect(() => {
     if (!household) return;
-    return shopping.subscribeForHousehold(household.id, setItems);
+    return shopping.subscribeForHousehold(household.id, (next) => setItems(sortItems(next)));
   }, [household]);
 
   const visible = useMemo(
-    () => items.filter((item) => filter === 'all' || item.category === filter),
-    [items, filter],
+    () => (activeListId ? items.filter((item) => item.listId === activeListId) : []),
+    [items, activeListId],
   );
 
   const styles = StyleSheet.create({
     page: { flex: 1, backgroundColor: theme.paper },
     content: { padding: 24, gap: 16 },
     card: { backgroundColor: theme.sheet, borderRadius: 20, padding: 22, gap: 12 },
-    title: { fontSize: 28, fontFamily: 'Georgia', color: theme.ink },
+    headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+    title: { fontSize: 28, fontFamily: 'Georgia', color: theme.ink, flex: 1 },
     muted: { color: theme.inkSoft },
-    small: { color: theme.inkSoft, fontSize: 14 },
     err: { color: theme.rust },
-    input: { borderWidth: 1, borderColor: theme.rule, borderRadius: 12, padding: 12, color: theme.ink, backgroundColor: theme.paper },
-    btn: { backgroundColor: theme.sage, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 14, alignItems: 'center' },
-    btnText: { color: theme.paper },
+    plusBtn: {
+      width: 44,
+      height: 44,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: theme.rule,
+      backgroundColor: theme.well,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
     ghost: { backgroundColor: theme.well, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 12 },
     ghostText: { color: theme.ink },
     chipSelected: { borderWidth: 1, borderColor: theme.sage, backgroundColor: theme.well },
     chipTextSelected: { color: theme.ink, fontWeight: '600' },
-    row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-    eventRow: { gap: 6, paddingVertical: 12, borderTopWidth: 1, borderTopColor: theme.rule },
-    done: { textDecorationLine: 'line-through', color: theme.inkFaint },
+    list: { marginTop: 4 },
   });
 
-  async function addItem() {
-    if (!household || !uid) return;
+  function selectList(listId: string) {
+    setActiveListId(listId);
+    router.setParams({ list: listId });
+  }
+
+  function closeListModal() {
+    setListModal(null);
+    setListModalError(null);
+    setListDraftName('');
+    setMoveToListId('');
+  }
+
+  function openCreateList() {
+    setListModal({ kind: 'create' });
+    setListModalError(null);
+    setListDraftName('');
+  }
+
+  function openEditList(list: ShoppingList) {
+    setListModal({ kind: 'edit', list });
+    setListModalError(null);
+    setListDraftName(list.name);
+  }
+
+  function openDeleteList(list: ShoppingList) {
+    const targets = shoppingListDeleteTargets(list.id, lists);
+    setListModal({ kind: 'delete', list });
+    setListModalError(null);
+    setMoveToListId(targets[0]?.id ?? '');
+  }
+
+  function showListMenu(list: ShoppingList) {
+    selectList(list.id);
+    const buttons: {
+      text: string;
+      style?: 'default' | 'cancel' | 'destructive';
+      onPress?: () => void;
+    }[] = [{ text: 'Bearbeiten', onPress: () => openEditList(list) }];
+    if (isOwner) {
+      buttons.push({
+        text: 'Löschen',
+        style: 'destructive',
+        onPress: () => openDeleteList(list),
+      });
+    }
+    buttons.push({ text: 'Abbrechen', style: 'cancel' });
+    Alert.alert(list.name, undefined, buttons);
+  }
+
+  async function saveListModal() {
+    if (!household || !uid || !listModal || listModal.kind === 'delete') return;
     setBusy(true);
+    setListModalError(null);
+    try {
+      if (listModal.kind === 'create') {
+        const result = prepareCreateShoppingList({
+          actorId: uid,
+          household,
+          listId: newEntityId('list'),
+          name: listDraftName,
+          sortOrder: nextShoppingListSortOrder(lists),
+          createdAt: new Date().toISOString(),
+        });
+        if (!result.ok) {
+          setListModalError(createShoppingListErrorMessage(result.reason));
+          return;
+        }
+        await shoppingLists.createList(result.list);
+        selectList(result.list.id);
+      } else {
+        const result = prepareUpdateShoppingList({
+          actorId: uid,
+          household,
+          list: listModal.list,
+          patch: { name: listDraftName },
+        });
+        if (!result.ok) {
+          setListModalError(createShoppingListErrorMessage(result.reason));
+          return;
+        }
+        await shoppingLists.saveList(result.list);
+      }
+      closeListModal();
+    } catch (err) {
+      setListModalError(messageFromStoreError(err, 'Liste konnte nicht gespeichert werden.'));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function confirmDeleteList() {
+    if (!household || !uid || !listModal || listModal.kind !== 'delete') return;
+    setBusy(true);
+    setListModalError(null);
+    try {
+      const plan = prepareDeleteShoppingListPlan({
+        actorId: uid,
+        household,
+        list: listModal.list,
+        lists,
+        items,
+        moveToListId: moveToListId || undefined,
+      });
+      if (!plan.ok) {
+        setListModalError(createShoppingListErrorMessage(plan.reason));
+        return;
+      }
+      if (plan.kind === 'relocate_and_delete') {
+        await shopping.saveItems(plan.items);
+      }
+      await shoppingLists.deleteList(listModal.list.id);
+      const fallback =
+        plan.kind === 'relocate_and_delete'
+          ? moveToListId
+          : lists.find((list) => list.id !== listModal.list.id)?.id;
+      closeListModal();
+      if (fallback) {
+        selectList(fallback);
+      }
+    } catch (err) {
+      setListModalError(messageFromStoreError(err, 'Liste konnte nicht gelöscht werden.'));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function addItem() {
+    if (!household || !uid || !activeListId) return;
+    setBusy(true);
+    setError(null);
     const result = prepareCreateShoppingItem({
       actorId: uid,
       household,
       itemId: newEntityId('shop'),
-      name,
-      category: filter === 'all' ? category : filter,
+      name: draftName,
+      listId: activeListId,
+      lists,
       createdAt: new Date().toISOString(),
     });
     if (!result.ok) {
@@ -138,8 +316,7 @@ export default function ListenScreen() {
     }
     try {
       await shopping.createItem(result.item);
-      setName('');
-      setShowForm(false);
+      setDraftName('');
     } catch (err) {
       setError(messageFromStoreError(err, 'Eintrag konnte nicht angelegt werden.'));
     } finally {
@@ -147,118 +324,138 @@ export default function ListenScreen() {
     }
   }
 
+  async function toggleChecked(item: ShoppingItem) {
+    if (!household || !uid) return;
+    const result = prepareToggleShoppingItemChecked({
+      actorId: uid,
+      household,
+      item,
+      lists,
+      checked: !item.checked,
+      checkedAt: new Date().toISOString(),
+    });
+    if (!result.ok) {
+      setError(createShoppingItemErrorMessage(result.reason));
+      return;
+    }
+    setBusy(true);
+    try {
+      await shopping.saveItem(result.item);
+    } catch (err) {
+      setError(messageFromStoreError(err, 'Abhaken fehlgeschlagen.'));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function removeItem(item: ShoppingItem) {
+    if (!household || !uid || !canDeleteShoppingItem({ actorId: uid, household, item })) {
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      await shopping.deleteItem(item.id);
+      setActiveItemId(null);
+    } catch (err) {
+      setError(messageFromStoreError(err, 'Eintrag konnte nicht gelöscht werden.'));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   if (!household || !uid) {
-    return <View style={[styles.page, styles.content]}><Text style={styles.muted}>Laden…</Text></View>;
+    return (
+      <View style={[styles.page, styles.content]}>
+        <Text style={styles.muted}>Laden…</Text>
+      </View>
+    );
   }
 
   return (
-    <ScrollView style={styles.page} contentContainerStyle={styles.content}>
-      <View style={styles.card}>
-        <View style={styles.row}>
-          <Text style={styles.title}>Listen</Text>
-          {!showForm ? (
-            <Pressable style={styles.btn} onPress={() => setShowForm(true)}>
-              <Text style={styles.btnText}>Neu</Text>
-            </Pressable>
-          ) : null}
-        </View>
-        {error ? <Text style={styles.err}>{error}</Text> : null}
-        <View style={styles.chips}>
-          <Pressable
-            style={[styles.ghost, filter === 'all' && styles.chipSelected]}
-            onPress={() => selectFilter('all')}
-          >
-            <Text style={[styles.ghostText, filter === 'all' && styles.chipTextSelected]}>Alle</Text>
-          </Pressable>
-          {SHOPPING_CATEGORIES.map((cat) => {
-            const selected = filter === cat;
-            return (
-              <Pressable
-                key={cat}
-                style={[styles.ghost, selected && styles.chipSelected]}
-                onPress={() => selectFilter(cat)}
-              >
-                <Text style={[styles.ghostText, selected && styles.chipTextSelected]}>
-                  {SHOPPING_CATEGORY_LABELS[cat]}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
-        {showForm ? (
-          <View style={{ gap: 8 }}>
-            <TextInput style={styles.input} placeholder="Artikel" placeholderTextColor={theme.inkFaint} value={name} onChangeText={setName} />
-            {filter === 'all' ? (
-              <View style={styles.chips}>
-                {SHOPPING_CATEGORIES.map((cat) => {
-                  const selected = category === cat;
-                  return (
-                    <Pressable
-                      key={cat}
-                      style={[styles.ghost, selected && styles.chipSelected]}
-                      onPress={() => setCategory(cat)}
-                    >
-                      <Text style={[styles.ghostText, selected && styles.chipTextSelected]}>
-                        {SHOPPING_CATEGORY_LABELS[cat]}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            ) : (
-              <Text style={styles.small}>Liste: {SHOPPING_CATEGORY_LABELS[filter]}</Text>
-            )}
-            <Pressable style={styles.btn} disabled={busy} onPress={() => void addItem()}>
-              <Text style={styles.btnText}>Anlegen</Text>
+    <>
+      <ScrollView style={styles.page} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        <View style={styles.card}>
+          <View style={styles.headerRow}>
+            <Text style={styles.title}>Listen</Text>
+            <Pressable
+              style={styles.plusBtn}
+              accessibilityRole="button"
+              accessibilityLabel="Neue Liste"
+              onPress={openCreateList}
+            >
+              <Ionicons name="add" size={24} color={theme.ink} />
             </Pressable>
           </View>
-        ) : null}
-        {visible.length === 0 ? (
-          <Text style={styles.muted}>Keine Einträge.</Text>
-        ) : (
-          visible.map((item) => {
-            const canDelete = canDeleteShoppingItem({ actorId: uid, household, item });
-            return (
-              <View key={item.id} style={styles.eventRow}>
-                <View style={styles.row}>
-                  <Switch
-                    value={item.checked}
-                    disabled={busy}
-                    onValueChange={() => {
-                      const result = prepareToggleShoppingItemChecked({
-                        actorId: uid,
-                        household,
-                        item,
-                        checked: !item.checked,
-                        checkedAt: new Date().toISOString(),
-                      });
-                      if (result.ok) void shopping.saveItem(result.item);
-                    }}
-                  />
-                  <Text style={[styles.title, { fontSize: 18 }, item.checked && styles.done]}>{item.name}</Text>
-                </View>
-                <Text style={styles.small}>
-                  {itemOpenClosedLabel(item.checked)} · {SHOPPING_CATEGORY_LABELS[item.category]} ·{' '}
-                  {shoppingAddedByLabel(household, item.addedBy)}
-                </Text>
-                {canDelete ? (
-                  <Pressable
-                    style={styles.ghost}
-                    onPress={() =>
-                      Alert.alert('Löschen', `„${item.name}" löschen?`, [
-                        { text: 'Abbrechen', style: 'cancel' },
-                        { text: 'Löschen', style: 'destructive', onPress: () => void shopping.deleteItem(item.id) },
-                      ])
-                    }
-                  >
-                    <Text style={styles.ghostText}>Löschen</Text>
-                  </Pressable>
-                ) : null}
-              </View>
-            );
-          })
-        )}
-      </View>
-    </ScrollView>
+          {error ? <Text style={styles.err}>{error}</Text> : null}
+          <View style={styles.chips}>
+            {lists.map((list) => {
+              const selected = activeListId === list.id;
+              return (
+                <Pressable
+                  key={list.id}
+                  style={[styles.ghost, selected && styles.chipSelected]}
+                  onPress={() => selectList(list.id)}
+                  onLongPress={() => showListMenu(list)}
+                  delayLongPress={350}
+                >
+                  <Text style={[styles.ghostText, selected && styles.chipTextSelected]}>{list.name}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+
+          {activeListId ? (
+            <ShoppingListInlineAdd
+              value={draftName}
+              busy={busy}
+              historyItems={items}
+              onChange={setDraftName}
+              onConfirm={() => void addItem()}
+              onCancel={() => setDraftName('')}
+            />
+          ) : null}
+
+          {visible.length === 0 ? (
+            <Text style={styles.muted}>Keine Einträge.</Text>
+          ) : (
+            <View style={styles.list}>
+              {visible.map((item) => (
+                <ShoppingListItemRow
+                  key={item.id}
+                  item={item}
+                  busy={busy}
+                  active={activeItemId === item.id}
+                  canDelete={canDeleteShoppingItem({ actorId: uid, household, item })}
+                  onActivate={() =>
+                    setActiveItemId((current) => (current === item.id ? null : item.id))
+                  }
+                  onToggle={() => void toggleChecked(item)}
+                  onDelete={() => void removeItem(item)}
+                />
+              ))}
+            </View>
+          )}
+        </View>
+      </ScrollView>
+
+      <ShoppingListModal
+        open={listModal !== null}
+        mode={listModal}
+        household={household}
+        actorId={uid}
+        lists={lists}
+        items={items}
+        name={listDraftName}
+        moveToListId={moveToListId}
+        busy={busy}
+        error={listModalError}
+        onNameChange={setListDraftName}
+        onMoveTargetChange={setMoveToListId}
+        onClose={closeListModal}
+        onSave={() => void saveListModal()}
+        onDelete={() => void confirmDeleteList()}
+      />
+    </>
   );
 }

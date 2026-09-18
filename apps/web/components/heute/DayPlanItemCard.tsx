@@ -6,6 +6,7 @@ import {
   dayPlanItemTitle,
   dayPlanItemToggleSupported,
   dayPlanKindStamp,
+  parseDefaultShoppingListCategory,
 } from '@family-companion/shared';
 import Link from 'next/link';
 import {
@@ -40,13 +41,17 @@ export function DayPlanItemCard({
         : undefined,
   });
   const canToggle = dayPlanItemToggleSupported(item) && onToggleDone;
+  const shoppingCategory =
+    item.kind === 'shopping' && item.shoppingListId
+      ? parseDefaultShoppingListCategory(item.shoppingListId, household.id)
+      : undefined;
 
   return (
     <article className={`day-plan-card${done ? ' day-plan-card--done' : ''}`}>
       <Link href={target.webPath} className="day-plan-card-link">
         <span className="day-plan-card-icon" aria-hidden="true">
-          {item.kind === 'shopping' && item.shoppingCategory ? (
-            <ShoppingCategoryIconGlyph icon={item.shoppingCategory} size={22} />
+          {item.kind === 'shopping' && shoppingCategory ? (
+            <ShoppingCategoryIconGlyph icon={shoppingCategory} size={22} />
           ) : (
             <DayPlanKindIconGlyph icon={item.kind} size={22} />
           )}

@@ -8,6 +8,7 @@ import type {
   MorningCheckInBand,
   PrioritizationSuggestion,
   ShoppingItem,
+  ShoppingList,
   TodoItem,
 } from '@family-companion/shared';
 import {
@@ -21,6 +22,7 @@ import {
   isTodoDoneForUser,
   localDateString,
   messageFromStoreError,
+  missingDefaultShoppingLists,
   MOOD_CHECK_IN_OPTIONS,
   moodBandToValue,
   morningCheckInErrorMessage,
@@ -45,6 +47,7 @@ import { auth } from '../../lib/firebase';
 import { households } from '../../lib/households';
 import { morning } from '../../lib/morning';
 import { shopping } from '../../lib/shopping';
+import { shoppingLists } from '../../lib/shoppingLists';
 import { todos } from '../../lib/todos';
 
 function isDayPlanItemDone(
@@ -72,6 +75,7 @@ export default function HeutePage() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [todoItems, setTodoItems] = useState<TodoItem[]>([]);
   const [shoppingItems, setShoppingItems] = useState<ShoppingItem[]>([]);
+  const [shoppingListsState, setShoppingListsState] = useState<ShoppingList[]>([]);
   const [moodBand, setMoodBand] = useState<MorningCheckInBand>('mid');
   const [energyBand, setEnergyBand] = useState<MorningCheckInBand>('mid');
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
@@ -113,13 +117,38 @@ export default function HeutePage() {
     const unsubEvents = calendar.subscribeForHousehold(household.id, setEvents);
     const unsubTodos = todos.subscribeForHousehold(household.id, setTodoItems);
     const unsubShopping = shopping.subscribeForHousehold(household.id, setShoppingItems);
+    const unsubLists = shoppingLists.subscribeForHousehold(
+      household.id,
+      (next) => {
+        setShoppingListsState(next);
+        if (!uid) {
+          return;
+        }
+        void (async () => {
+          const missing = missingDefaultShoppingLists(next, {
+            householdId: household.id,
+            createdBy: uid,
+            createdAt: new Date().toISOString(),
+          });
+          if (missing.length === 0) {
+            return;
+          }
+          try {
+            await Promise.all(missing.map((list) => shoppingLists.createList(list)));
+          } catch {
+            setError('Standard-Listen konnten nicht angelegt werden.');
+          }
+        })();
+      },
+    );
     return () => {
       unsubCheckIns();
       unsubEvents();
       unsubTodos();
       unsubShopping();
+      unsubLists();
     };
-  }, [household, today]);
+  }, [household, today, uid]);
 
   const actorCheckIn = useMemo(
     () => checkIns.find((entry) => entry.userId === uid) ?? null,
@@ -138,8 +167,9 @@ export default function HeutePage() {
       events,
       todos: todoItems,
       shoppingItems,
+      shoppingLists: shoppingListsState,
     });
-  }, [household, uid, today, checkIns, events, todoItems, shoppingItems]);
+  }, [household, uid, today, checkIns, events, todoItems, shoppingItems, shoppingListsState]);
 
   const areaSummaries = useMemo(() => {
     if (!household || !uid) {

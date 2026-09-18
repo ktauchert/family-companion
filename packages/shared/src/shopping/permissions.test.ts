@@ -30,13 +30,24 @@ function itemOf(overrides: Partial<ShoppingItem> = {}): ShoppingItem {
     id: 'shop_1',
     householdId: 'hh_1',
     name: 'Milch',
-    category: 'supermarket',
+    listId: 'hh_1_supermarket',
     checked: false,
     addedBy: 'user_sophie',
     createdAt: '2026-09-20T10:00:00.000Z',
     ...overrides,
   };
 }
+
+const lists = [
+  {
+    id: 'hh_1_supermarket',
+    householdId: 'hh_1',
+    name: 'Supermarkt',
+    sortOrder: 0,
+    createdBy: 'user_julian',
+    createdAt: '2026-09-20T10:00:00.000Z',
+  },
+];
 
 describe('canDeleteShoppingItem', () => {
   const household = householdOf();
@@ -72,6 +83,7 @@ describe('canUpdateShoppingItem', () => {
         household,
         item: itemOf(),
         patch: { addedBy: 'user_julian' },
+        lists,
       }),
     ).toBe(false);
   });
@@ -83,8 +95,21 @@ describe('canUpdateShoppingItem', () => {
         household,
         item: itemOf(),
         patch: { checked: true, checkedAt: '2026-09-20T11:00:00.000Z' },
+        lists,
       }),
     ).toBe(true);
+  });
+
+  it('denies moving item to foreign list', () => {
+    expect(
+      canUpdateShoppingItem({
+        actorId: 'user_julian',
+        household,
+        item: itemOf(),
+        patch: { listId: 'hh_2_supermarket' },
+        lists,
+      }),
+    ).toBe(false);
   });
 });
 

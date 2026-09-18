@@ -119,13 +119,44 @@ service cloud.firestore {
         && request.resource.data.createdAt == resource.data.createdAt;
     }
 
+    function shoppingListExists(householdId, listId) {
+      return exists(/databases/$(database)/documents/shopping_lists/$(listId))
+        && get(/databases/$(database)/documents/shopping_lists/$(listId)).data.householdId == householdId;
+    }
+
+    function validShoppingListCreate() {
+      return request.resource.data.id is string
+        && request.resource.data.householdId is string
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.sortOrder is int
+        && request.resource.data.sortOrder >= 0
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdAt is string;
+    }
+
+    function shoppingListIdentityFrozen() {
+      return request.resource.data.id == resource.data.id
+        && request.resource.data.householdId == resource.data.householdId
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.createdAt == resource.data.createdAt;
+    }
+
+    function validShoppingListUpdate() {
+      return request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.sortOrder is int
+        && request.resource.data.sortOrder >= 0;
+    }
+
     function validShoppingItemCreate() {
       return request.resource.data.id is string
         && request.resource.data.householdId is string
         && request.resource.data.addedBy == request.auth.uid
         && request.resource.data.name is string
         && request.resource.data.name.size() > 0
-        && request.resource.data.category in ['supermarket', 'drugstore', 'pharmacy', 'clothing', 'other']
+        && request.resource.data.listId is string
+        && shoppingListExists(request.resource.data.householdId, request.resource.data.listId)
         && request.resource.data.checked is bool
         && request.resource.data.createdAt is string;
     }
@@ -265,7 +296,8 @@ service cloud.firestore {
     function validShoppingItemUpdate() {
       return request.resource.data.name is string
         && request.resource.data.name.size() > 0
-        && request.resource.data.category in ['supermarket', 'drugstore', 'pharmacy', 'clothing', 'other']
+        && request.resource.data.listId is string
+        && shoppingListExists(resource.data.householdId, request.resource.data.listId)
         && request.resource.data.checked is bool;
     }
 
@@ -316,6 +348,20 @@ service cloud.firestore {
       allow delete: if isHouseholdMemberOf(resource.data.householdId)
         && (isHouseholdOwnerOf(resource.data.householdId)
             || resource.data.createdBy == request.auth.uid);
+    }
+
+    match /shopping_lists/{id} {
+      allow read: if isHouseholdMemberOf(resource.data.householdId);
+
+      allow create: if isHouseholdMemberOf(request.resource.data.householdId)
+        && request.resource.data.id == id
+        && validShoppingListCreate();
+
+      allow update: if isHouseholdMemberOf(resource.data.householdId)
+        && shoppingListIdentityFrozen()
+        && validShoppingListUpdate();
+
+      allow delete: if isHouseholdOwnerOf(resource.data.householdId);
     }
 
     match /shopping_items/{id} {

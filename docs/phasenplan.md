@@ -16,9 +16,9 @@ Quellen: [features.md](./features.md), [user-journey.md](./user-journey.md), [de
 | **1 Auth & Haushalt** | erledigt | [01-auth-haushalt.md](./phasen/01-auth-haushalt.md) |
 | **1.1 Dev-Build & Google nativ** | erledigt | [01.1-dev-build-google-native.md](./phasen/01.1-dev-build-google-native.md) |
 | 2 Alltag | erledigt | [02-alltag.md](./phasen/02-alltag.md) |
-| **2.1 Heute UX** | offen | [02.1-heute-ux.md](./phasen/02.1-heute-ux.md) · Milestone [Phase 2.1](https://github.com/ktauchert/family-companion/milestone/1) |
-| **2.2 Kalender & Todos UX** | offen | [02.2-kalender-todos-ux.md](./phasen/02.2-kalender-todos-ux.md) · Milestone [Phase 2.2](https://github.com/ktauchert/family-companion/milestone/2) |
-| **2.3 Listen UX** | offen | [02.3-listen-ux.md](./phasen/02.3-listen-ux.md) · Milestone [Phase 2.3](https://github.com/ktauchert/family-companion/milestone/3) |
+| **2.1 Heute UX** | erledigt | [02.1-heute-ux.md](./phasen/02.1-heute-ux.md) · Milestone [Phase 2.1](https://github.com/ktauchert/family-companion/milestone/1) · PR [#44](https://github.com/ktauchert/family-companion/pull/44) |
+| **2.2 Kalender & Todos UX** | erledigt | [02.2-kalender-todos-ux.md](./phasen/02.2-kalender-todos-ux.md) · Milestone [Phase 2.2](https://github.com/ktauchert/family-companion/milestone/2) · PR [#45](https://github.com/ktauchert/family-companion/pull/45) |
+| **2.3 Listen UX** | in Arbeit | [02.3-listen-ux.md](./phasen/02.3-listen-ux.md) · Milestone [Phase 2.3](https://github.com/ktauchert/family-companion/milestone/3) · Branch `phase-2.3-listen-ux`, PR ausstehend |
 | **2.4 Haushalt, Nav & Shell** | offen | [02.4-haushalt-nav-shell.md](./phasen/02.4-haushalt-nav-shell.md) · Milestone [Phase 2.4](https://github.com/ktauchert/family-companion/milestone/4) |
 | **2.5 Landing (Scaffold)** | offen | [02.5-landing-scaffold.md](./phasen/02.5-landing-scaffold.md) · Milestone [Phase 2.5](https://github.com/ktauchert/family-companion/milestone/5) |
 | 3 Pro-Trigger | offen | [03-pro-trigger.md](./phasen/03-pro-trigger.md) |

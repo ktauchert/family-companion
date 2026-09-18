@@ -8,13 +8,13 @@ import {
 } from './day-plan-display';
 
 describe('dayPlanItemTitle', () => {
-  it('shows category and open count for aggregated shopping rows', () => {
+  it('shows list name and open count for aggregated shopping rows', () => {
     const item: DayPlanItem = {
       kind: 'shopping',
-      id: 'shopping_supermarket',
+      id: 'shopping_hh_1_supermarket',
       title: 'Supermarkt',
       energyHint: 'medium',
-      shoppingCategory: 'supermarket',
+      shoppingListId: 'hh_1_supermarket',
       openCount: 3,
     };
     expect(dayPlanItemTitle(item)).toBe('Supermarkt · 3 offen');
@@ -33,18 +33,18 @@ describe('dayPlanItemTitle', () => {
 });
 
 describe('dayPlanItemTarget', () => {
-  it('routes shopping aggregates to listen with category filter', () => {
+  it('routes shopping aggregates to listen with list filter', () => {
     const target = dayPlanItemTarget({
       kind: 'shopping',
-      id: 'shopping_supermarket',
+      id: 'shopping_hh_1_supermarket',
       title: 'Supermarkt',
       energyHint: 'medium',
-      shoppingCategory: 'supermarket',
+      shoppingListId: 'hh_1_supermarket',
       openCount: 2,
     });
     expect(target.area).toBe('listen');
-    expect(target.webPath).toBe('/listen?category=supermarket');
-    expect(target.mobilePath).toBe('/listen?category=supermarket');
+    expect(target.webPath).toBe('/listen?list=hh_1_supermarket');
+    expect(target.mobilePath).toBe('/listen?list=hh_1_supermarket');
   });
 });
 
@@ -59,7 +59,7 @@ describe('dayPlanItemToggleSupported', () => {
         id: 's',
         title: 'x',
         energyHint: 'medium',
-        shoppingCategory: 'other',
+        shoppingListId: 'hh_1_other',
         openCount: 1,
       }),
     ).toBe(false);
@@ -71,10 +71,10 @@ describe('dayPlanItemMetaLines', () => {
     const lines = dayPlanItemMetaLines(
       {
         kind: 'shopping',
-        id: 'shopping_supermarket',
+        id: 'shopping_hh_1_supermarket',
         title: 'Supermarkt',
         energyHint: 'medium',
-        shoppingCategory: 'supermarket',
+        shoppingListId: 'hh_1_supermarket',
         openCount: 1,
       },
       { assigneeLabel: 'Haushalt' },

@@ -1,5 +1,6 @@
 export const FIRESTORE_COLLECTIONS = {
   households: 'households',
+  shoppingLists: 'shopping_lists',
   shoppingItems: 'shopping_items',
   todos: 'todos',
   calendarEvents: 'calendar_events',
