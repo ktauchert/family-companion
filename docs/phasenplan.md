@@ -21,7 +21,7 @@ Quellen: [features.md](./features.md), [user-journey.md](./user-journey.md), [de
 | **2.3 Listen UX** | erledigt | [02.3-listen-ux.md](./phasen/02.3-listen-ux.md) · Milestone [Phase 2.3](https://github.com/ktauchert/family-companion/milestone/3) · PR [#46](https://github.com/ktauchert/family-companion/pull/46) |
 | **2.4 Haushalt, Nav & Shell** | erledigt | [02.4-haushalt-nav-shell.md](./phasen/02.4-haushalt-nav-shell.md) · Milestone [Phase 2.4](https://github.com/ktauchert/family-companion/milestone/4) · PR [#47](https://github.com/ktauchert/family-companion/pull/47) |
 | **2.5 Landing (Scaffold)** | erledigt | [02.5-landing-scaffold.md](./phasen/02.5-landing-scaffold.md) · Milestone [Phase 2.5](https://github.com/ktauchert/family-companion/milestone/5) · PR [#48](https://github.com/ktauchert/family-companion/pull/48) |
-| 3 Pro-Trigger | offen | [03-pro-trigger.md](./phasen/03-pro-trigger.md) |
+| **3 Pro-Trigger** | erledigt | [03-pro-trigger.md](./phasen/03-pro-trigger.md) · PR [#49](https://github.com/ktauchert/family-companion/pull/49) |
 | 4 Pro: KI & Habits | offen | [04-pro-ki-habits.md](./phasen/04-pro-ki-habits.md) |
 
 ## Qualitätssicherung
