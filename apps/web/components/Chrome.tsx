@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import {
   NAV_AREA_KEYS,
@@ -5,6 +7,8 @@ import {
   NAV_ICON_TO_WEB_PATH,
   type NavIcon,
 } from '@family-companion/shared';
+import { ChromeCheckInChip } from './ChromeCheckInChip';
+import { Footer } from './Footer';
 import { NavAreaIcon } from './icons';
 
 export function Chrome({
@@ -17,10 +21,10 @@ export function Chrome({
   children: React.ReactNode;
 }) {
   return (
-    <>
+    <div className="app-shell">
       <header className="top">
         <strong className="serif">Family Companion</strong>
-        <nav>
+        <nav aria-label="Hauptnavigation">
           {NAV_AREA_KEYS.map((key) => (
             <Link
               key={key}
@@ -33,11 +37,18 @@ export function Chrome({
             </Link>
           ))}
         </nav>
+        <div className="top-actions">
+          <ChromeCheckInChip />
+          <Link className="icon-btn top-settings" href="/einstellungen" aria-label="Einstellungen">
+            ⚙
+          </Link>
+        </div>
       </header>
       <div className="wrap">
         <p className="crumb">{crumb}</p>
         {children}
       </div>
-    </>
+      <Footer />
+    </div>
   );
 }

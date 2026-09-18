@@ -3,7 +3,6 @@
 import type { Household } from '@family-companion/shared';
 import {
   ensureMemberEmail,
-  householdMemberLabel,
   householdMembers,
   messageFromStoreError,
   removeHouseholdMember,
@@ -14,6 +13,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Chrome } from '../../components/Chrome';
+import { MemberRow } from '../../components/haushalt/MemberRow';
 import { auth } from '../../lib/firebase';
 import { households } from '../../lib/households';
 
@@ -116,33 +116,17 @@ export default function HaushaltPage() {
               {error}
             </p>
           ) : null}
-          <ul className="plain-list">
-            {members.map((member) => {
-              const emailLabel = householdMemberLabel(member.email);
-              const canKick = isOwner && member.role !== 'owner';
-              const canLeave = member.userId === uid && member.role !== 'owner';
-              return (
-                <li className="invite-row" key={member.userId}>
-                  <p>
-                    {emailLabel}
-                    {member.role === 'owner' ? ' · Inhaber' : ''}
-                    {member.userId === uid ? ' · du' : ''}
-                  </p>
-                  {canKick || canLeave ? (
-                    <div className="row-actions">
-                      <button
-                        className="btn ghost"
-                        type="button"
-                        disabled={busy}
-                        onClick={() => void removeMember(member.userId, emailLabel)}
-                      >
-                        {canLeave ? 'Austreten' : 'Entfernen'}
-                      </button>
-                    </div>
-                  ) : null}
-                </li>
-              );
-            })}
+          <ul className="member-list">
+            {members.map((member) => (
+              <MemberRow
+                key={member.userId}
+                member={member}
+                actorId={uid}
+                isOwner={isOwner}
+                busy={busy}
+                onRemove={(memberId, label) => void removeMember(memberId, label)}
+              />
+            ))}
           </ul>
         </article>
         <article className="card stack">

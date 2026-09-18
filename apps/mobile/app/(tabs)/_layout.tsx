@@ -5,6 +5,7 @@ import {
 } from '@family-companion/shared';
 import { Tabs } from 'expo-router';
 import { navAreaTabIcon } from '../../components/nav-icons';
+import { HeuteSettingsButton } from '../../components/HeuteSettingsButton';
 import { useTheme } from '../../lib/theme';
 
 export default function TabLayout() {
@@ -33,6 +34,9 @@ export default function TabLayout() {
             options={{
               title: navAreaMobileTabLabel(key),
               tabBarIcon: navAreaTabIcon(key),
+              ...(tabName === 'heute'
+                ? { headerRight: () => <HeuteSettingsButton /> }
+                : {}),
             }}
           />
         );
