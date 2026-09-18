@@ -42,5 +42,5 @@ Analyse betrachtet Einfügen und Abhaken, getrennt nach Liste/Thema.
 ## UI & Custom Listen (Phase 2.3, 2026-09-15)
 
 - Listen-Chips ohne „Alle“-Tab; Inline-Add mit Autocomplete (Teilmatch ab 3 Zeichen, Shared: `suggestShoppingItemNames`).
-- Custom Listen (`shopping_lists`): Plus-Modal, Bearbeiten/Löschen am aktiven Tab; Inhaber darf Listen löschen; bei vorhandenen Items **Verschieben** in andere Liste.
+- Custom Listen (`shopping_lists`): Plus-Modal; Bearbeiten/Löschen per **Long-Press** (App) / **Rechtsklick** (Web) auf Listen-Chip; Inhaber darf Listen löschen; bei vorhandenen Items **Verschieben** in andere Liste.
 - Details: [02.3-listen-ux.md](../phasen/02.3-listen-ux.md).
